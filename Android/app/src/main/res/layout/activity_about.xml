@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ /*
+  ~  * Copyright (c) 2022 NetEase, Inc.  All rights reserved.
+  ~  * Use of this source code is governed by a MIT license that can be found in the LICENSE file.
+  ~  */
+  -->
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="@android:color/white"
+    android:layout_height="match_parent">
+
+
+    <com.netease.yunxin.app.one2one.ui.view.TitleBar
+        android:id="@+id/title_bar"
+        android:layout_width="match_parent"
+        app:titleBar_title="@string/about_us"
+        app:titleBar_title_bg_color="@color/white"
+        android:layout_height="wrap_content" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_below="@id/title_bar">
+
+        <ImageView
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_marginTop="200dp"
+            android:layout_gravity="center_horizontal"
+            android:src="@mipmap/ic_launcher"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:layout_gravity="center_horizontal"
+            android:textSize="14dp"
+            android:textColor="@color/color_black_333333"
+            android:text="@string/yun_xin"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:textSize="14dp"
+            android:textColor="@color/color_black_333333"
+            android:text="@string/app_long_name"/>
+
+    </LinearLayout>
+
+    <ImageView
+        android:layout_width="98dp"
+        android:layout_height="24dp"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="50dp"
+        android:src="@drawable/yunxin_logo"/>
+    <TextView
+        android:id="@+id/about_version"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:paddingBottom="10dp"
+        android:gravity="center"
+        android:textSize="14dp"
+        android:textColor="@color/color_grey_999999"
+        android:text="@string/app_version"/>
+</RelativeLayout>

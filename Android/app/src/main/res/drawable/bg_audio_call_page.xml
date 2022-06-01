@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ /*
+  ~  * Copyright (c) 2022 NetEase, Inc.  All rights reserved.
+  ~  * Use of this source code is governed by a MIT license that can be found in the LICENSE file.
+  ~  */
+  -->
+
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <gradient
+        android:angle="270"
+        android:startColor="@color/color_c76c96"
+        android:endColor="@color/color_8c6cfd" />
+</shape>

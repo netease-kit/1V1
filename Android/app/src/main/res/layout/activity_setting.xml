@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ /*
+  ~  * Copyright (c) 2022 NetEase, Inc.  All rights reserved.
+  ~  * Use of this source code is governed by a MIT license that can be found in the LICENSE file.
+  ~  */
+  -->
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/color_eff1f4"
+    android:orientation="vertical"
+    xmlns:tools="http://schemas.android.com/tools">
+    <com.netease.yunxin.app.one2one.ui.view.TitleBar
+        app:titleBar_title="通用设置"
+        app:titleBar_title_bg_color="@android:color/transparent"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+    <ScrollView
+        android:layout_marginTop="5dp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <LinearLayout
+                android:id="@+id/ll"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp"
+                android:background="@drawable/bg_setting"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintLeft_toLeftOf="parent"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+                    <TextView
+                        android:id="@+id/tv_title"
+                        android:textColor="@color/color_333333"
+                        app:layout_constraintLeft_toLeftOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        android:textSize="16sp"
+                        android:paddingLeft="20dp"
+                        android:text="@string/message_notice"
+                        android:gravity="center_vertical"
+                        android:layout_width="wrap_content"
+                        android:layout_height="56dp" />
+                    <Switch
+                        app:layout_constraintTop_toBottomOf="@+id/tv_title"
+                        app:layout_constraintBottom_toTopOf="@+id/tv_title"
+                        android:id="@+id/switch_button"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@null"
+                        android:checked="true"
+                        android:switchMinWidth="46dp"
+                        android:thumb="@drawable/video_group_switch_thumb"
+                        android:track="@drawable/video_group_switch_track"
+                        android:layout_marginRight="16dp"
+                        app:layout_constraintRight_toRightOf="parent"
+                        tools:background="@android:color/holo_green_dark" />
+                    <View
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintLeft_toLeftOf="parent"
+                        android:background="@color/color_f5f8fc"
+                        android:layout_marginLeft="20dp"
+                        android:layout_width="match_parent"
+                        android:layout_height="1px" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <com.netease.yunxin.app.one2one.ui.view.SettingItemView
+                    android:id="@+id/itemView_privacy_policy"
+                    android:layout_width="match_parent"
+                    android:layout_height="46dp"
+                    app:setting_item_title="@string/privacy_policy" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1px"
+                    android:background="@color/color_f5f8fc" />
+
+                <com.netease.yunxin.app.one2one.ui.view.SettingItemView
+                    android:id="@+id/itemView_user_agreement"
+                    android:layout_width="match_parent"
+                    android:layout_height="46dp"
+                    app:setting_item_title="@string/user_agreement" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1px"
+                    android:background="@color/color_f5f8fc" />
+
+                <com.netease.yunxin.app.one2one.ui.view.SettingItemView
+                    android:id="@+id/itemView_about_us"
+                    android:layout_width="match_parent"
+                    android:layout_height="46dp"
+                    app:setting_item_title="@string/about_us" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1px"
+                    android:background="@color/color_f5f8fc" />
+
+                <com.netease.yunxin.app.one2one.ui.view.SettingItemView
+                    android:id="@+id/itemView_bind_other_account"
+                    android:layout_width="match_parent"
+                    android:layout_height="46dp"
+                    app:setting_item_title="@string/bind_other_account" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1px"
+                    android:background="@color/color_f5f8fc" />
+
+                <com.netease.yunxin.app.one2one.ui.view.SettingItemView
+                    android:id="@+id/itemView_pstn"
+                    android:layout_width="match_parent"
+                    android:layout_height="46dp"
+                    app:setting_item_title="@string/pstn_item_text" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1px"
+                    android:background="@color/color_f5f8fc" />
+
+
+
+            </LinearLayout>
+            <TextView
+                app:layout_constraintTop_toBottomOf="@+id/ll"
+                android:id="@+id/tv_logout"
+                android:layout_marginTop="24dp"
+                android:text="@string/logout"
+                android:background="@drawable/bg_logout_button"
+                android:textColor="@color/color_333333"
+                android:gravity="center"
+                android:textSize="16sp"
+                android:layout_gravity="center"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp"
+                android:layout_width="match_parent"
+                android:layout_height="40dp" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </ScrollView>
+
+</LinearLayout>

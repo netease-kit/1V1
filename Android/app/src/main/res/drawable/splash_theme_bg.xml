@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ /*
+  ~  * Copyright (c) 2022 NetEase, Inc.  All rights reserved.
+  ~  * Use of this source code is governed by a MIT license that can be found in the LICENSE file.
+  ~  */
+  -->
+
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item android:drawable="@drawable/bg_splash" />
+    <item android:top='154dp'>
+        <bitmap
+            android:gravity="center_horizontal|top"
+            android:src="@drawable/icon_splash_top" />
+    </item>
+    <item android:bottom='0dp'>
+        <bitmap
+            android:gravity="center_horizontal|bottom"
+            android:src="@drawable/icon_splash_bottom" />
+    </item>
+</layer-list>

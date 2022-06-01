@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ /*
+  ~  * Copyright (c) 2022 NetEase, Inc.  All rights reserved.
+  ~  * Use of this source code is governed by a MIT license that can be found in the LICENSE file.
+  ~  */
+  -->
+
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/white"
+    android:orientation="vertical"
+    tools:context=".MainActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/tv_account"
+            android:paddingTop="60dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@android:color/black"
+            android:textSize="20dp" />
+
+        <EditText
+            android:id="@+id/editText"
+            android:hint="输入账号"
+            android:text="18072940912"
+            android:background="@android:color/holo_green_dark"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+        <Button
+            android:id="@+id/btn_audio_call"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="音频通话(纯RTC)" />
+
+        <Button
+            android:id="@+id/btn_audio_pstn_call"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="音频通话(带PSTN)" />
+
+        <Button
+            android:id="@+id/btn_video_call"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="视频通话" />
+
+        <Button
+            android:id="@+id/btn_sendSms"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="发送短信" />
+
+        <Button
+            android:id="@+id/btn_userInfo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="用户信息" />
+
+        <Button
+            android:id="@+id/btn_userInfoEdit"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="用户信息编辑" />
+
+        <Button
+            android:id="@+id/btn_pstnSetting"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="PSTN设置" />
+
+        <Button
+            android:id="@+id/btn_about"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="关于" />
+
+        <Button
+            android:id="@+id/btn_bindOtherAccount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="绑定对方账号" />
+
+        <Button
+            android:id="@+id/btn_setting"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="设置" />
+
+        <Button
+            android:id="@+id/btn_web"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="网页" />
+
+
+    </LinearLayout>
+
+
+</ScrollView>
