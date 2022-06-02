@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ /*
+  ~  * Copyright (c) 2022 NetEase, Inc.  All rights reserved.
+  ~  * Use of this source code is governed by a MIT license that can be found in the LICENSE file.
+  ~  */
+  -->
+
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@drawable/icon_pressed_video_accept" android:state_selected="true" />
+    <item android:drawable="@drawable/icon_pressed_video_accept" android:state_focused="true" />
+    <item android:drawable="@drawable/icon_pressed_video_accept" android:state_pressed="true" />
+    <item android:drawable="@drawable/icon_video_accept" />
+</selector>

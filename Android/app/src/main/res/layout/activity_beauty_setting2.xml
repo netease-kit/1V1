@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ /*
+  ~  * Copyright (c) 2022 NetEase, Inc.  All rights reserved.
+  ~  * Use of this source code is governed by a MIT license that can be found in the LICENSE file.
+  ~  */
+  -->
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FF212129">
+    <View
+        android:id="@+id/statusBar_holder"
+        android:layout_width="match_parent"
+        android:layout_height="0dp" />
+    <com.netease.lava.nertc.sdk.video.NERtcVideoView
+        android:id="@+id/vv_local_user"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <RelativeLayout
+        android:id="@+id/beauty_setting_panel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:visibility="invisible">
+
+        <ImageView
+            android:id="@+id/img_beauty_compared"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_above="@id/vp_pager"
+            android:layout_alignParentEnd="true"
+            android:layout_marginBottom="20dp"
+            android:layout_marginEnd="10dp"
+            android:src="@drawable/beauty_compared" />
+
+        <androidx.viewpager.widget.ViewPager
+            android:id="@+id/vp_pager"
+            android:layout_width="match_parent"
+            android:layout_height="144dp"
+            android:layout_above="@id/line"
+            android:background="@color/semitransparent" />
+
+        <View
+            android:id="@+id/line"
+            android:layout_width="match_parent"
+            android:layout_height="1px"
+            android:layout_above="@id/tab_bottom"
+            android:background="@color/color_88ffffff"/>
+
+        <com.google.android.material.tabs.TabLayout
+            android:id="@+id/tab_bottom"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:layout_alignParentBottom="true"
+            android:background="@color/semitransparent"
+            app:tabIndicatorHeight="0dp"
+            app:tabSelectedTextColor="@color/white"
+            app:tabTextColor="@color/color_80ffffff" />
+    </RelativeLayout>
+
+    <LinearLayout
+        android:id="@+id/beauty_tools_panel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="90dp"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:id="@+id/switch_camera"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_weight="1"
+            android:src="@drawable/switch_camera" />
+
+        <ImageView
+            android:id="@+id/beauty_ok"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_weight="1"
+            android:src="@drawable/beauty_ok" />
+
+        <ImageView
+            android:id="@+id/open_beauty"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_weight="1"
+            android:src="@drawable/open_beauty" />
+
+    </LinearLayout>
+
+    <com.netease.yunxin.app.one2one.ui.view.TitleBar
+        android:layout_below="@+id/statusBar_holder"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:titleBar_back_icon="@drawable/icon_left_arrow_white"
+        app:titleBar_title="" />
+
+</RelativeLayout>

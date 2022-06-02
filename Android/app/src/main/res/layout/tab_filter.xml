@@ -1,0 +1,705 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ /*
+  ~  * Copyright (c) 2022 NetEase, Inc.  All rights reserved.
+  ~  * Use of this source code is governed by a MIT license that can be found in the LICENSE file.
+  ~  */
+  -->
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:custom="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <com.google.android.material.slider.Slider
+        android:id="@+id/slider_filter_level"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="@dimen/effect_btn_padding"
+        android:stepSize="1"
+        android:theme="@style/SliderTheme"
+        android:valueFrom="0"
+        android:valueTo="100"
+        app:thumbColor="@color/colorAccent"
+        app:thumbRadius="@dimen/slider_thumbradius"
+        app:tickVisible="false"
+        app:trackColorActive="@color/colorAccent"
+        app:trackColorInactive="@color/colorPrimary"
+        app:trackHeight="@dimen/slider_trackheight" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:orientation="horizontal">
+
+        <com.netease.yunxin.app.one2one.ui.view.MyRadioButton
+            android:id="@+id/rb_filter_origin"
+            android:layout_width="80dp"
+            android:layout_height="match_parent"
+            android:button="@null"
+            android:clickable="true"
+            android:gravity="center"
+            android:text="@string/effect_recover"
+            android:textColor="@color/color_80ffffff"
+            android:textSize="12dp"
+            custom:drawableSizes="40dp"
+            custom:drawableTop="@drawable/recovery" />
+
+        <View
+            android:layout_width="1px"
+            android:layout_height="50dp"
+            android:layout_gravity="center_vertical"
+            android:background="@color/color_88ffffff" />
+
+        <HorizontalScrollView
+            android:id="@+id/horizontal_scrollv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@android:color/transparent"
+            android:scrollbars="none">
+
+            <com.netease.yunxin.app.one2one.ui.view.NEBeautyRadioGroup
+                android:id="@+id/radio_group_filter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@android:color/transparent"
+                android:orientation="horizontal">
+                <com.netease.yunxin.app.one2one.ui.view.MyRadioButton
+                    android:id="@+id/rb_filter_summer"
+                    android:layout_width="80dp"
+                    android:layout_height="wrap_content"
+                    android:button="@null"
+                    android:clickable="true"
+                    android:gravity="center"
+                    android:text="@string/filter_summer"
+                    android:textColor="@color/color_80ffffff"
+                    android:textSize="12dp"
+                    custom:drawableSizes="53dp"
+                    custom:drawableTop="@drawable/ic_filter_style_summer"
+                    android:focusable="true" />
+
+                <com.netease.yunxin.app.one2one.ui.view.MyRadioButton
+                    android:id="@+id/rb_filter_autumn"
+                    android:layout_width="80dp"
+                    android:layout_height="wrap_content"
+                    android:button="@null"
+                    android:clickable="true"
+                    android:gravity="center"
+                    android:text="@string/filter_autumn"
+                    android:textColor="@color/color_80ffffff"
+                    android:textSize="12dp"
+                    custom:drawableSizes="53dp"
+                    custom:drawableTop="@drawable/ic_filter_style_autumn"
+                    android:focusable="true" />
+
+                <com.netease.yunxin.app.one2one.ui.view.MyRadioButton
+                    android:id="@+id/rb_filter_winter"
+                    android:layout_width="80dp"
+                    android:layout_height="wrap_content"
+                    android:button="@null"
+                    android:clickable="true"
+                    android:gravity="center"
+                    android:text="@string/filter_winter"
+                    android:textColor="@color/color_80ffffff"
+                    android:textSize="12dp"
+                    custom:drawableSizes="53dp"
+                    custom:drawableTop="@drawable/ic_filter_style_winter"
+                    android:focusable="true" />
+
+                <com.netease.yunxin.app.one2one.ui.view.MyRadioButton
+                    android:id="@+id/rb_filter_shimmer"
+                    android:layout_width="80dp"
+                    android:layout_height="wrap_content"
+                    android:button="@null"
+                    android:clickable="true"
+                    android:gravity="center"
+                    android:text="@string/filter_shimmer"
+                    android:textColor="@color/color_80ffffff"
+                    android:textSize="12dp"
+                    custom:drawableSizes="53dp"
+                    custom:drawableTop="@drawable/ic_filter_style_shimmer"
+                    android:focusable="true" />
+
+                <com.netease.yunxin.app.one2one.ui.view.MyRadioButton
+                    android:id="@+id/rb_filter_feminine"
+                    android:layout_width="80dp"
+                    android:layout_height="wrap_content"
+                    android:button="@null"
+                    android:clickable="true"
+                    android:gravity="center"
+                    android:text="@string/filter_feminine"
+                    android:textColor="@color/color_80ffffff"
+                    android:textSize="12dp"
+                    custom:drawableSizes="53dp"
+                    custom:drawableTop="@drawable/ic_filter_style_feminine"
+                    android:focusable="true" />
+
+                <com.netease.yunxin.app.one2one.ui.view.MyRadioButton
+                    android:id="@+id/rb_filter_forest"
+                    android:layout_width="80dp"
+                    android:layout_height="wrap_content"
+                    android:button="@null"
+                    android:clickable="true"
+                    android:gravity="center"
+                    android:text="@string/filter_forest"
+                    android:textColor="@color/color_80ffffff"
+                    android:textSize="12dp"
+                    custom:drawableSizes="53dp"
+                    custom:drawableTop="@drawable/ic_filter_style_forest"
+                    android:focusable="true" />
+
+                <com.netease.yunxin.app.one2one.ui.view.MyRadioButton
+                    android:id="@+id/rb_filter_waterl"
+                    android:layout_width="80dp"
+                    android:layout_height="wrap_content"
+                    android:button="@null"
+                    android:clickable="true"
+                    android:gravity="center"
+                    android:text="@string/filter_waterl"
+                    android:textColor="@color/color_80ffffff"
+                    android:textSize="12dp"
+                    custom:drawableSizes="53dp"
+                    custom:drawableTop="@drawable/ic_filter_style_waterl"
+                    android:focusable="true" />
+
+                <com.netease.yunxin.app.one2one.ui.view.MyRadioButton
+                    android:id="@+id/rb_filter_soda"
+                    android:layout_width="80dp"
+                    android:layout_height="wrap_content"
+                    android:button="@null"
+                    android:clickable="true"
+                    android:gravity="center"
+                    android:text="@string/filter_soda"
+                    android:textColor="@color/color_80ffffff"
+                    android:textSize="12dp"
+                    custom:drawableSizes="53dp"
+                    custom:drawableTop="@drawable/ic_filter_style_soda"
+                    android:focusable="true" />
+
+                <com.netease.yunxin.app.one2one.ui.view.MyRadioButton
+                    android:id="@+id/rb_filter_texture1"
+                    android:layout_width="80dp"
+                    android:layout_height="wrap_content"
+                    android:button="@null"
+                    android:clickable="true"
+                    android:gravity="center"
+                    android:text="@string/filter_texture1"
+                    android:textColor="@color/color_80ffffff"
+                    android:textSize="12dp"
+                    custom:drawableSizes="53dp"
+                    custom:drawableTop="@drawable/ic_filter_style_texture1"
+                    android:focusable="true" />
+
+                <com.netease.yunxin.app.one2one.ui.view.MyRadioButton
+                    android:id="@+id/rb_filter_texture2"
+                    android:layout_width="80dp"
+                    android:layout_height="wrap_content"
+                    android:button="@null"
+                    android:clickable="true"
+                    android:gravity="center"
+                    android:text="@string/filter_texture2"
+                    android:textColor="@color/color_80ffffff"
+                    android:textSize="12dp"
+                    custom:drawableSizes="53dp"
+                    custom:drawableTop="@drawable/ic_filter_style_texture2"
+                    android:focusable="true" />
+
+                <com.netease.yunxin.app.one2one.ui.view.MyRadioButton
+                    android:id="@+id/rb_filter_texture3"
+                    android:layout_width="80dp"
+                    android:layout_height="wrap_content"
+                    android:button="@null"
+                    android:clickable="true"
+                    android:gravity="center"
+                    android:text="@string/filter_texture3"
+                    android:textColor="@color/color_80ffffff"
+                    android:textSize="12dp"
+                    custom:drawableSizes="53dp"
+                    custom:drawableTop="@drawable/ic_filter_style_texture3"
+                    android:focusable="true" />
+
+                <com.netease.yunxin.app.one2one.ui.view.MyRadioButton
+                    android:id="@+id/rb_filter_texture4"
+                    android:layout_width="80dp"
+                    android:layout_height="wrap_content"
+                    android:button="@null"
+                    android:clickable="true"
+                    android:gravity="center"
+                    android:text="@string/filter_texture4"
+                    android:textColor="@color/color_80ffffff"
+                    android:textSize="12dp"
+                    custom:drawableSizes="53dp"
+                    custom:drawableTop="@drawable/ic_filter_style_texture4"
+                    android:focusable="true" />
+
+                <com.netease.yunxin.app.one2one.ui.view.MyRadioButton
+                    android:id="@+id/rb_filter_texture5"
+                    android:layout_width="80dp"
+                    android:layout_height="wrap_content"
+                    android:button="@null"
+                    android:clickable="true"
+                    android:gravity="center"
+                    android:text="@string/filter_texture5"
+                    android:textColor="@color/color_80ffffff"
+                    android:textSize="12dp"
+                    custom:drawableSizes="53dp"
+                    custom:drawableTop="@drawable/ic_filter_style_texture5"
+                    android:focusable="true" />
+
+                <com.netease.yunxin.app.one2one.ui.view.MyRadioButton
+                    android:id="@+id/rb_filter_texture6"
+                    android:layout_width="80dp"
+                    android:layout_height="wrap_content"
+                    android:button="@null"
+                    android:clickable="true"
+                    android:gravity="center"
+                    android:text="@string/filter_texture6"
+                    android:textColor="@color/color_80ffffff"
+                    android:textSize="12dp"
+                    custom:drawableSizes="53dp"
+                    custom:drawableTop="@drawable/ic_filter_style_texture6"
+                    android:focusable="true" />
+
+                <com.netease.yunxin.app.one2one.ui.view.MyRadioButton
+                    android:id="@+id/rb_filter_nature1"
+                    android:layout_width="80dp"
+                    android:layout_height="wrap_content"
+                    android:button="@null"
+                    android:clickable="true"
+                    android:gravity="center"
+                    android:text="@string/filter_nature1"
+                    android:textColor="@color/color_80ffffff"
+                    android:textSize="12dp"
+                    custom:drawableSizes="53dp"
+                    custom:drawableTop="@drawable/ic_filter_style_nature1"
+                    android:focusable="true" />
+
+                <com.netease.yunxin.app.one2one.ui.view.MyRadioButton
+                    android:id="@+id/rb_filter_nature2"
+                    android:layout_width="80dp"
+                    android:layout_height="wrap_content"
+                    android:button="@null"
+                    android:clickable="true"
+                    android:gravity="center"
+                    android:text="@string/filter_nature2"
+                    android:textColor="@color/color_80ffffff"
+                    android:textSize="12dp"
+                    custom:drawableSizes="53dp"
+                    custom:drawableTop="@drawable/ic_filter_style_nature2"
+                    android:focusable="true" />
+
+                <com.netease.yunxin.app.one2one.ui.view.MyRadioButton
+                    android:id="@+id/rb_filter_nature3"
+                    android:layout_width="80dp"
+                    android:layout_height="wrap_content"
+                    android:button="@null"
+                    android:clickable="true"
+                    android:gravity="center"
+                    android:text="@string/filter_nature3"
+                    android:textColor="@color/color_80ffffff"
+                    android:textSize="12dp"
+                    custom:drawableSizes="53dp"
+                    custom:drawableTop="@drawable/ic_filter_style_nature3"
+                    android:focusable="true" />
+
+                <com.netease.yunxin.app.one2one.ui.view.MyRadioButton
+                    android:id="@+id/rb_filter_nature4"
+                    android:layout_width="80dp"
+                    android:layout_height="wrap_content"
+                    android:button="@null"
+                    android:clickable="true"
+                    android:gravity="center"
+                    android:text="@string/filter_nature4"
+                    android:textColor="@color/color_80ffffff"
+                    android:textSize="12dp"
+                    custom:drawableSizes="53dp"
+                    custom:drawableTop="@drawable/ic_filter_style_nature4"
+                    android:focusable="true" />
+
+                <com.netease.yunxin.app.one2one.ui.view.MyRadioButton
+                    android:id="@+id/rb_filter_nature5"
+                    android:layout_width="80dp"
+                    android:layout_height="wrap_content"
+                    android:button="@null"
+                    android:clickable="true"
+                    android:gravity="center"
+                    android:text="@string/filter_nature5"
+                    android:textColor="@color/color_80ffffff"
+                    android:textSize="12dp"
+                    custom:drawableSizes="53dp"
+                    custom:drawableTop="@drawable/ic_filter_style_nature5"
+                    android:focusable="true" />
+
+                <com.netease.yunxin.app.one2one.ui.view.MyRadioButton
+                    android:id="@+id/rb_filter_nature6"
+                    android:layout_width="80dp"
+                    android:layout_height="wrap_content"
+                    android:button="@null"
+                    android:clickable="true"
+                    android:gravity="center"
+                    android:text="@string/filter_nature6"
+                    android:textColor="@color/color_80ffffff"
+                    android:textSize="12dp"
+                    custom:drawableSizes="53dp"
+                    custom:drawableTop="@drawable/ic_filter_style_nature6"
+                    android:focusable="true" />
+
+                <com.netease.yunxin.app.one2one.ui.view.MyRadioButton
+                    android:id="@+id/rb_filter_fair1"
+                    android:layout_width="80dp"
+                    android:layout_height="wrap_content"
+                    android:button="@null"
+                    android:clickable="true"
+                    android:gravity="center"
+                    android:text="@string/filter_fair1"
+                    android:textColor="@color/color_80ffffff"
+                    android:textSize="12dp"
+                    custom:drawableSizes="53dp"
+                    custom:drawableTop="@drawable/ic_filter_style_fair1"
+                    android:focusable="true" />
+
+                <com.netease.yunxin.app.one2one.ui.view.MyRadioButton
+                    android:id="@+id/rb_filter_fair2"
+                    android:layout_width="80dp"
+                    android:layout_height="wrap_content"
+                    android:button="@null"
+                    android:clickable="true"
+                    android:gravity="center"
+                    android:text="@string/filter_fair2"
+                    android:textColor="@color/color_80ffffff"
+                    android:textSize="12dp"
+                    custom:drawableSizes="53dp"
+                    custom:drawableTop="@drawable/ic_filter_style_fair2"
+                    android:focusable="true" />
+
+                <com.netease.yunxin.app.one2one.ui.view.MyRadioButton
+                    android:id="@+id/rb_filter_fair3"
+                    android:layout_width="80dp"
+                    android:layout_height="wrap_content"
+                    android:button="@null"
+                    android:clickable="true"
+                    android:gravity="center"
+                    android:text="@string/filter_fair3"
+                    android:textColor="@color/color_80ffffff"
+                    android:textSize="12dp"
+                    custom:drawableSizes="53dp"
+                    custom:drawableTop="@drawable/ic_filter_style_fair3"
+                    android:focusable="true" />
+
+                <com.netease.yunxin.app.one2one.ui.view.MyRadioButton
+                    android:id="@+id/rb_filter_fair4"
+                    android:layout_width="80dp"
+                    android:layout_height="wrap_content"
+                    android:button="@null"
+                    android:clickable="true"
+                    android:gravity="center"
+                    android:text="@string/filter_fair4"
+                    android:textColor="@color/color_80ffffff"
+                    android:textSize="12dp"
+                    custom:drawableSizes="53dp"
+                    custom:drawableTop="@drawable/ic_filter_style_fair4"
+                    android:focusable="true" />
+
+                <com.netease.yunxin.app.one2one.ui.view.MyRadioButton
+                    android:id="@+id/rb_filter_fair5"
+                    android:layout_width="80dp"
+                    android:layout_height="wrap_content"
+                    android:button="@null"
+                    android:clickable="true"
+                    android:gravity="center"
+                    android:text="@string/filter_fair5"
+                    android:textColor="@color/color_80ffffff"
+                    android:textSize="12dp"
+                    custom:drawableSizes="53dp"
+                    custom:drawableTop="@drawable/ic_filter_style_fair5"
+                    android:focusable="true" />
+
+                <com.netease.yunxin.app.one2one.ui.view.MyRadioButton
+                    android:id="@+id/rb_filter_fair6"
+                    android:layout_width="80dp"
+                    android:layout_height="wrap_content"
+                    android:button="@null"
+                    android:clickable="true"
+                    android:gravity="center"
+                    android:text="@string/filter_fair6"
+                    android:textColor="@color/color_80ffffff"
+                    android:textSize="12dp"
+                    custom:drawableSizes="53dp"
+                    custom:drawableTop="@drawable/ic_filter_style_fair6"
+                    android:focusable="true" />
+
+                <com.netease.yunxin.app.one2one.ui.view.MyRadioButton
+                    android:id="@+id/rb_filter_refresh1"
+                    android:layout_width="80dp"
+                    android:layout_height="wrap_content"
+                    android:button="@null"
+                    android:clickable="true"
+                    android:gravity="center"
+                    android:text="@string/filter_refresh1"
+                    android:textColor="@color/color_80ffffff"
+                    android:textSize="12dp"
+                    custom:drawableSizes="53dp"
+                    custom:drawableTop="@drawable/ic_filter_style_refresh1"
+                    android:focusable="true" />
+
+                <com.netease.yunxin.app.one2one.ui.view.MyRadioButton
+                    android:id="@+id/rb_filter_refresh2"
+                    android:layout_width="80dp"
+                    android:layout_height="wrap_content"
+                    android:button="@null"
+                    android:clickable="true"
+                    android:gravity="center"
+                    android:text="@string/filter_refresh2"
+                    android:textColor="@color/color_80ffffff"
+                    android:textSize="12dp"
+                    custom:drawableSizes="53dp"
+                    custom:drawableTop="@drawable/ic_filter_style_refresh2"
+                    android:focusable="true" />
+
+                <com.netease.yunxin.app.one2one.ui.view.MyRadioButton
+                    android:id="@+id/rb_filter_refresh3"
+                    android:layout_width="80dp"
+                    android:layout_height="wrap_content"
+                    android:button="@null"
+                    android:clickable="true"
+                    android:gravity="center"
+                    android:text="@string/filter_refresh3"
+                    android:textColor="@color/color_80ffffff"
+                    android:textSize="12dp"
+                    custom:drawableSizes="53dp"
+                    custom:drawableTop="@drawable/ic_filter_style_refresh3"
+                    android:focusable="true" />
+
+                <com.netease.yunxin.app.one2one.ui.view.MyRadioButton
+                    android:id="@+id/rb_filter_refresh4"
+                    android:layout_width="80dp"
+                    android:layout_height="wrap_content"
+                    android:button="@null"
+                    android:clickable="true"
+                    android:gravity="center"
+                    android:text="@string/filter_refresh4"
+                    android:textColor="@color/color_80ffffff"
+                    android:textSize="12dp"
+                    custom:drawableSizes="53dp"
+                    custom:drawableTop="@drawable/ic_filter_style_refresh4"
+                    android:focusable="true" />
+
+                <com.netease.yunxin.app.one2one.ui.view.MyRadioButton
+                    android:id="@+id/rb_filter_refresh5"
+                    android:layout_width="80dp"
+                    android:layout_height="wrap_content"
+                    android:button="@null"
+                    android:clickable="true"
+                    android:gravity="center"
+                    android:text="@string/filter_refresh5"
+                    android:textColor="@color/color_80ffffff"
+                    android:textSize="12dp"
+                    custom:drawableSizes="53dp"
+                    custom:drawableTop="@drawable/ic_filter_style_refresh5"
+                    android:focusable="true" />
+
+                <com.netease.yunxin.app.one2one.ui.view.MyRadioButton
+                    android:id="@+id/rb_filter_refresh6"
+                    android:layout_width="80dp"
+                    android:layout_height="wrap_content"
+                    android:button="@null"
+                    android:clickable="true"
+                    android:gravity="center"
+                    android:text="@string/filter_refresh6"
+                    android:textColor="@color/color_80ffffff"
+                    android:textSize="12dp"
+                    custom:drawableSizes="53dp"
+                    custom:drawableTop="@drawable/ic_filter_style_refresh6"
+                    android:focusable="true" />
+
+                <com.netease.yunxin.app.one2one.ui.view.MyRadioButton
+                    android:id="@+id/rb_filter_p1"
+                    android:layout_width="80dp"
+                    android:layout_height="wrap_content"
+                    android:button="@null"
+                    android:clickable="true"
+                    android:gravity="center"
+                    android:text="@string/filter_p1"
+                    android:textColor="@color/color_80ffffff"
+                    android:textSize="12dp"
+                    custom:drawableSizes="53dp"
+                    custom:drawableTop="@drawable/ic_filter_style_p1"
+                    android:focusable="true" />
+
+                <com.netease.yunxin.app.one2one.ui.view.MyRadioButton
+                    android:id="@+id/rb_filter_p2"
+                    android:layout_width="80dp"
+                    android:layout_height="wrap_content"
+                    android:button="@null"
+                    android:clickable="true"
+                    android:gravity="center"
+                    android:text="@string/filter_p2"
+                    android:textColor="@color/color_80ffffff"
+                    android:textSize="12dp"
+                    custom:drawableSizes="53dp"
+                    custom:drawableTop="@drawable/ic_filter_style_p2"
+                    android:focusable="true" />
+
+                <com.netease.yunxin.app.one2one.ui.view.MyRadioButton
+                    android:id="@+id/rb_filter_p3"
+                    android:layout_width="80dp"
+                    android:layout_height="wrap_content"
+                    android:button="@null"
+                    android:clickable="true"
+                    android:gravity="center"
+                    android:text="@string/filter_p3"
+                    android:textColor="@color/color_80ffffff"
+                    android:textSize="12dp"
+                    custom:drawableSizes="53dp"
+                    custom:drawableTop="@drawable/ic_filter_style_p3"
+                    android:focusable="true" />
+
+                <com.netease.yunxin.app.one2one.ui.view.MyRadioButton
+                    android:id="@+id/rb_filter_p4"
+                    android:layout_width="80dp"
+                    android:layout_height="wrap_content"
+                    android:button="@null"
+                    android:clickable="true"
+                    android:gravity="center"
+                    android:text="@string/filter_p4"
+                    android:textColor="@color/color_80ffffff"
+                    android:textSize="12dp"
+                    custom:drawableSizes="53dp"
+                    custom:drawableTop="@drawable/ic_filter_style_p4"
+                    android:focusable="true" />
+
+                <com.netease.yunxin.app.one2one.ui.view.MyRadioButton
+                    android:id="@+id/rb_filter_p5"
+                    android:layout_width="80dp"
+                    android:layout_height="wrap_content"
+                    android:button="@null"
+                    android:clickable="true"
+                    android:gravity="center"
+                    android:text="@string/filter_p5"
+                    android:textColor="@color/color_80ffffff"
+                    android:textSize="12dp"
+                    custom:drawableSizes="53dp"
+                    custom:drawableTop="@drawable/ic_filter_style_p5"
+                    android:focusable="true" />
+
+                <com.netease.yunxin.app.one2one.ui.view.MyRadioButton
+                    android:id="@+id/rb_filter_p6"
+                    android:layout_width="80dp"
+                    android:layout_height="wrap_content"
+                    android:button="@null"
+                    android:clickable="true"
+                    android:gravity="center"
+                    android:text="@string/filter_p6"
+                    android:textColor="@color/color_80ffffff"
+                    android:textSize="12dp"
+                    custom:drawableSizes="53dp"
+                    custom:drawableTop="@drawable/ic_filter_style_p6"
+                    android:focusable="true" />
+
+
+            </com.netease.yunxin.app.one2one.ui.view.NEBeautyRadioGroup>
+
+<!--            <com.netease.yunxin.app.one2one.ui.view.NEBeautyRadioGroup-->
+<!--                android:id="@+id/radio_group_filter"-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:background="@android:color/transparent"-->
+<!--                android:orientation="horizontal">-->
+
+<!--                <RadioButton-->
+<!--                    android:id="@+id/rb_filter_f1"-->
+<!--                    android:layout_width="80dp"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:button="@null"-->
+<!--                    android:drawableTop="@drawable/ic_filter_style_f1"-->
+<!--                    android:gravity="center"-->
+<!--                    android:padding="@dimen/filter_btn_padding"-->
+<!--                    android:text="@string/filter_f1"-->
+<!--                    android:textColor="@color/white" />-->
+
+<!--                <RadioButton-->
+<!--                    android:id="@+id/rb_filter_f2"-->
+<!--                    android:layout_width="80dp"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:button="@null"-->
+<!--                    android:drawableTop="@drawable/ic_filter_style_f2"-->
+<!--                    android:gravity="center"-->
+<!--                    android:padding="@dimen/filter_btn_padding"-->
+<!--                    android:text="@string/filter_f2"-->
+<!--                    android:textColor="@color/white" />-->
+
+<!--                <RadioButton-->
+<!--                    android:id="@+id/rb_filter_f3"-->
+<!--                    android:layout_width="80dp"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:button="@null"-->
+<!--                    android:drawableTop="@drawable/ic_filter_style_f3"-->
+<!--                    android:gravity="center"-->
+<!--                    android:padding="@dimen/filter_btn_padding"-->
+<!--                    android:text="@string/filter_f3"-->
+<!--                    android:textColor="@color/white" />-->
+
+<!--                <RadioButton-->
+<!--                    android:id="@+id/rb_filter_f4"-->
+<!--                    android:layout_width="wrap_content"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:button="@null"-->
+<!--                    android:drawableTop="@drawable/ic_filter_style_f4"-->
+<!--                    android:gravity="center"-->
+<!--                    android:padding="@dimen/filter_btn_padding"-->
+<!--                    android:text="@string/filter_f4"-->
+<!--                    android:textColor="@color/white" />-->
+
+<!--                <RadioButton-->
+<!--                    android:id="@+id/rb_filter_fn1"-->
+<!--                    android:layout_width="wrap_content"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:button="@null"-->
+<!--                    android:drawableTop="@drawable/ic_filter_style_fn1"-->
+<!--                    android:gravity="center"-->
+<!--                    android:padding="@dimen/filter_btn_padding"-->
+<!--                    android:text="@string/filter_fn1"-->
+<!--                    android:textColor="@color/white" />-->
+
+<!--                <RadioButton-->
+<!--                    android:id="@+id/rb_filter_fn2"-->
+<!--                    android:layout_width="wrap_content"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:button="@null"-->
+<!--                    android:drawableTop="@drawable/ic_filter_style_fn2"-->
+<!--                    android:gravity="center"-->
+<!--                    android:padding="@dimen/filter_btn_padding"-->
+<!--                    android:text="@string/filter_fn2"-->
+<!--                    android:textColor="@color/white" />-->
+
+<!--                <RadioButton-->
+<!--                    android:id="@+id/rb_filter_n2"-->
+<!--                    android:layout_width="wrap_content"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:button="@null"-->
+<!--                    android:drawableTop="@drawable/ic_filter_style_n2"-->
+<!--                    android:gravity="center"-->
+<!--                    android:padding="@dimen/filter_btn_padding"-->
+<!--                    android:text="@string/filter_n2"-->
+<!--                    android:textColor="@color/white" />-->
+
+
+<!--                <RadioButton-->
+<!--                    android:id="@+id/rb_filter_stamen"-->
+<!--                    android:layout_width="wrap_content"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:button="@null"-->
+<!--                    android:drawableTop="@drawable/ic_filter_style_stamen"-->
+<!--                    android:gravity="center"-->
+<!--                    android:padding="@dimen/filter_btn_padding"-->
+<!--                    android:text="@string/filter_stamen"-->
+<!--                    android:textColor="@color/white" />-->
+
+
+        </HorizontalScrollView>
+    </LinearLayout>
+</LinearLayout>

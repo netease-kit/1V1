@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ /*
+  ~  * Copyright (c) 2022 NetEase, Inc.  All rights reserved.
+  ~  * Use of this source code is governed by a MIT license that can be found in the LICENSE file.
+  ~  */
+  -->
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:custom="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <com.google.android.material.slider.Slider
+        android:id="@+id/slider_effect_level"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="@dimen/effect_btn_padding"
+        android:stepSize="1"
+        android:theme="@style/SliderTheme"
+        android:valueFrom="0"
+        android:valueTo="100"
+        app:thumbColor="@color/colorAccent"
+        app:thumbRadius="@dimen/slider_thumbradius"
+        app:tickVisible="false"
+        app:trackColorActive="@color/colorAccent"
+        app:trackColorInactive="@color/colorPrimary"
+        app:trackHeight="@dimen/slider_trackheight" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:orientation="horizontal">
+
+        <com.netease.yunxin.app.one2one.ui.view.MyRadioButton
+            android:id="@+id/rb_effect_recover"
+            android:layout_width="80dp"
+            android:layout_height="match_parent"
+            android:button="@null"
+            android:clickable="true"
+            android:gravity="center"
+            android:text="@string/effect_recover"
+            android:textColor="@color/color_80ffffff"
+            android:textSize="12dp"
+            custom:drawableSizes="40dp"
+            custom:drawableTop="@drawable/recovery" />
+
+        <View
+            android:layout_width="1px"
+            android:layout_height="50dp"
+            android:layout_gravity="center_vertical"
+            android:background="@color/color_88ffffff"/>
+
+        <HorizontalScrollView
+            android:id="@+id/horizontal_scrollv_beauty"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@android:color/transparent"
+            android:scrollbars="none">
+
+
+            <com.netease.yunxin.app.one2one.ui.view.NEBeautyRadioGroup
+                android:id="@+id/radio_group_effect"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@android:color/transparent"
+                android:orientation="horizontal">
+
+                <com.netease.yunxin.app.one2one.ui.view.MyRadioButton
+                    android:id="@+id/rb_effect_smooth"
+                    android:layout_width="80dp"
+                    android:layout_height="wrap_content"
+                    android:button="@null"
+                    android:clickable="true"
+                    android:gravity="center"
+                    android:text="@string/effect_smooth"
+                    android:textColor="@color/color_80ffffff"
+                    android:textSize="12dp"
+                    custom:drawableSizes="40dp"
+                    custom:drawableTop="@drawable/mopi"
+                    android:focusable="true" />
+
+                <com.netease.yunxin.app.one2one.ui.view.MyRadioButton
+                    android:id="@+id/rb_effect_whiten"
+                    android:layout_width="80dp"
+                    android:layout_height="wrap_content"
+                    android:button="@null"
+                    android:clickable="true"
+                    android:gravity="center"
+                    android:text="@string/effect_whiten"
+                    android:textColor="@color/color_80ffffff"
+                    android:textSize="12dp"
+                    custom:drawableSizes="40dp"
+                    custom:drawableTop="@drawable/meibai"
+                    android:focusable="true" />
+
+                <com.netease.yunxin.app.one2one.ui.view.MyRadioButton
+                    android:id="@+id/rb_effect_faceruddy"
+                    android:layout_width="80dp"
+                    android:layout_height="wrap_content"
+                    android:button="@null"
+                    android:clickable="true"
+                    android:gravity="center"
+                    android:text="@string/effect_faceruddy"
+                    android:textColor="@color/color_80ffffff"
+                    android:textSize="12dp"
+                    custom:drawableSizes="40dp"
+                    custom:drawableTop="@drawable/hongrun"
+                    android:focusable="true" />
+
+                <com.netease.yunxin.app.one2one.ui.view.MyRadioButton
+                    android:id="@+id/rb_effect_facesharpen"
+                    android:layout_width="80dp"
+                    android:layout_height="wrap_content"
+                    android:button="@null"
+                    android:clickable="true"
+                    android:gravity="center"
+                    android:text="@string/effect_facesharpen"
+                    android:textColor="@color/color_80ffffff"
+                    android:textSize="12dp"
+                    custom:drawableSizes="40dp"
+                    custom:drawableTop="@drawable/ruihua"
+                    android:focusable="true" />
+
+                <com.netease.yunxin.app.one2one.ui.view.MyRadioButton
+                    android:id="@+id/rb_effect_lighteye"
+                    android:layout_width="80dp"
+                    android:layout_height="wrap_content"
+                    android:button="@null"
+                    android:clickable="true"
+                    android:gravity="center"
+                    android:paddingLeft="@dimen/effect_btn_padding"
+                    android:text="@string/effect_lighteye"
+                    android:textColor="@color/color_80ffffff"
+                    android:textSize="12dp"
+                    custom:drawableSizes="40dp"
+                    custom:drawableTop="@drawable/liangyan"
+                    android:focusable="true" />
+
+                <com.netease.yunxin.app.one2one.ui.view.MyRadioButton
+                    android:id="@+id/rb_effect_whiteteeth"
+                    android:layout_width="80dp"
+                    android:layout_height="wrap_content"
+                    android:button="@null"
+                    android:clickable="true"
+                    android:gravity="center"
+                    android:paddingLeft="@dimen/effect_btn_padding"
+                    android:text="@string/effect_whiteteeth"
+                    android:textColor="@color/color_80ffffff"
+                    android:textSize="12dp"
+                    custom:drawableSizes="40dp"
+                    custom:drawableTop="@drawable/meiya"
+                    android:focusable="true"/>
+
+            </com.netease.yunxin.app.one2one.ui.view.NEBeautyRadioGroup>
+
+        </HorizontalScrollView>
+    </LinearLayout>
+</LinearLayout>
