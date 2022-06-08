@@ -57,6 +57,7 @@
             android:layout_height="60dp"
             android:layout_alignParentBottom="true"
             android:background="@color/semitransparent"
+            android:visibility="gone"
             app:tabIndicatorHeight="0dp"
             app:tabSelectedTextColor="@color/white"
             app:tabTextColor="@color/color_80ffffff" />

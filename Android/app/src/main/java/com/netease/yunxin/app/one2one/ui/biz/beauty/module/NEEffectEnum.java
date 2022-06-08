@@ -16,8 +16,8 @@ public enum NEEffectEnum {
     WHITETEETH(R.id.rb_effect_whiteteeth, NERtcBeautyEffectType.kNERtcBeautyWhiteTeeth, 0.6f),
     LIGHTEYE(R.id.rb_effect_lighteye, NERtcBeautyEffectType.kNERtcBeautyLightEye, 0.6f),
     WHITEN(R.id.rb_effect_whiten, NERtcBeautyEffectType.kNERtcBeautyWhiten, 0.6f),
-    SMOOTH(R.id.rb_effect_smooth, NERtcBeautyEffectType.kNERtcBeautySmooth, 0.8f),
-    FACERUDDY(R.id.rb_effect_faceruddy, NERtcBeautyEffectType.kNERtcBeautyFaceRuddy, 0.0f),
+    SMOOTH(R.id.rb_effect_smooth, NERtcBeautyEffectType.kNERtcBeautySmooth, 0.7f),
+    FACERUDDY(R.id.rb_effect_faceruddy, NERtcBeautyEffectType.kNERtcBeautyFaceRuddy, 0.5f),
     FACESHARPEN(R.id.rb_effect_facesharpen, NERtcBeautyEffectType.kNERtcBeautyFaceSharpen, 0.0f);
 
     private int resId;

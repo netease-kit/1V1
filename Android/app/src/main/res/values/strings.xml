@@ -193,6 +193,7 @@
     <string name="login_home_desc">打造一体式娱乐社交方案</string>
     <string name="other_end_call">对方结束通话</string>
     <string name="network_error">网络异常请稍后再试</string>
+    <string name="phonenumber_error_tips">对方测试号码不正确，请重新填写</string>
 
     <string-array name="beauty_option_tags">
         <item>美肤</item>

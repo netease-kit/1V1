@@ -103,8 +103,10 @@ public class MineFragment extends Fragment {
                 .statusBarView(binding.statusBarHolder)
                 .statusBarDarkFont(true)
                 .init();
-        binding.tvNickname.setText(UserInfoManager.getSelfUserInfo().getNickname());
-        ImageLoader.with(AppGlobals.getApplication()).circleLoad(UserInfoManager.getSelfUserInfo().getAvatar(), binding.ivAvatar);
+        if (UserInfoManager.getSelfUserInfo()!=null){
+            binding.tvNickname.setText(UserInfoManager.getSelfUserInfo().getNickname());
+            ImageLoader.with(AppGlobals.getApplication()).circleLoad(UserInfoManager.getSelfUserInfo().getAvatar(), binding.ivAvatar);
+        }
     }
 
     @Override

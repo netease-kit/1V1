@@ -10,7 +10,21 @@ package com.netease.yunxin.app.one2one.constant;
 import com.netease.lava.nertc.sdk.video.NERtcEncodeConfig;
 
 public class AppRtcConfig {
-    public static final int VIDEO_WIDTH =1280;
-    public static final int VIDEO_HEIGHT =720;
+    /**
+     * 预览分辨率-宽
+     */
+    public static final int VIDEO_PREVIEW_WIDTH = 1920;
+    /**
+     * 预览分辨率-高
+     */
+    public static final int VIDEO_PREVIEW_HEIGHT = 1080;
+    /**
+     * 通话中分辨率-宽
+     */
+    public static final int VIDEO_WIDTH = 1280;
+    /**
+     * 通话中分辨率-高
+     */
+    public static final int VIDEO_HEIGHT = 720;
     public static final NERtcEncodeConfig.NERtcVideoFrameRate VIDEO_FRAME_RATE = NERtcEncodeConfig.NERtcVideoFrameRate.FRAME_RATE_FPS_24;
 }

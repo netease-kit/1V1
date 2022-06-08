@@ -18,7 +18,7 @@ android {
         minSdk = 21
         targetSdk = 30
         versionCode = 1
-        versionName = "1.0"
+        versionName = "1.0.0"
         multiDexEnabled = true
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -79,7 +79,13 @@ dependencies {
     implementation("androidx.constraintlayout:constraintlayout:2.1.3")
     implementation("androidx.recyclerview:recyclerview:1.2.1")
     implementation("com.netease.yunxin.kit:alog:1.0.2")
-    implementation("com.netease.yunxin.kit:call-pstn:1.5.4")
+    implementation("com.netease.yunxin:nertc:4.2.142")
+    implementation("com.netease.yunxin.kit:call-pstn:1.5.4"){
+        exclude("com.netease.yunxin","nertc")
+        exclude("com.netease.yunxin","report")
+        exclude("com.netease.yunxin","catcher")
+        exclude("com.netease.yunxin","nos")
+    }
     implementation("com.gyf.immersionbar:immersionbar:3.0.0")
     implementation("com.netease.yunxin.kit.auth:auth-yunxin-login:1.0.1")
     implementation("com.blankj:utilcodex:1.30.6")

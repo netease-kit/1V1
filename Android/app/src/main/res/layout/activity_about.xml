@@ -26,27 +26,27 @@
         android:orientation="vertical"
         android:layout_below="@id/title_bar">
 
-        <ImageView
-            android:layout_width="100dp"
-            android:layout_height="100dp"
-            android:layout_marginTop="200dp"
-            android:layout_gravity="center_horizontal"
-            android:src="@mipmap/ic_launcher"/>
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:layout_gravity="center_horizontal"
-            android:textSize="14dp"
-            android:textColor="@color/color_black_333333"
-            android:text="@string/yun_xin"/>
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:textSize="14dp"
-            android:textColor="@color/color_black_333333"
-            android:text="@string/app_long_name"/>
+    <ImageView
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_marginTop="200dp"
+        android:layout_gravity="center_horizontal"
+        android:src="@mipmap/ic_launcher"/>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:layout_gravity="center_horizontal"
+        android:textSize="14dp"
+        android:textColor="@color/color_black_333333"
+        android:text="@string/yun_xin"/>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:textSize="14dp"
+        android:textColor="@color/color_black_333333"
+        android:text="@string/app_long_name"/>
 
     </LinearLayout>
 

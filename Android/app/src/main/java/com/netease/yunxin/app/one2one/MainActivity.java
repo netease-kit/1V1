@@ -16,16 +16,15 @@ import androidx.fragment.app.FragmentTransaction;
 
 import com.blankj.utilcode.util.ProcessUtils;
 import com.gyf.immersionbar.ImmersionBar;
-import com.netease.lava.nertc.sdk.NERtcEx;
+import com.netease.lava.nertc.sdk.NERtcConstants;
 import com.netease.lava.nertc.sdk.NERtcOption;
-import com.netease.lava.nertc.sdk.video.NERtcVideoConfig;
 import com.netease.nimlib.sdk.RequestCallback;
 import com.netease.yunxin.android.lib.network.common.BaseResponse;
 import com.netease.yunxin.android.lib.network.common.NetworkClient;
 import com.netease.yunxin.app.one2one.base.BaseActivity;
 import com.netease.yunxin.app.one2one.constant.AppConstants;
-import com.netease.yunxin.app.one2one.constant.CallConfig;
 import com.netease.yunxin.app.one2one.constant.AppRtcConfig;
+import com.netease.yunxin.app.one2one.constant.CallConfig;
 import com.netease.yunxin.app.one2one.databinding.ActivityMainBinding;
 import com.netease.yunxin.app.one2one.http.HttpService;
 import com.netease.yunxin.app.one2one.ui.biz.beauty.module.NEAssetsEnum;
@@ -36,6 +35,7 @@ import com.netease.yunxin.app.one2one.ui.biz.home.MineFragment;
 import com.netease.yunxin.app.one2one.utils.AssetUtils;
 import com.netease.yunxin.app.one2one.utils.LogUtil;
 import com.netease.yunxin.app.one2one.utils.NavUtils;
+import com.netease.yunxin.app.one2one.utils.RtcUtil;
 import com.netease.yunxin.app.one2one.utils.ThreadUtils;
 import com.netease.yunxin.app.one2one.utils.UserInfoManager;
 import com.netease.yunxin.kit.alog.ALog;
@@ -79,7 +79,7 @@ public class MainActivity extends BaseActivity {
         NetworkClient.getInstance().configAccessToken(UserInfoManager.getSelfAccessToken());
         selectFragment(TAB_HOME);
         handleEvent();
-        if (ProcessUtils.isMainProcess()){
+        if (ProcessUtils.isMainProcess()) {
             initCallKit();
         }
         extFilesDirPath = getExternalFilesDir(null).getAbsolutePath();
@@ -117,7 +117,7 @@ public class MainActivity extends BaseActivity {
         Fragment currentFragment = supportFragmentManager.findFragmentByTag(curTabIndex + "");
         if (currentFragment != null) {
             fragmentTransaction.hide(currentFragment);
-            LogUtil.i(TAG,"hide:"+currentFragment);
+            LogUtil.i(TAG, "hide:" + currentFragment);
         }
         curTabIndex = tabIndex;
         Fragment fragment = supportFragmentManager.findFragmentByTag(tabIndex + "");
@@ -127,27 +127,27 @@ public class MainActivity extends BaseActivity {
                     if (homeFragment == null) {
                         homeFragment = new HomeFragment();
                     }
-                    fragment=homeFragment;
+                    fragment = homeFragment;
                     break;
                 case TAB_MSG:
                     if (messageFragment == null) {
                         messageFragment = new MessageFragment();
                     }
-                    fragment=messageFragment;
+                    fragment = messageFragment;
                     break;
                 case TAB_MINE:
                     if (mineFragment == null) {
                         mineFragment = new MineFragment();
                     }
-                    fragment=mineFragment;
+                    fragment = mineFragment;
                     break;
                 default:
                     break;
             }
-            LogUtil.i(TAG,"add:"+fragment);
+            LogUtil.i(TAG, "add:" + fragment);
             fragmentTransaction.add(R.id.fragment_container, fragment, tabIndex + "");
         } else {
-            LogUtil.i(TAG,"show:"+fragment);
+            LogUtil.i(TAG, "show:" + fragment);
             fragmentTransaction.show(fragment);
         }
         if (fragment instanceof HomeFragment) {
@@ -165,7 +165,10 @@ public class MainActivity extends BaseActivity {
         binding.tvMsg.setSelected(msgSelected);
         binding.tvMine.setSelected(mineSelected);
     }
+
     private void initCallKit() {
+        NERtcOption neRtcOption = new NERtcOption();
+        neRtcOption.logLevel = NERtcConstants.LogLevel.INFO;
         CallKitUIOptions options = new CallKitUIOptions.Builder()
                 // 必要：音视频通话 sdk appKey，用于通话中使用
                 .rtcAppKey(AppConstants.APP_KEY)
@@ -175,14 +178,10 @@ public class MainActivity extends BaseActivity {
                 .notificationConfigFetcher(invitedInfo -> new CallKitNotificationConfig(R.mipmap.ic_launcher))
                 // 收到被叫时若 app 在后台，在恢复到前台时是否自动唤起被叫页面，默认为 true
                 .resumeBGInvitation(true)
-                .rtcCallExtension(new SelfConfigExtension(){
+                .rtcCallExtension(new SelfConfigExtension() {
                     @Override
                     public void configVideoConfig() {
-                        NERtcVideoConfig videoConfig = new NERtcVideoConfig();
-                        videoConfig.frameRate = AppRtcConfig.VIDEO_FRAME_RATE;
-                        videoConfig.width = AppRtcConfig.VIDEO_WIDTH;
-                        videoConfig.height = AppRtcConfig.VIDEO_HEIGHT;
-                        NERtcEx.getInstance().setLocalVideoConfig(videoConfig);
+                        RtcUtil.configVideoConfig(AppRtcConfig.VIDEO_WIDTH,AppRtcConfig.VIDEO_HEIGHT);
                     }
                 })
                 .rtcTokenService(new TokenService() {
@@ -208,7 +207,7 @@ public class MainActivity extends BaseActivity {
 
                     }
                 }) // 自己实现的 token 请求方法
-                .rtcSdkOption(new NERtcOption())
+                .rtcSdkOption(neRtcOption)
                 // 呼叫组件初始化 rtc 范围，true-全局初始化，false-每次通话进行初始化以及销毁
                 // 全局初始化有助于更快进入首帧页面，当结合其他组件使用时存在rtc初始化冲突可设置false
                 .rtcInitScope(true)
@@ -229,9 +228,9 @@ public class MainActivity extends BaseActivity {
                 ret = AssetUtils.copyAssetRecursive(getAssets(), type.getAssetsPath(), getBeautyAssetPath(type), false);
                 if (ret != 0) break;
             }
-            if(ret == 0) {
+            if (ret == 0) {
                 ALog.i(TAG, "beauty asset is ready");
-            }else{
+            } else {
                 ALog.i(TAG, "beauty asset is failed");
             }
         });
@@ -246,6 +245,7 @@ public class MainActivity extends BaseActivity {
 
     /**
      * 生成滤镜和美妆模板资源文件的路径，资源文件在App启动后会拷贝到的App的外部存储路径
+     *
      * @param type @see NEAssetsEnum 对应assets目录下的美颜，滤镜或者美妆资源目录
      * @return 美颜，滤镜或者美妆的App外部存储路径
      */
