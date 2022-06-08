@@ -108,9 +108,6 @@ public class BeautySettingActivity extends BaseActivity {
         }).request();
     }
 
-    /**
-     * 开始预览
-     */
     private void startPreview() {
         binding.vvLocalUser.setZOrderMediaOverlay(true);
         binding.vvLocalUser.setScalingType(NERtcConstants.VideoScalingType.SCALE_ASPECT_FILL);
@@ -332,6 +329,7 @@ public class BeautySettingActivity extends BaseActivity {
     private void showOrDismissBeautySettingPanel() {
         isBeautySettingPanelShowing = !isBeautySettingPanelShowing;
         binding.beautySettingPanel.setVisibility(isBeautySettingPanelShowing ? View.VISIBLE : View.INVISIBLE);
+        binding.tabBottom.setVisibility(isBeautySettingPanelShowing ? View.VISIBLE : View.INVISIBLE);
         binding.beautyToolsPanel.setVisibility(isBeautySettingPanelShowing ? View.INVISIBLE : View.VISIBLE);
     }
 

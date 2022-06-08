@@ -96,7 +96,7 @@ public class BindOtherPhoneActivity extends BaseActivity {
         HttpService.searchUserInfoWithPhoneNumber(currentPhoneNumber).subscribe(new ResourceSingleObserver<BaseResponse<UserModel>>() {
             @Override
             public void onSuccess(BaseResponse<UserModel> userModelBaseResponse) {
-                if (userModelBaseResponse.isSuccessful()) {
+                if (userModelBaseResponse.isSuccessful()&&userModelBaseResponse.data!=null) {
                     PhoneBindUtil.setLastBindPhoneNumber(currentPhoneNumber);
                     LogUtil.i(TAG, "bind success,phoneNumber is:" + currentPhoneNumber);
                     ToastUtils.showShort(R.string.save_success);

@@ -7,12 +7,16 @@ import com.blankj.utilcode.util.SPUtils;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.netease.lava.nertc.sdk.NERtcEx;
+import com.netease.yunxin.app.one2one.constant.AppRtcConfig;
 import com.netease.yunxin.app.one2one.ui.biz.beauty.module.NEAssetsEnum;
 import com.netease.yunxin.app.one2one.ui.biz.beauty.module.NEBodyEffectEnum;
 import com.netease.yunxin.app.one2one.ui.biz.beauty.module.NEEffect;
 import com.netease.yunxin.app.one2one.ui.biz.beauty.module.NEEffectEnum;
 import com.netease.yunxin.app.one2one.ui.biz.beauty.module.NEFilter;
 import com.netease.yunxin.app.one2one.ui.biz.beauty.module.NEFilterEnum;
+import com.netease.yunxin.app.one2one.utils.LogUtil;
+import com.netease.yunxin.app.one2one.utils.RtcUtil;
+
 import java.io.File;
 import java.io.Serializable;
 import java.lang.reflect.Type;
@@ -31,7 +35,7 @@ public class BeautyManager {
     private BeautyFilter selectedFilter;
     private String extFilesDirPath;
     private static volatile BeautyManager mInstance;
-
+    private static final String TAG="BeautyManager";
     private BeautyManager(){
     }
 
@@ -115,6 +119,7 @@ public class BeautyManager {
         NEEffect effect = defaultEffects.get(resId);
         if(effect != null) {
             NERtcEx.getInstance().setBeautyEffect(effect.getType(), level);
+            LogUtil.e(TAG,"setBeautyEffect-setBeautyEffect,type:"+effect.getType()+",level:"+level);
         }
     }
 
@@ -122,6 +127,7 @@ public class BeautyManager {
         NEEffect effect = defaultBodyEffects.get(resId);
         if(effect != null) {
             NERtcEx.getInstance().setBeautyEffect(effect.getType(), level);
+            LogUtil.e(TAG,"setBeautyBodyEffect-setBeautyEffect,type:"+effect.getType()+",level:"+level);
         }
     }
 
@@ -130,6 +136,7 @@ public class BeautyManager {
         if(filter != null) {
             NERtcEx.getInstance().addBeautyFilter(getBeautyAssetPath(NEAssetsEnum.FILTERS, filter.getName()));
             NERtcEx.getInstance().setBeautyFilterLevel(level);
+            LogUtil.e(TAG,"addBeautyFilter-setBeautyFilterLevel"+",level:"+level);
         }
     }
 
@@ -156,21 +163,25 @@ public class BeautyManager {
     public void resetEffect(){
         for (NEEffect effect : defaultEffects.values()) {
             NERtcEx.getInstance().setBeautyEffect(effect.getType(), effect.getLevel());
+            LogUtil.e(TAG,"resetEffect-setBeautyEffect,type:"+effect.getType()+",level:"+effect.getLevel());
         }
     }
 
     public void resetBodyEffect(){
         for (NEEffect effect : defaultBodyEffects.values()) {
             NERtcEx.getInstance().setBeautyEffect(effect.getType(), effect.getLevel());
+            LogUtil.e(TAG,"resetBodyEffect-setBeautyEffect,type:"+effect.getType()+",level:"+effect.getLevel());
         }
     }
 
     public void resetFilter(){
         selectedFilter = null;
         NERtcEx.getInstance().removeBeautyFilter();
+        LogUtil.e(TAG,"resetBodyEffect-removeBeautyFilter");
     }
 
     public void startBeauty(){
+        RtcUtil.configVideoConfig(AppRtcConfig.VIDEO_PREVIEW_WIDTH,AppRtcConfig.VIDEO_PREVIEW_HEIGHT);
         NERtcEx.getInstance().startBeauty();
         for (NEEffect effect : localEffects.values()) {
             NERtcEx.getInstance().setBeautyEffect(effect.getType(), effect.getLevel());
@@ -183,6 +194,8 @@ public class BeautyManager {
         if(selectedFilter != null) {
             NERtcEx.getInstance().addBeautyFilter(getBeautyAssetPath(NEAssetsEnum.FILTERS, defaultFilters.get(selectedFilter.resId).getName()));
             NERtcEx.getInstance().setBeautyFilterLevel(selectedFilter.level);
+            LogUtil.e(TAG,"startBeauty-addBeautyFilter,s:"+getBeautyAssetPath(NEAssetsEnum.FILTERS, defaultFilters.get(selectedFilter.resId).getName()));
+            LogUtil.e(TAG,"startBeauty-setBeautyFilterLevel,level:"+selectedFilter.level);
         }
     }
 

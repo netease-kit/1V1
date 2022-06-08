@@ -115,11 +115,12 @@ public class UserInfoActivity extends BaseActivity {
         HttpService.searchUserInfoWithPhoneNumber(phoneNumber).subscribe(new ResourceSingleObserver<BaseResponse<UserModel>>() {
             @Override
             public void onSuccess(BaseResponse<UserModel> userModelBaseResponse) {
-                if (userModelBaseResponse.isSuccessful()) {
+                if (userModelBaseResponse.isSuccessful()&&userModelBaseResponse.data!=null) {
                     LogUtil.i(TAG, "phoneNumber:" + phoneNumber + ",imAccid:" + userModelBaseResponse.data.imAccid);
                     NavUtils.toCallPage(UserInfoActivity.this, userModelBaseResponse.data, channelType, needPstnCall);
                 } else {
                     LogUtil.e(TAG, "call failed errorMsg:" + userModelBaseResponse.msg);
+                    ToastUtils.showShort(R.string.phonenumber_error_tips);
                 }
                 binding.rlAudioCall.setEnabled(true);
                 binding.rlVideoCall.setEnabled(true);
@@ -128,6 +129,7 @@ public class UserInfoActivity extends BaseActivity {
             @Override
             public void onError(Throwable e) {
                 LogUtil.e(TAG, "call failed errorMsg:" + e);
+                ToastUtils.showShort(R.string.network_error);
                 binding.rlAudioCall.setEnabled(true);
                 binding.rlVideoCall.setEnabled(true);
             }

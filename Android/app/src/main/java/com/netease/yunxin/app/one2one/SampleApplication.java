@@ -46,11 +46,9 @@ public class SampleApplication extends Application {
         wrapperUncaughtExceptionHandler();
         NIMClient.init(this, null, options());
         application = this;
-        //初始化登录模块
         AuthorConfig authorConfig = new AuthorConfig(AppConstants.APP_KEY, AppConstants.PARENT_SCOPE, AppConstants.SCOPE, false);
         authorConfig.setLoginType(LoginType.LANGUAGE_SWITCH);
         AuthorManager.INSTANCE.initAuthor(getApplicationContext(), authorConfig);
-        //初始化应用网络
         NetworkClient.getInstance()
                 .configBaseUrl(AppConstants.BASE_URL)
                 .appKey(AppConstants.APP_KEY)

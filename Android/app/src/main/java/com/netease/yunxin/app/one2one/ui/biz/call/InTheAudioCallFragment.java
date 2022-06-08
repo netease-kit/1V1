@@ -121,9 +121,7 @@ public class InTheAudioCallFragment extends Fragment {
             @Override
             public void onChanged(Boolean aBoolean) {
                 ToastUtils.showShort(R.string.other_end_call);
-                if (!activity.isFinishing()) {
-                    activity.finish();
-                }
+                finishActivity();
             }
         });
 
@@ -136,9 +134,7 @@ public class InTheAudioCallFragment extends Fragment {
         pstnCallViewModel.getReleaseAndFinish().observe(viewLifecycleOwner, new Observer<Boolean>() {
             @Override
             public void onChanged(Boolean aBoolean) {
-                if (!activity.isFinishing()) {
-                    activity.finish();
-                }
+                finishActivity();
             }
         });
 
