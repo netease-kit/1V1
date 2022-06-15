@@ -23,19 +23,7 @@ import retrofit2.http.Query;
 public interface ServerApi {
 
     /**
-     * 获取Rtc Token  https://nrtc.netease.im/demo/getChecksum.action?uid=30569704039&appkey=56813bdfbaa1c2a29bbea391ffbbe27a
-     * {
-     * 	"code": 200,
-     * 	"checksum": "4ac9066de56ba7259dddb45a4334b8838a987dcb"
-     * }
-     *
-     *
-     * {
-     * 	"code": 200,
-     * 	"data": "c4a69f571a1291ebe7729a906668b62f138b1b9d",
-     * 	"requestId": "abd1e08202204141725273050020000",
-     * 	"costTime": "96ms"
-     * }
+     * 获取Rtc Token
      */
     @POST("/demo/getCheckSum.action")
     Single<BaseResponse> requestRtcToken(@Body Map<String, Object> body);
