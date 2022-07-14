@@ -25,6 +25,9 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.blankj.utilcode.util.ToastUtils;
+import com.netease.lava.nertc.sdk.NERtcConstants;
+import com.netease.lava.nertc.sdk.NERtcEx;
+import com.netease.lava.nertc.sdk.video.NERtcVideoView;
 import com.netease.yunxin.android.lib.picture.ImageLoader;
 import com.netease.yunxin.app.one2one.R;
 import com.netease.yunxin.app.one2one.databinding.FragmentInVideoCallBinding;
@@ -103,7 +106,16 @@ public class InTheVideoCallFragment extends Fragment {
         return binding.getRoot();
     }
 
+    private void setupLocalView(NERtcVideoView videoView){
+        NERtcEx.getInstance().setupLocalVideoCanvas(null);
+        NERtcEx.getInstance().enableLocalVideo(true);
+        videoView.setScalingType(NERtcConstants.VideoScalingType.SCALE_ASPECT_BALANCED);
+        NERtcEx.getInstance().setupLocalVideoCanvas(videoView);
+    }
+
     private void subscribeUi() {
+        binding.smallVideo.setZOrderMediaOverlay(true);
+        binding.bigVideo.setZOrderMediaOverlay(false);
         viewModel.refresh(activity.getCallParams());
         LifecycleOwner viewLifecycleOwner = getViewLifecycleOwner();
         viewModel.getOtherInfo().observe(viewLifecycleOwner, new Observer<OtherUserInfo>() {
@@ -111,7 +123,7 @@ public class InTheVideoCallFragment extends Fragment {
             public void onChanged(OtherUserInfo otherUserInfo) {
                 otherUid = otherUserInfo.accId;
                 rtcCall.setupRemoteView(binding.bigVideo, otherUid);
-                rtcCall.setupLocalView(binding.smallVideo);
+                setupLocalView(binding.smallVideo);
                 binding.tvNickname.setText(otherUserInfo.nickname);
                 ImageLoader.with(AppGlobals.getApplication()).circleLoad(otherUserInfo.avatar, binding.ivAvatar);
             }
@@ -373,10 +385,10 @@ public class InTheVideoCallFragment extends Fragment {
 
     private void switchVideosCanvas(boolean isSelfInSmallUi) {
         if (isSelfInSmallUi) {
-            rtcCall.setupLocalView(binding.smallVideo);
+            setupLocalView(binding.smallVideo);
             rtcCall.setupRemoteView(binding.bigVideo, otherUid);
         } else {
-            rtcCall.setupLocalView(binding.bigVideo);
+            setupLocalView(binding.bigVideo);
             rtcCall.setupRemoteView(binding.smallVideo, otherUid);
         }
     }
