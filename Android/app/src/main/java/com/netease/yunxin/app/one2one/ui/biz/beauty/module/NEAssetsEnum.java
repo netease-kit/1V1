@@ -9,7 +9,7 @@ package com.netease.yunxin.app.one2one.ui.biz.beauty.module;
 
 public enum NEAssetsEnum {
     EFFECTS("beauty"),
-    FILTERS("filters"),
+    FILTERS("filter_portrait"),
     MAKEUPS("makeups");
 
     private String assetsPath;
