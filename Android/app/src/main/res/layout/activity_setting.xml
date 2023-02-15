@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  ~ /*
-  ~  * Copyright (c) 2022 NetEase, Inc.  All rights reserved.
-  ~  * Use of this source code is governed by a MIT license that can be found in the LICENSE file.
-  ~  */
+  ~ Copyright (c) 2022 NetEase, Inc. All rights reserved.
+  ~ Use of this source code is governed by a MIT license that can be
+  ~ found in the LICENSE file.
   -->
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -14,7 +13,7 @@
     android:orientation="vertical"
     xmlns:tools="http://schemas.android.com/tools">
     <com.netease.yunxin.app.one2one.ui.view.TitleBar
-        app:titleBar_title="通用设置"
+        app:titleBar_title="@string/general_settings"
         app:titleBar_title_bg_color="@android:color/transparent"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
@@ -127,6 +126,7 @@
                     app:setting_item_title="@string/pstn_item_text" />
 
                 <View
+                    android:id="@+id/line_pstn"
                     android:layout_width="match_parent"
                     android:layout_height="1px"
                     android:background="@color/color_f5f8fc" />

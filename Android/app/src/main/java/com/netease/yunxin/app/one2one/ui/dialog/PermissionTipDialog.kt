@@ -1,8 +1,7 @@
 /*
- *
- *  * Copyright (c) 2022 NetEase, Inc.  All rights reserved.
- *  * Use of this source code is governed by a MIT license that can be found in the LICENSE file.
- *
+ * Copyright (c) 2022 NetEase, Inc. All rights reserved.
+ * Use of this source code is governed by a MIT license that can be
+ * found in the LICENSE file.
  */
 
 package com.netease.yunxin.app.one2one.ui.dialog
@@ -23,7 +22,8 @@ import com.netease.yunxin.nertc.ui.R
  */
 class PermissionTipDialog(activity: Activity, private val clickListener: View.OnClickListener) :
     Dialog(
-        activity, R.style.BottomDialogTheme
+        activity,
+        R.style.BottomDialogTheme
     ) {
     private var rootView: View
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -72,14 +72,14 @@ class PermissionTipDialog(activity: Activity, private val clickListener: View.On
         }
     }
 
-   override fun dismiss(){
-        if (!isShowing){
+    override fun dismiss() {
+        if (!isShowing) {
             return
         }
-       try {
-           super.dismiss()
-       } catch (ignored: Throwable) {
-       }
+        try {
+            super.dismiss()
+        } catch (ignored: Throwable) {
+        }
     }
 
     init {
