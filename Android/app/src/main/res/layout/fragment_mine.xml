@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  ~ /*
-  ~  * Copyright (c) 2022 NetEase, Inc.  All rights reserved.
-  ~  * Use of this source code is governed by a MIT license that can be found in the LICENSE file.
-  ~  */
+  ~ Copyright (c) 2022 NetEase, Inc. All rights reserved.
+  ~ Use of this source code is governed by a MIT license that can be
+  ~ found in the LICENSE file.
   -->
 
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -75,6 +74,7 @@
 
 
             <LinearLayout
+                android:id="@+id/ll_item"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="20dp"
@@ -117,7 +117,76 @@
                     android:layout_height="52dp"
                     app:mine_item_icon="@drawable/icon_setting"
                     app:mine_item_title="@string/common_setting" />
+                <com.netease.yunxin.app.one2one.ui.view.MineItemView
+                    android:id="@+id/itemView_log_upload"
+                    android:layout_width="match_parent"
+                    android:layout_height="52dp"
+                    app:mine_item_icon="@drawable/icon_upload"
+                    app:mine_item_title="@string/log_upload" />
+                <com.netease.yunxin.app.one2one.ui.view.MineItemView
+                    android:id="@+id/itemView_network"
+                    android:layout_width="match_parent"
+                    android:layout_height="52dp"
+                    app:mine_item_icon="@drawable/icon_network"
+                    app:mine_item_title="@string/network_probe" />
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="52dp">
+                    <ImageView
+                        android:layout_centerVertical="true"
+                        android:id="@+id/iv_icon"
+                        android:background="@drawable/icon_data_center"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp" />
 
+                    <TextView
+                        android:id="@+id/tv"
+                        android:layout_toRightOf="@+id/iv_icon"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:paddingLeft="12dp"
+                        android:textColor="@android:color/black"
+                        android:textSize="16sp"
+                        android:text="@string/app_data_center" />
+                    <View
+                        android:background="@color/color_f5f8fc"
+                        android:layout_width="match_parent"
+                        android:layout_alignParentBottom="true"
+                        android:layout_height="1px" />
+                    <RadioGroup
+                        android:layout_alignParentRight="true"
+                        android:layout_centerVertical="true"
+                        android:id="@+id/data_centers"
+                        android:layout_marginRight="23dp"
+                        android:orientation="horizontal"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content">
+                        <RadioButton
+                            android:id="@+id/data_center_mainland"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:padding="10dp"
+                            android:button="@null"
+                            android:textColor="@android:color/black"
+                            android:drawablePadding="6dp"
+                            android:drawableLeft="@drawable/selector_radiobutton"
+                            android:textSize="14sp"
+                            android:text="@string/app_data_center_mainland"/>
+                        <RadioButton
+                            android:id="@+id/data_center_oversea"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="8dp"
+                            android:textColor="@android:color/black"
+                            android:button="@null"
+                            android:textSize="14sp"
+                            android:drawablePadding="6dp"
+                            android:drawableLeft="@drawable/selector_radiobutton"
+                            android:text="@string/app_data_center_oversea"/>
+
+                    </RadioGroup>
+                </RelativeLayout>
             </LinearLayout>
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>

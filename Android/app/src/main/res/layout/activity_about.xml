@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  ~ /*
-  ~  * Copyright (c) 2022 NetEase, Inc.  All rights reserved.
-  ~  * Use of this source code is governed by a MIT license that can be found in the LICENSE file.
-  ~  */
+  ~ Copyright (c) 2022 NetEase, Inc. All rights reserved.
+  ~ Use of this source code is governed by a MIT license that can be
+  ~ found in the LICENSE file.
   -->
 
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:background="@android:color/white"
     android:layout_height="match_parent">
 
@@ -66,5 +66,5 @@
         android:gravity="center"
         android:textSize="14dp"
         android:textColor="@color/color_grey_999999"
-        android:text="@string/app_version"/>
+        tools:text="@string/app_version"/>
 </RelativeLayout>
