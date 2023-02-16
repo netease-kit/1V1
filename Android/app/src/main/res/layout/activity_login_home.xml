@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  ~ /*
-  ~  * Copyright (c) 2022 NetEase, Inc.  All rights reserved.
-  ~  * Use of this source code is governed by a MIT license that can be found in the LICENSE file.
-  ~  */
+  ~ Copyright (c) 2022 NetEase, Inc. All rights reserved.
+  ~ Use of this source code is governed by a MIT license that can be
+  ~ found in the LICENSE file.
   -->
 
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -28,7 +27,7 @@
         android:paddingTop="12dp"
         android:gravity="center"
         app:layout_constraintTop_toBottomOf="@+id/iv_icon"
-        android:text="@string/app_name"
+        android:text="@string/one_on_one_app_name"
         android:textSize="17sp"
         android:textColor="@android:color/white"
         android:layout_width="match_parent"
@@ -64,6 +63,8 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         android:layout_marginBottom="40dp"
+        android:paddingLeft="20dp"
+        android:paddingRight="20dp"
         tools:text="111111111111111111"
         android:gravity="center"
         android:textColor="@android:color/white"
