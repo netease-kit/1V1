@@ -1,0 +1,78 @@
+# Uncomment the next line to define a global platform for your project
+ platform :ios, '11.0'
+
+source 'https://github.com/CocoaPods/Specs.git'
+
+def imVersion
+  '9.8.0'
+end
+
+def rtcVersion
+  '4.6.43'
+end
+
+#公共库(被多余一个组件引用，可定义多个)
+def imSDKPod
+  pod 'NIMSDK_LITE',imVersion
+end
+
+def rtcBasicPod
+  pod 'NERtcSDK/RtcBasic',rtcVersion
+end
+
+def thirdPartyLibraryPod
+  pod 'SDWebImage', '5.7.1'
+  pod 'AFNetworking', '4.0'
+  pod 'ReactiveObjC'
+  pod 'Masonry'
+  pod 'Toast'
+  pod 'GCDWebServer', '3.5.4'
+  pod 'YYWebImage', '1.0.4'
+  pod 'YYImage/WebP','1.0.4'
+  pod 'SVProgressHUD'
+end
+
+target 'OneOnOneSample' do
+  
+  use_frameworks!
+  # Comment the next line if you don't want to use dynamic frameworks
+  
+
+plugin 'cocoapods-pod-sign'
+skip_pod_bundle_sign
+
+  imSDKPod
+  rtcBasicPod
+  thirdPartyLibraryPod
+  
+  pod 'NEUIKit', :path => '../UIKit/NEUIKit/NEUIKit.podspec'
+  
+  # OneOnOne
+  pod 'NEOneOnOneUIKit', :path => '../OneOnOneUIKit/NEOneOnOneUIKit.podspec'
+  pod 'NEOneOnOneKit', :path => '../OneOnOneKit/NEOneOnOneKit.podspec'
+  
+
+  target 'OneOnOneSampleTests' do
+    inherit! :search_paths
+    # Pods for testing
+  end
+
+  target 'OneOnOneSampleUITests' do
+    # Pods for testing
+  end
+
+end
+
+
+# ---------------------------- 公用钩子处理 ----------------------------
+post_install do |installer|
+  installer.pods_project.targets.each do |target|
+      target.build_configurations.each do |config|
+        config.build_settings['ENABLE_BITCODE'] = 'NO'
+      end
+  end
+#  # M1 模拟器运行打开一下代码
+#  installer.pods_project.build_configurations.each do |config|
+#     config.build_settings["EXCLUDED_ARCHS[sdk=iphonesimulator*]"] = "arm64"
+#   end
+end
