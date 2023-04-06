@@ -1,0 +1,366 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2022 NetEase, Inc. All rights reserved.
+  ~ Use of this source code is governed by a MIT license that can be
+  ~ found in the LICENSE file.
+  -->
+
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@android:color/white"
+    android:paddingBottom="94dp">
+
+    <ImageView
+        android:id="@+id/iv_bg"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:background="@android:color/holo_green_dark" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/cl_nickname"
+        android:layout_width="match_parent"
+        android:layout_height="94dp"
+        app:layout_constraintTop_toBottomOf="@+id/iv_bg">
+
+        <TextView
+            android:id="@+id/tv_nickname"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="20dp"
+            android:layout_marginTop="24dp"
+            android:textColor="@color/color_333333"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="nickname" />
+
+        <TextView
+            android:id="@+id/tv_desc"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:textColor="@color/color_999999"
+            android:textSize="14sp"
+            app:layout_constraintLeft_toLeftOf="@+id/tv_nickname"
+            app:layout_constraintTop_toBottomOf="@+id/tv_nickname"
+            tools:text="desc" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="27dp"
+            android:layout_marginRight="20dp"
+            android:orientation="horizontal"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="8dp"
+                android:src="@drawable/icon_star" />
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="8dp"
+                android:src="@drawable/icon_star" />
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="8dp"
+                android:src="@drawable/icon_star" />
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/icon_star" />
+        </LinearLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <View
+        android:id="@+id/view_gap"
+        android:layout_width="match_parent"
+        android:layout_height="6dp"
+        android:background="@color/color_eff1f4"
+        app:layout_constraintTop_toBottomOf="@+id/cl_nickname" />
+
+    <TextView
+        android:id="@+id/tv_album"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="20dp"
+        android:paddingTop="24dp"
+        android:paddingBottom="9dp"
+        android:text="@string/album"
+        android:textColor="@android:color/black"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/view_gap" />
+
+    <com.netease.yunxin.app.oneonone.ui.view.AlbumsRecycleView
+        android:id="@+id/albumView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@+id/tv_album" />
+
+    <View
+        android:id="@+id/view_line_album"
+        android:layout_width="match_parent"
+        android:layout_height="1px"
+        android:background="@color/color_f5f8fc"
+        android:layout_marginTop="24dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/albumView" />
+
+    <TextView
+        android:id="@+id/tv_gift_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:paddingLeft="20dp"
+        android:text="@string/gift"
+        android:textColor="@android:color/black"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/view_line_album" />
+
+    <LinearLayout
+        android:id="@+id/ll_gift"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="20dp"
+        android:layout_marginTop="17dp"
+        android:layout_marginRight="20dp"
+        android:orientation="horizontal"
+        app:layout_constraintTop_toBottomOf="@+id/tv_gift_title">
+
+        <ImageView
+
+            android:layout_width="0dp"
+            android:layout_height="50dp"
+            android:layout_weight="1"
+            android:scaleType="centerInside"
+            android:src="@drawable/icon_gift_one" />
+
+        <ImageView
+            android:layout_width="0dp"
+            android:layout_height="50dp"
+            android:layout_marginLeft="19dp"
+            android:layout_weight="1"
+            android:scaleType="centerInside"
+            android:src="@drawable/icon_gift_two" />
+
+        <ImageView
+            android:layout_width="0dp"
+            android:layout_height="50dp"
+            android:layout_marginLeft="19dp"
+            android:layout_weight="1"
+            android:scaleType="centerInside"
+            android:src="@drawable/icon_gift_three" />
+
+        <ImageView
+            android:layout_width="0dp"
+            android:layout_height="50dp"
+            android:layout_marginLeft="19dp"
+            android:layout_weight="1"
+            android:scaleType="centerInside"
+            android:src="@drawable/icon_gift_four" />
+
+        <ImageView
+            android:layout_width="0dp"
+            android:layout_height="50dp"
+            android:layout_marginLeft="19dp"
+            android:layout_weight="1"
+            android:scaleType="centerInside"
+            android:src="@drawable/icon_gift_five" />
+    </LinearLayout>
+
+    <View
+        android:id="@+id/view_line_gift"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@color/color_f5f8fc"
+        android:layout_marginTop="30dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/ll_gift" />
+
+    <TextView
+        android:id="@+id/tv_base_info"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:paddingLeft="20dp"
+        android:paddingBottom="20dp"
+        android:text="@string/info"
+        android:textColor="@android:color/black"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/view_line_gift" />
+
+    <RelativeLayout
+        android:id="@+id/rl_age"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        app:layout_constraintTop_toBottomOf="@+id/tv_base_info">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:text="@string/age"
+            android:textColor="@color/color_666666"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/tv_age_value"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            tools:text="24" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1px"
+            android:layout_alignParentBottom="true"
+            android:background="@color/color_f5f8fc" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:id="@+id/rl_height"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        app:layout_constraintTop_toBottomOf="@+id/rl_age">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:text="@string/height"
+            android:textColor="@color/color_666666"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/tv_height_value"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            tools:text="24" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1px"
+            android:layout_alignParentBottom="true"
+            android:background="@color/color_f5f8fc" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:id="@+id/rl_weight"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        app:layout_constraintTop_toBottomOf="@+id/rl_height">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:text="@string/weight"
+            android:textColor="@color/color_666666"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/tv_weight_value"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            tools:text="24" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1px"
+            android:layout_alignParentBottom="true"
+            android:background="@color/color_f5f8fc" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:id="@+id/rl_hobby"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        app:layout_constraintTop_toBottomOf="@+id/rl_weight">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:text="@string/hobby"
+            android:textColor="@color/color_666666"
+            android:textSize="14sp" />
+
+        <LinearLayout
+            android:layout_centerVertical="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="42dp"
+                android:layout_height="20dp"
+                android:layout_marginRight="4dp"
+                android:background="@drawable/bg_sing_text"
+                android:gravity="center"
+                android:text="@string/sing"
+                android:textColor="@color/color_60cfa7"
+                android:textSize="12sp" />
+
+            <TextView
+                android:layout_width="42dp"
+                android:layout_height="20dp"
+                android:layout_marginRight="4dp"
+                android:background="@drawable/bg_dance_text"
+                android:gravity="center"
+                android:text="@string/dance"
+                android:textColor="@color/color_53c3f3"
+                android:textSize="12sp" />
+
+            <TextView
+                android:layout_width="42dp"
+                android:layout_height="20dp"
+                android:layout_marginRight="4dp"
+                android:background="@drawable/bg_travel_text"
+                android:gravity="center"
+                android:text="@string/travel"
+                android:textColor="@color/color_4788e9"
+                android:textSize="12sp" />
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1px"
+            android:layout_alignParentBottom="true"
+            android:background="@color/color_f5f8fc" />
+    </RelativeLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

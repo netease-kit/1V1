@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2022 NetEase, Inc. All rights reserved.
+  ~ Use of this source code is governed by a MIT license that can be
+  ~ found in the LICENSE file.
+  -->
+
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.netease.yunxin.app.oneonone.ui">
+    <!--    //网络相关-->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
+    <!--    //防止通话过程中锁屏-->
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <!--    //视频权限-->
+    <uses-permission android:name="android.permission.CAMERA" />
+    <!--    //录音权限-->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <!--    //修改音频设置-->
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+    <!--    //蓝牙权限-->
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <!--    //外置存储卡写入权限-->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <!--    //蓝牙 startBluetoothSco 会用到此权限-->
+    <uses-permission android:name="android.permission.BROADCAST_STICKY" />
+    <!--    //获取设备信息-->
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+
+    <!--    //允许应用程序使用camera硬件资源-->
+    <uses-feature android:name="android.hardware.camera" />
+    <!--    //自动对焦-->
+    <uses-feature android:name="android.hardware.camera.autofocus" />
+
+    <application>
+        <activity
+            android:name=".activity.OneOnOneHomeActivity"
+            android:theme="@style/Theme.AppCompat.NoActionBar"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activity.UserInfoActivity"
+            android:theme="@style/Theme.AppCompat.NoActionBar"
+            android:screenOrientation="portrait" />
+
+        <activity
+            android:name=".activity.CallActivity"
+            android:theme="@style/Theme.AppCompat.NoActionBar"
+            android:launchMode="singleTop"
+            android:screenOrientation="portrait" />
+
+    </application>
+
+</manifest>

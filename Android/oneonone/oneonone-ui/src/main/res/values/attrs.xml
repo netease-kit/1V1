@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2022 NetEase, Inc. All rights reserved.
+  ~ Use of this source code is governed by a MIT license that can be
+  ~ found in the LICENSE file.
+  -->
+
+<resources>
+
+    <declare-styleable name="SettingItemView">
+        <attr name="setting_item_title" format="string" />
+    </declare-styleable>
+
+    <declare-styleable name="MineItemView">
+        <attr name="mine_item_title" format="string" />
+        <attr name="mine_item_icon" format="reference" />
+    </declare-styleable>
+
+    <declare-styleable name="TitleBar">
+        <attr name="titleBar_title" format="string" />
+        <attr name="titleBar_title_bg_color" format="color" />
+        <attr name="titleBar_back_icon" format="reference" />
+    </declare-styleable>
+
+</resources>

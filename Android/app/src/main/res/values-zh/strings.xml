@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <resources>
-    <string name="one_on_one_app_name">云信1v1社交</string>
+    <string name="one_on_one_app_name">云信1对1社交</string>
     <string name="title_home">Home</string>
     <string name="title_dashboard">Dashboard</string>
     <string name="title_notifications">Notifications</string>
@@ -12,11 +12,6 @@
     <string name="message_notice">消息通知</string>
     <string name="cancel">取消</string>
     <string name="accept">接听</string>
-    <string name="connecting">正在连接对方...</string>
-    <string name="invited_audio_title">对方邀请你语音聊天</string>
-    <string name="invited_video_title">对方邀请你视频聊天</string>
-    <string name="invite_subtitle">每个人都会遇见那个TA</string>
-    <string name="invited_subtitle">和对方进入开心之旅</string>
     <string name="in_the_chat">聊天中...</string>
     <string name="reject">拒绝</string>
     <string name="audio_call_security_tips">您的言语涉及敏感内容，请文明用语哦~</string>
@@ -31,12 +26,8 @@
     <string name="earphone_tips">耳语功能敬请期待</string>
     <string name="input_other_test_account">填写对方测试账号</string>
     <string name="pstn_setting_title">高接通配置</string>
-    <string name="reject_tips">对方已拒绝你的请求</string>
-    <string name="permission_request_failed_tips">权限申请失败，暂无法使用！</string>
-    <string name="user_busy">对方占线</string>
-    <string name="caller_timeout_tips">无法连接对方，请稍后再试</string>
     <string name="called_timeout_tips">超时未接，已结束连接</string>
-    <string name="cancel_by_other">对方已取消连接</string>
+    <string name="cancel_by_other">对方已取消</string>
     <string name="call_failed">呼叫发起失败</string>
     <string name="personal_info_edit">信息编辑</string>
     <string name="yun_xin">网易云信</string>
@@ -186,13 +177,10 @@
     <string name="app_notification_tips">需要先打开通知权限,才能打开前台服务</string>
     <string name="sure">确定</string>
     <string name="login_home_desc">打造一体式娱乐社交方案</string>
-    <string name="other_end_call">对方结束通话</string>
-    <string name="network_error">网络异常请稍后再试</string>
     <string name="phonenumber_error_tips">对方测试号码不正确，请重新填写</string>
     <string name="log_upload">日志上传</string>
     <string name="network_probe">网络探测</string>
     <string name="app_data_center">数据中心:</string>
-    <string name="app_data_center_switch_confirm_message">确定切换数据中心吗？\n需要重新登录</string>
     <string name="app_yes">是</string>
     <string name="app_no">否</string>
     <string name="app_data_center_mainland">中国</string>
@@ -206,7 +194,8 @@
     <string name="network_down_packet_loss_rate">下行网络丢包率：</string>
     <string name="network_down_jitter">下行网络抖动：</string>
     <string name="network_down_available_band_width">下行网络可用带宽：</string>
-    <string name="please_wait_five_second_upload">请等待5s上传</string>
+    <string name="please_wait_five_second_upload">正在上传中，请等待5秒。</string>
+    <string name="probing_in_progress">正在探测中...</string>
     <string name="quality_unknown">质量未知</string>
     <string name="quality_excellent">质量极好</string>
     <string name="quality_good">用户主观感觉和极好差不多，但码率可能略低于极好</string>
@@ -226,7 +215,20 @@
     <string name="login_tips">登录即视为您已同意 隐私政策 和 用户服务协议</string>
     <string name="terms_of_service">用户服务协议</string>
     <string name="general_settings">通用设置</string>
+    <string name="app_notification_new_incoming_audio_call">邀请您语音聊天</string>
+    <string name="app_notification_new_incoming_video_call">邀请您视频聊天</string>
+    <string name="app_probing_in_progress">正在探测中...</string>
 
+    <string name="app_beauty_setting">美颜设置</string>
+    <string name="app_log_upload">日志上传</string>
+    <string name="app_network_detect">网络探测</string>
+    <string name="app_phone_consult">电话咨询</string>
+    <string name="app_common_setting">通用设置</string>
+    <string name="app_disclaimer">免责声明</string>
+    <string name="app_user_center">个人中心</string>
+    <string name="app_application">应用</string>
+    <string name="app_1v1">1对1社交</string>
+    <string name="app_1v1_desc">提高通话接通率，享受低延时、高清视频带来的极致体验</string>
 
     <string-array name="beauty_option_tags">
         <item>美肤</item>

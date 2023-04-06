@@ -1,0 +1,304 @@
+<!--
+  ~ Copyright (c) 2022 NetEase, Inc. All rights reserved.
+  ~ Use of this source code is governed by a MIT license that can be
+  ~ found in the LICENSE file.
+  -->
+
+<resources>
+    <string name="one_on_one_app_name">One-on-One Social Demo</string>
+    <string name="title_home">Home</string>
+    <string name="title_dashboard">Dashboard</string>
+    <string name="title_notifications">Notifications</string>
+    <string name="privacy_policy">Privacy Policy</string>
+    <string name="user_agreement">Term of Service</string>
+    <string name="about_us">About Us</string>
+    <string name="bind_other_account">Enter a test account</string>
+    <string name="message_notice">Notifications</string>
+    <string name="cancel">Cancel</string>
+    <string name="accept">Accept</string>
+    <string name="connecting">Connecting...</string>
+    <string name="invited_audio_title">Inviting you to audio chat</string>
+    <string name="invited_video_title">Inviting you to video chat</string>
+    <string name="invite_subtitle">Everyone can meet a match</string>
+    <string name="invited_subtitle">Hang out with your friends</string>
+    <string name="in_the_chat">Chatting...</string>
+    <string name="reject">Reject</string>
+    <string name="audio_call_security_tips">Your message contains sensitive content. Use a proper expression~</string>
+    <string name="audio_call_other_security_tips">The message contain sensitive content. Use a proper expression~</string>
+    <string name="video_call_mine_security_tips">The image contains sensitive content.\nThe image is automatically filtered.</string>
+    <string name="video_call_other_security_tips">The image contains sensitive content.\nThe image is automatically filtered.</string>
+    <string name="video_call_mine_all_security_tips">The text or image in your message contains sensitive content. Use a proper expression~</string>
+    <string name="video_call_other_all_security_tips">The text or image in the message contains sensitive content. Use a proper expression~~</string>
+    <string name="pstn_item_text">PSTN</string>
+    <string name="verification_code">Verification code</string>
+    <string name="gift_tips">The functionality entry point for display. You can implement the feature on your own</string>
+    <string name="earphone_tips">ASMR coming soon</string>
+    <string name="input_other_test_account">Enter a test account</string>
+    <string name="pstn_setting_title">PSTN Settings</string>
+    <string name="reject_tips">Your request was rejected</string>
+    <string name="permission_request_failed_tips">Permission request failed. The service is unavailable</string>
+    <string name="permission_microphone_missing_tips">Unable to access the microphone. Enable microphone access and try again</string>
+    <string name="permission_camera_missing_tips">Unable to access the camera. Enable camera access and try again</string>
+    <string name="permission_microphone_and_camera_missing_tips">Unable to access the microphone and camera. Enable microphone and camera access and try again</string>
+    <string name="user_busy">The line is busy</string>
+    <string name="caller_timeout_tips">Connection failed, try again later</string>
+    <string name="called_timeout_tips">Connection timeout, calling ended</string>
+    <string name="cancel_by_other">Conncetion cancelled</string>
+    <string name="call_failed">Failed to start the call</string>
+    <string name="personal_info_edit">Edit</string>
+    <string name="yun_xin">CommsEase</string>
+    <string name="app_long_name">One-on-one social app</string>
+    <string name="app_version">V 1.0.0</string>
+    <string name="avatar">avatar</string>
+    <string name="nick">Nickname</string>
+    <string name="title_level1">PSTN: </string>
+    <string name="content1">PSTN service provides three methods to promote connectivity.\nUse PSTN solely or in combination with other services.</string>
+    <string name="title_level2">Level 2</string>
+    <string name="content2">1. App Persistence: \nIf App Persistence is enabled, a notification will be shown on the notification bar for testing purpose.\nThe feature allows the app to run in the background for a long time (mobile phones of different brands can persist for a different time) \n\n\n2. Audio call: \nSIP calls are automatically switched to audio calls if failed.\nIf you start an audio call by clicking Auido Call and fails to get connected after 15 seconds, you are switched to SIP calling. The trigger condition can be customized.\n\n\n3. SMS notification:\nThe feature can notify the called parity of call requests. Users can open the app can handle the requests.\nIf an audio or video call is connecting for 30 seconds and fails, an SMS notification will be delivered.</string>
+    <string name="content3">The following articles also restrict and applies to the user of this website and is referenced herewith:</string>
+    <string name="end_video">End</string>
+    <string name="other_mute_video">Camera turned off</string>
+    <string name="home_page">Home</string>
+    <string name="message">Message</string>
+    <string name="mine">My</string>
+    <string name="system_message_notify">System notification</string>
+    <string name="empty_message_text">No message\nTalk with your friends</string>
+    <string name="my_diamond">My diamonds</string>
+    <string name="my_follow">My followers</string>
+    <string name="who_like_me">Likes</string>
+    <string name="beauty_setting">Beauty settings</string>
+    <string name="common_setting">General</string>
+    <string name="todo_fuction_tips">The functionality entry point for display. You must implement the feature on your own</string>
+    <string name="todo_fuction_tips2">The functionality entry point for display</string>
+    <string name="logout">Log out</string>
+    <string name="save">Save</string>
+    <string name="please_input_other_phone">Enter the registered phone number</string>
+    <string name="please_input_correct_phone_number">Enter a valid phone number</string>
+    <string name="bind_phone_tips">Note: \nEnter a new phone number and click Save.</string>
+    <string name="binded_phone_number_empty">Phone number: unspecified</string>
+    <string name="other_phone_number">Phone number: </string>
+    <string name="audio_call_text">Audio call</string>
+    <string name="video_call_text">Video call</string>
+    <string name="please_input_phone_number_in_setting_page">Enter a test phone number in the General setting</string>
+    <string name="bind_mine_phone_number_error_tips">You cannot bind your own number.</string>
+    <string name="help_notes">Note</string>
+    <string name="help_notes_tips">Note: Register two accounts with two different phone numbers for test. On the My page--General--enter the phone number for a peer.</string>
+    <string name="help_notes_content">1. The demo app is used for demostrating the one-on-one social solution. You can try a complete set of features from registering, user list, profiles, message interface, and My page.\n\n2. To handle the low calling answer rate in one-on-one social scenario, the PSTN component is integrated.\n\n3. The advanced beauty feature is also added for free use.\n\n4. The content moderation service can moderate the inappropriate content of the user generated data.</string>
+    <string name="already_close_camera">Camera was turned off</string>
+    <string name="other_already_close_camera">The peer already turned off the camera</string>
+    <string name="gift">Gift</string>
+    <string name="album">Album</string>
+    <string name="info">Info</string>
+    <string name="age">Age</string>
+    <string name="sing">Sing</string>
+    <string name="dance">Dance</string>
+    <string name="travel">Travel</string>
+    <string name="height">Height</string>
+    <string name="hobby">Hobby</string>
+    <string name="yes">YES</string>
+    <string name="no">No</string>
+    <string name="end_call">End</string>
+    <string name="sure_end_call">Do you want to end the call?</string>
+    <string name="call_out_failed">Calling failed</string>
+    <string name="one_on_one_network_error">Net error,try again</string>
+
+    <!--beauty-->
+    <string name="effect_recover">Recover</string>
+    <string name="effect_smooth">Smooth</string>
+    <string name="effect_whiten">Whiten</string>
+    <string name="effect_thinface">Thin face</string>
+    <string name="effect_mouth">Mouth</string>
+    <string name="effect_whiteteeth">White teeth</string>
+    <string name="effect_lighteye">Light eye</string>
+    <string name="effect_smallnose">Small nose</string>
+    <string name="effect_eyedis">Eye distance</string>
+    <string name="effect_eyeangle">Eye corner</string>
+    <string name="effect_bigeye">Big eye</string>
+    <string name="effect_smallface">Small face</string>
+    <string name="effect_jaw">Jaw</string>
+    <string name="effect_faceruddy">Ruddy face</string>
+    <string name="effect_longnose">Long nose</string>
+    <string name="effect_philtrum">Philtrum</string>
+    <string name="effect_mouthangle">mouth corner</string>
+    <string name="effect_roundeye">Round eye</string>
+    <string name="effect_eyecorner">Eye corner</string>
+    <string name="effect_vface">V face</string>
+    <string name="effect_underjaw">Nuder jaw</string>
+    <string name="effect_narrowface">Narrow face</string>
+    <string name="effect_cheekbone">Cheek bone</string>
+    <string name="effect_facesharpen">Sharpen</string>
+    <!--filter-->
+    <string name="filter_origin">Original</string>
+    <string name="filter_f1">f1</string>
+    <string name="filter_f2">f2</string>
+    <string name="filter_f3">f3</string>
+    <string name="filter_f4">f4</string>
+    <string name="filter_fn1">FN1</string>
+    <string name="filter_fn2">FN2</string>
+    <string name="filter_n2">n2</string>
+    <string name="filter_p1">Personal 1</string>
+    <string name="filter_p2">Personal 2</string>
+    <string name="filter_p3">Personal 3</string>
+    <string name="filter_p4">Personal 4</string>
+    <string name="filter_p5">Personal 5</string>
+    <string name="filter_p6">Personal 6</string>
+    <string name="filter_summer">Summer</string>
+    <string name="filter_winter">Winter</string>
+    <string name="filter_shimmer">Shimmer</string>
+    <string name="filter_feminine">Feminine</string>
+    <string name="filter_forest">Forest</string>
+    <string name="filter_waterl">Water</string>
+    <string name="filter_soda">Soda</string>
+    <string name="filter_refresh1">Refresh 1</string>
+    <string name="filter_refresh2">Refresh 2</string>
+    <string name="filter_refresh3">Refresh 3</string>
+    <string name="filter_refresh4">Refresh 4</string>
+    <string name="filter_refresh5">Refresh 5</string>
+    <string name="filter_refresh6">Refresh 6</string>
+    <string name="filter_fair">Fair</string>
+    <string name="filter_fair1">Fair 1</string>
+    <string name="filter_fair2">Fair 2</string>
+    <string name="filter_fair3">Fair 3</string>
+    <string name="filter_fair4">Fair 4</string>
+    <string name="filter_fair5">Fair 5</string>
+    <string name="filter_fair6">Fair 6</string>
+    <string name="filter_autumn">Autumn</string>
+    <string name="filter_nature">Nature</string>
+    <string name="filter_nature1">Nature 1</string>
+    <string name="filter_nature2">Nature 2</string>
+    <string name="filter_nature3">Nature 3</string>
+    <string name="filter_nature4">Nature 4</string>
+    <string name="filter_nature5">Nature 5</string>
+    <string name="filter_nature6">Nature 6</string>
+    <string name="filter_stamen">Stamen</string>
+    <string name="filter_texture">Texture</string>
+    <string name="filter_texture1">Texture 1</string>
+    <string name="filter_texture2">Texture 2</string>
+    <string name="filter_texture3">Texture 3</string>
+    <string name="filter_texture4">Texture 4</string>
+    <string name="filter_texture5">Texture 5</string>
+    <string name="filter_texture6">Texture 6</string>
+    <!--sticker-->
+    <string name="sticker_bunny">Bunny ear</string>
+    <string name="sticker_rabbiteating">Bunny</string>
+    <string name="sticker_lianpu">Faces</string>
+    <!--makeups-->
+    <string name="makeup_eyeshadow">Makeup</string>
+    <string name="makeup_remover">Remove</string>
+    <string name="save_success">Saved</string>
+    <string name="bind_other_phone_failed_tips">The number you entered is unregistered. Please use a registered number.</string>
+    <string name="app_high_keep_alive_feature">Keep alive</string>
+    <string name="tips">Tip</string>
+    <string name="app_notification_tips">The notification permission must be turned on before opening foreground services</string>
+    <string name="sure">OK</string>
+    <string name="login_home_desc">Build an all-in-one social app</string>
+    <string name="other_end_call">Call ended</string>
+    <string name="phonenumber_error_tips">Incorrect test number. Try an new number</string>
+    <string name="log_upload">Log upload</string>
+    <string name="network_probe">Network probe</string>
+    <string name="app_data_center">Service node: </string>
+    <string name="app_yes">Yes</string>
+    <string name="app_no">No</string>
+    <string name="app_data_center_mainland">China</string>
+    <string name="app_data_center_oversea">Global</string>
+
+    <string-array name="beauty_option_tags">
+        <item>Skin</item>
+        <item>Shape</item>
+        <item>Filter</item>
+    </string-array>
+
+    <string name="network_quality">Network quality: </string>
+    <string name="quality_result">Result: </string>
+    <string name="network_rtt">Round-trip time:</string>
+    <string name="network_up_packet_loss_rate">Outbound packet loss rate: </string>
+    <string name="network_up_jitter">Outbound network jitter: </string>
+    <string name="network_up_avaliable_band_width">Outbound available bandwidth: </string>
+    <string name="network_down_packet_loss_rate">Inbound packet loss rate: </string>
+    <string name="network_down_jitter">Inbound network jitter: </string>
+    <string name="network_down_available_band_width">Inbound available bandwidth: </string>
+    <string name="please_wait_five_second_upload">Please wait for 5s for upload</string>
+
+
+    <string name="quality_unknown">Unknown</string>
+    <string name="quality_excellent">Excellent</string>
+    <string name="quality_good">User experience similar to the excellent quality with a lower bitrate</string>
+    <string name="quality_poor">Poor user experience but communication still works</string>
+    <string name="quality_bad">Poor communication</string>
+    <string name="quality_vbad">Communication is almost unavailable</string>
+    <string name="quality_down">No communication</string>
+    <string name="state_result_complete">The Last-mile quality detection is complete.</string>
+    <string name="state_result_incomplete_no_bwe">The Last-mile quality detection does not include bandwidth prediction. The result is incomplete. The common reason is limited resources</string>
+    <string name="state_result_unavailable">No Last-mile quality detection is performed. The common reason is disconnection. </string>
+    <string name="user_sign">The falling leaves in autumn are so appealing.</string>
+    <string name="user_sing">Sing</string>
+    <string name="user_dance">Dance</string>
+    <string name="user_travel">Travel</string>
+    <string name="weight">Weight</string>
+    <string name="app_year"> years old</string>
+    <string name="login_tips">By logging in, you agree to CommsEase Privacy Policy and Terms of Service</string>
+    <string name="terms_of_service">Terms of Service</string>
+    <string name="general_settings">General settings</string>
+    <string name="one_on_one_title">One-on-One Hangout</string>
+    <string name="one_on_one_have_no_more">No more content</string>
+    <string name="one_on_one_pull_to_refresh">Swipe to refresh</string>
+    <string name="one_on_one_release_to_refresh">Release to refresh</string>
+    <string name="one_on_one_refreshing">Updating...</string>
+    <string name="one_on_one_load_more">Load more</string>
+    <string name="one_one_one_online">Online</string>
+    <string name="one_on_one_other_is_not_online">Offline\nTry again later</string>
+    <string name="one_on_one_confirm">OK</string>
+    <string name="one_on_one_other_is_busy">Busy\nTry again later</string>
+    <string name="one_on_one_other_you_are_in_the_chatroom">You are still in the room\nLeave the room and try again</string>
+    <string name="one_on_one_notification_new_incoming_audio_call">Incoming audio call</string>
+    <string name="one_on_one_notification_new_incoming_video_call">Incoming video call</string>
+    <string name="one_on_one_empty_online_user">No online users</string>
+
+
+    <string-array name="mock_nicknames">
+        <item>Lina</item>
+        <item>Amelia</item>
+        <item>Evelyn</item>
+        <item>Sofia</item>
+        <item>Ella</item>
+        <item>Grace</item>
+        <item>Choloe</item>
+        <item>Victoria</item>
+        <item>Lily</item>
+        <item>Layla</item>
+    </string-array>
+
+    <string-array name="mock_avatars">
+        <item>https://yx-web-nosdn.netease.im/common/addd8ce87aa1d9280e1084ddb34972d3/oversea_avatar1.png</item>
+        <item>https://yx-web-nosdn.netease.im/common/8e053ef20b88d063d039927ca6001a88/oversea_avatar2.png</item>
+        <item>https://yx-web-nosdn.netease.im/common/2a32d52d776d9c97e9dfc2730fe81b32/oversea_avatar3.png</item>
+        <item>https://yx-web-nosdn.netease.im/common/69f3fdea0adc6a92c314b9c90aeecc71/oversea_avatar4.png</item>
+        <item>https://yx-web-nosdn.netease.im/common/203f4d04a8f1b3d0d883ca4a6ce1c4ae/oversea_avatar5.png</item>
+        <item>https://yx-web-nosdn.netease.im/common/6ba0726541ed9287a842de6b4ee3754a/oversea_avatar6.png</item>
+        <item>https://yx-web-nosdn.netease.im/common/b4c6bc0b2258160a335cb2840f58baf5/oversea_avatar7.png</item>
+        <item>https://yx-web-nosdn.netease.im/common/018d68e50059f98e1d9496dc5014fb05/oversea_avatar8.png</item>
+        <item>https://yx-web-nosdn.netease.im/common/300ca286474de787efc5f444ba8ff514/oversea_avatar9.png</item>
+        <item>https://yx-web-nosdn.netease.im/common/2e188a54717e471d2c49491d18e49c88/oversea_avatar10.png</item>
+
+    </string-array>
+
+    <integer-array name="mock_ages">
+        <item>22</item>
+        <item>22</item>
+        <item>22</item>
+        <item>22</item>
+        <item>22</item>
+        <item>22</item>
+        <item>22</item>
+        <item>25</item>
+        <item>23</item>
+        <item>20</item>
+    </integer-array>
+
+    <string-array name="mock_albums">
+        <item>https://yx-web-nosdn.netease.im/common/addd8ce87aa1d9280e1084ddb34972d3/oversea_avatar1.png</item>
+        <item>https://yx-web-nosdn.netease.im/common/8e053ef20b88d063d039927ca6001a88/oversea_avatar2.png</item>
+        <item>https://yx-web-nosdn.netease.im/common/2a32d52d776d9c97e9dfc2730fe81b32/oversea_avatar3.png</item>
+        <item>https://yx-web-nosdn.netease.im/common/69f3fdea0adc6a92c314b9c90aeecc71/oversea_avatar4.png</item>
+    </string-array>
+</resources>

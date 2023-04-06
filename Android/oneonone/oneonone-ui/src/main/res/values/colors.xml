@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2022 NetEase, Inc. All rights reserved.
+  ~ Use of this source code is governed by a MIT license that can be
+  ~ found in the LICENSE file.
+  -->
+
+<resources>
+    <color name="purple_200">#FFBB86FC</color>
+    <color name="purple_500">#FF6200EE</color>
+    <color name="purple_700">#FF3700B3</color>
+    <color name="teal_200">#FF03DAC5</color>
+    <color name="teal_700">#FF018786</color>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+
+    <color name="uncheck_color">#2e000000</color>
+    <color name="checked_color">#337EFF</color>
+    <color name="color_111111">#111111</color>
+    <color name="color_ff605e">#FF605E</color>
+    <color name="color_ff2262">#FF2262</color>
+    <color name="color_c76c96">#C76C96</color>
+    <color name="color_8c6cfd">#8C6CFD</color>
+    <color name="color_80ffffff">#80FFFFFF</color>
+    <color name="color_8cffffff">#8CFFFFFF</color>
+    <color name="color_66000000">#66000000</color>
+    <color name="color_01abe8">#01ABE8</color>
+    <color name="color_104e94">#104E94</color>
+    <color name="color_80000000">#80000000</color>
+    <color name="color_ff4061">#FF4061</color>
+    <color name="color_999999">#999999</color>
+    <color name="color_333333">#333333</color>
+    <color name="color_e9eff5">#E9EFF5</color>
+    <color name="color_eff1f4">#EFF1F4</color>
+    <color name="color_c5c9d2">#C5C9D2</color>
+    <color name="color_f5f8fc">#F5F8FC</color>
+    <color name="color_b3b7bc">#B3B7BC</color>
+    <color name="color_5ecfff">#5ECFFF</color>
+    <color name="color_438eff">#438EFF</color>
+    <color name="color_4cc69a">#4CC69A</color>
+    <color name="color_6ee7bb">#6EE7BB</color>
+    <color name="color_ff5b64">#FF5B64</color>
+    <color name="color_666666">#666666</color>
+    <color name="color_222222">#222222</color>
+    <color name="color_1d2026">#1D2026</color>
+    <color name="color_dffff4">#DFFFF4</color>
+    <color name="color_60cfa7">#60CFA7</color>
+    <color name="color_53c3f3">#53C3F3</color>
+    <color name="color_d6f3ff">#D6F3FF</color>
+    <color name="color_cbe0ff">#CBE0FF</color>
+    <color name="color_8ab9ff">#8AB9FF</color>
+    <color name="color_4788e9">#4788E9</color>
+
+    <color name="colorPrimary">@color/white</color>
+    <color name="colorPrimaryDark">@color/white</color>
+    <color name="colorAccent">@color/base_blue</color>
+
+    <color name="transparent">@android:color/transparent</color>
+    <color name="white_c">#FFCCCCCC</color>
+    <color name="base_blue">#FF337EFF</color>
+    <color name="base_red">#E6F24957</color>
+    <color name="meeting_background">#FF212129</color>
+    <color name="edit_hint">#FFB0B6BE</color>
+    <color name="semitransparent">#80000000</color>
+    <color name="color_88ffffff">#88ffffff</color>
+    <color name="color_b34cc69a">#B34cc69a</color>
+    <color name="color_b36ee7bb">#B36ee7bb</color>
+    <color name="color_b3ff605e">#B3ff605e</color>
+    <color name="color_b3ff2262">#B3ff2262</color>
+    <color name="color_b35ecfff">#B35ecfff</color>
+    <color name="color_b3438eff">#B3438eff</color>
+
+
+</resources>

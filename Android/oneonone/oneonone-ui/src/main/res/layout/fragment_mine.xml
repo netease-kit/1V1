@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2022 NetEase, Inc. All rights reserved.
+  ~ Use of this source code is governed by a MIT license that can be
+  ~ found in the LICENSE file.
+  -->
+
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="192dp"
+        android:background="@drawable/bg_mine_top"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_constraintLeft_toLeftOf="parent">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:id="@+id/ll_info"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <View
+                    android:id="@+id/statusBar_holder"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <LinearLayout
+
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:id="@+id/iv_avatar"
+                        android:layout_width="70dp"
+                        android:layout_height="70dp"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginLeft="20dp" />
+
+                    <TextView
+                        android:id="@+id/tv_nickname"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:paddingLeft="12dp"
+                        android:paddingRight="10dp"
+                        android:textColor="@color/color_333333"
+                        android:textSize="22sp"
+                        android:textStyle="bold"
+                        tools:text="nickname" />
+                </LinearLayout>
+            </LinearLayout>
+
+
+            <LinearLayout
+                android:id="@+id/ll_item"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="20dp"
+                android:layout_marginTop="42dp"
+                android:orientation="vertical"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/ll_info">
+
+                <com.netease.yunxin.app.oneonone.ui.view.MineItemView
+                    android:id="@+id/itemView_diamond"
+                    android:layout_width="match_parent"
+                    android:layout_height="52dp"
+                    app:mine_item_icon="@drawable/icon_diamond"
+                    app:mine_item_title="@string/my_diamond" />
+
+                <com.netease.yunxin.app.oneonone.ui.view.MineItemView
+                    android:id="@+id/itemView_follow"
+                    android:layout_width="match_parent"
+                    android:layout_height="52dp"
+                    app:mine_item_icon="@drawable/icon_follow"
+                    app:mine_item_title="@string/my_follow" />
+
+                <com.netease.yunxin.app.oneonone.ui.view.MineItemView
+                    android:id="@+id/itemView_love"
+                    android:layout_width="match_parent"
+                    android:layout_height="52dp"
+                    app:mine_item_icon="@drawable/icon_love"
+                    app:mine_item_title="@string/who_like_me" />
+
+                <com.netease.yunxin.app.oneonone.ui.view.MineItemView
+                    android:id="@+id/itemView_beauty"
+                    android:layout_width="match_parent"
+                    android:layout_height="52dp"
+                    app:mine_item_icon="@drawable/icon_beauty"
+                    app:mine_item_title="@string/beauty_setting" />
+
+                <com.netease.yunxin.app.oneonone.ui.view.MineItemView
+                    android:id="@+id/itemView_setting"
+                    android:layout_width="match_parent"
+                    android:layout_height="52dp"
+                    app:mine_item_icon="@drawable/icon_setting"
+                    app:mine_item_title="@string/common_setting" />
+                <com.netease.yunxin.app.oneonone.ui.view.MineItemView
+                    android:id="@+id/itemView_log_upload"
+                    android:layout_width="match_parent"
+                    android:layout_height="52dp"
+                    app:mine_item_icon="@drawable/icon_upload"
+                    app:mine_item_title="@string/log_upload" />
+                <com.netease.yunxin.app.oneonone.ui.view.MineItemView
+                    android:id="@+id/itemView_network"
+                    android:layout_width="match_parent"
+                    android:layout_height="52dp"
+                    app:mine_item_icon="@drawable/icon_network"
+                    app:mine_item_title="@string/network_probe" />
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="52dp">
+                    <ImageView
+                        android:layout_centerVertical="true"
+                        android:id="@+id/iv_icon"
+                        android:background="@drawable/icon_data_center"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp" />
+
+                    <TextView
+                        android:id="@+id/tv"
+                        android:layout_toRightOf="@+id/iv_icon"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:paddingLeft="12dp"
+                        android:textColor="@android:color/black"
+                        android:textSize="16sp"
+                        android:text="@string/app_data_center" />
+                    <View
+                        android:background="@color/color_f5f8fc"
+                        android:layout_width="match_parent"
+                        android:layout_alignParentBottom="true"
+                        android:layout_height="1px" />
+                    <RadioGroup
+                        android:layout_alignParentRight="true"
+                        android:layout_centerVertical="true"
+                        android:id="@+id/data_centers"
+                        android:layout_marginRight="23dp"
+                        android:orientation="horizontal"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content">
+                        <RadioButton
+                            android:id="@+id/data_center_mainland"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:padding="10dp"
+                            android:button="@null"
+                            android:textColor="@android:color/black"
+                            android:drawablePadding="6dp"
+                            android:drawableLeft="@drawable/selector_radiobutton"
+                            android:textSize="14sp"
+                            android:text="@string/app_data_center_mainland"/>
+                        <RadioButton
+                            android:id="@+id/data_center_oversea"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="8dp"
+                            android:textColor="@android:color/black"
+                            android:button="@null"
+                            android:textSize="14sp"
+                            android:drawablePadding="6dp"
+                            android:drawableLeft="@drawable/selector_radiobutton"
+                            android:text="@string/app_data_center_oversea"/>
+
+                    </RadioGroup>
+                </RelativeLayout>
+            </LinearLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </ScrollView>
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

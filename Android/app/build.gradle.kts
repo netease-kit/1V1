@@ -14,11 +14,11 @@ android {
     compileSdk = 31
 
     defaultConfig {
-        applicationId = "com.netease.yunxin.app.one2one"
+        applicationId = "com.netease.yunxin.app.oneonone"
         minSdk = 21
         targetSdk = 30
-        versionCode = 1
-        versionName = "1.0.0"
+        versionCode = 3
+        versionName = "1.3.0"
         multiDexEnabled = true
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -78,29 +78,27 @@ dependencies {
     implementation("com.google.android.material:material:1.5.0")
     implementation("androidx.constraintlayout:constraintlayout:2.1.3")
     implementation("androidx.recyclerview:recyclerview:1.2.1")
-    implementation("com.netease.yunxin.kit:alog:1.0.2")
-    implementation("com.netease.yunxin:nertc-full:4.6.42")
-    implementation("com.netease.yunxin.kit.call:call-pstn:1.8.1"){
+    implementation("com.netease.yunxin.kit:alog:1.0.9")
+
+    implementation("com.netease.yunxin.kit.call:call-pstn:1.8.2"){
         exclude("com.netease.yunxin","nertc-base")
     }
     implementation("com.gyf.immersionbar:immersionbar:3.0.0")
-    implementation("com.netease.yunxin.kit.auth:auth-yunxin-login:1.0.1")
+    implementation("com.netease.yunxin.kit.auth:auth-yunxin-login:1.0.4")
     implementation("com.blankj:utilcodex:1.30.6")
     implementation("com.squareup.okhttp3:logging-interceptor:4.7.2")
-    implementation("com.squareup.okhttp3:okhttp:4.7.2")
-    implementation("com.google.code.gson:gson:2.8.6")
+    implementation("com.squareup.okhttp3:okhttp:4.9.3")
+    implementation("com.google.code.gson:gson:2.9.0")
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:adapter-rxjava2:2.9.0")
     implementation("io.reactivex.rxjava2:rxandroid:2.1.1")
     implementation("androidx.navigation:navigation-fragment-ktx:2.4.2")
     implementation("androidx.navigation:navigation-ui-ktx:2.4.2")
-    implementation("com.netease.yunxin.kit.common:common-ui:1.1.13")
+    implementation("com.netease.yunxin.kit.common:common-ui:1.1.16")
 //    implementation("com.android.support:support-v4:28.0.0")
-
-    testImplementation("junit:junit:4.13.2")
-    androidTestImplementation("androidx.test.ext:junit:1.1.3")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.4.0")
-
+    implementation(project(":oneonone:oneonone-ui"))
+    implementation(project(":entertainment:entertainment-common"))
+    implementation(project(":beauty:beauty-ui"))
 
 
 }
