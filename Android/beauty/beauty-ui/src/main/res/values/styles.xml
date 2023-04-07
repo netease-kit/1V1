@@ -1,0 +1,27 @@
+<resources>
+
+    <style name="BottomDialogTheme" parent="ThemeOverlay.AppCompat.Dialog">
+        <item name="android:windowBackground">#00000000</item>
+        <item name="android:colorBackgroundCacheHint">@null</item>
+        <item name="android:backgroundDimEnabled">false</item>
+        <item name="android:windowIsTranslucent">false</item>
+        <item name="android:windowAnimationStyle">@style/BottomDialogAnimation</item>
+    </style>
+
+    <style name="SliderTheme" parent="Theme.MaterialComponents.Light.NoActionBar"/>
+
+    <declare-styleable name="MyRadioButton">
+        <attr name="drawableSizes" format="dimension"/><!--drawable的大小-->
+        <attr name="drawableTop" format="reference"/><!--显示在上方的图片-->
+        <attr name="drawableLeft" format="reference"/><!--显示在左边的图片-->
+        <attr name="drawableRight" format="reference"/><!--显示在右边的图片-->
+        <attr name="drawableBottom" format="reference"/><!--显示下边的图片-->
+    </declare-styleable>
+
+    <declare-styleable name="TitleBar">
+        <attr name="titleBar_title" format="string" />
+        <attr name="titleBar_title_bg_color" format="color" />
+        <attr name="titleBar_back_icon" format="reference" />
+    </declare-styleable>
+
+</resources>

@@ -7,7 +7,7 @@
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="com.netease.yunxin.app.one2one">
+    package="com.netease.yunxin.app.oneonone">
     <!--    //网络相关-->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
@@ -44,13 +44,12 @@
     <!-- 8.0+系统需要-->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
-
     <!-- 下面的 uses-permission 一起加入到你的 AndroidManifest 文件中。 -->
     <permission
-        android:name="com.netease.yunxin.app.one2one.permission.RECEIVE_MSG"
+        android:name="${applicationId}.permission.RECEIVE_MSG"
         android:protectionLevel="signature" />
 
-    <uses-permission android:name="com.netease.yunxin.app.one2one.permission.RECEIVE_MSG" />
+    <uses-permission android:name="${applicationId}.permission.RECEIVE_MSG" />
 
     <supports-screens
         android:anyDensity="true"
@@ -59,7 +58,7 @@
         android:smallScreens="true" />
 
     <application
-        android:name=".SampleApplication"
+        android:name=".OneOnOneApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/one_on_one_app_name"
@@ -80,62 +79,21 @@
             android:name="notch.config"
             android:value="portrait|landscape" />
         <activity
-            android:name="com.netease.yunxin.app.one2one.SplashActivity"
-            android:exported="true"
+            android:name=".activity.HomeActivity"
+            android:theme="@style/Theme.AppCompat.NoActionBar"
             android:screenOrientation="portrait"
-            android:theme="@style/SplashStyle">
-            <!--            android:theme="@style/SplashStyle"-->
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
-        <activity
-            android:name=".LoginHomeActivity"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".MainActivity"
             android:exported="false"
-            android:launchMode="singleTask"
-            android:screenOrientation="portrait"
-            android:theme="@style/Theme.AppCompat.NoActionBar">
+            android:launchMode="singleTask">
             <intent-filter>
-                <action android:name="https://netease.yunxin.newlive.home" />
-                <category android:name="android.intent.category.DEFAULT" />
+                <action android:name="https://netease.yunxin.party.home"/>
+                <category android:name="android.intent.category.DEFAULT"/>
             </intent-filter>
         </activity>
-        <activity
-            android:name=".ui.biz.web.WebViewActivity"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".ui.biz.setting.SettingActivity"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".ui.biz.setting.AboutActivity"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".ui.biz.setting.BindOtherPhoneActivity"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".ui.biz.setting.PSTNSettingActivity"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".ui.biz.userinfo.UserInfoActivity"
-            android:screenOrientation="portrait" />
 
         <activity
-            android:name=".ui.biz.userinfo.UserInfoEditActivity"
-            android:screenOrientation="portrait" />
-
-        <activity
-            android:name=".ui.biz.call.CallActivity"
-            android:launchMode="singleTop"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".ui.biz.beauty.BeautySettingActivity"
-            android:screenOrientation="portrait" />
-
+            android:name=".activity.CommonSettingActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.AppCompat.NoActionBar" />
 
         <!--        // 云信IM-->
         <!-- 云信后台服务，请使用独立进程。 -->
@@ -175,7 +133,7 @@
         <!-- 云信进程间通信provider -->
         <provider
             android:name="com.netease.nimlib.ipc.NIMContentProvider"
-            android:authorities="com.netease.yunxin.app.one2one.ipc.provider"
+            android:authorities="com.netease.yunxin.app.oneonone.ipc.provider"
             android:exported="false"
             android:process=":core" />
 
@@ -183,7 +141,8 @@
         <!-- SDK启动时会强制检测该组件的声明是否配置正确，如果检测到该声明不正确，SDK会主动抛出异常引发崩溃 -->
         <provider
             android:name="com.netease.nimlib.ipc.cp.provider.PreferenceContentProvider"
-            android:authorities="com.netease.yunxin.app.one2one.ipc.provider.preference"
+            android:authorities="com.netease.yunxin.app.oneonone.ipc.provider.preference"
+            tools:replace="android:authorities"
             android:exported="false" />
 
         <service android:name="com.netease.lava.nertc.foreground.ForegroundService"

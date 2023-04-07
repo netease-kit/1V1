@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2022 NetEase, Inc. All rights reserved.
+  ~ Use of this source code is governed by a MIT license that can be
+  ~ found in the LICENSE file.
+  -->
+
+<resources>
+    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+<!--        <item name="colorPrimary">@color/white</item>-->
+<!--        <item name="colorPrimaryDark">@color/white</item>-->
+<!--        <item name="colorAccent">@color/white</item>-->
+<!--        <item name="android:windowBackground">@color/color_111111</item>-->
+<!--        <item name="android:windowContentOverlay">@color/color_111111</item>-->
+        <!--增加activity 切换动画-->
+<!--        <item name="android:windowAnimationStyle">@style/AnimationActivity</item>-->
+    </style>
+
+    <style name="SplashStyle" parent="AppTheme">
+        <item name="android:windowBackground">@drawable/splash_theme_bg</item>
+        <item name="android:windowNoTitle">true</item>
+        <!--<item name="android:windowFullscreen">?android:windowNoTitle</item>-->
+        <!--Splash 禁用动画-->
+        <item name="android:windowAnimationStyle">@null</item>
+
+    </style>
+
+    <style name="SliderTheme" parent="Theme.MaterialComponents.Light.NoActionBar"/>
+
+    <style name="OneOnOneBottomDialogTheme" parent="ThemeOverlay.AppCompat.Dialog">
+        <item name="android:windowBackground">#00000000</item>
+        <item name="android:colorBackgroundCacheHint">@null</item>
+        <item name="android:backgroundDimEnabled">false</item>
+        <item name="android:windowIsTranslucent">false</item>
+        <item name="android:windowAnimationStyle">@style/OneOnOneBottomDialogAnimation</item>
+    </style>
+
+    <style name="OneOnOneBottomDialogAnimation">
+        <item name="android:windowEnterAnimation">@anim/anim_enter</item>
+        <item name="android:windowExitAnimation">@anim/anim_exit</item>
+    </style>
+</resources>

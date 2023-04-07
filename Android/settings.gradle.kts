@@ -32,3 +32,7 @@ dependencyResolutionManagement {
 }
 
 include(":app")
+include(":oneonone:oneonone-ui")
+include(":entertainment:entertainment-common")
+include(":beauty:beauty-ui")
+
