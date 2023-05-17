@@ -12,8 +12,6 @@ NS_ASSUME_NONNULL_BEGIN
 typedef NS_ENUM(NSInteger, NEOneOnOneClientEvent) {
   /// 被踢出登录
   NEOneOnOneClientEventKicOut,
-  /// 授权过期
-  NEOneOnOneClientEventUnauthorized,
   /// 服务器禁止登录
   NEOneOnOneClientEventForbidden,
   /// 账号或密码错误

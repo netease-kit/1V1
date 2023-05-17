@@ -12,12 +12,15 @@ class NetworkConfig {
       return url
     } else if isDebug {
       return "https://yiyong-qa.netease.im"
+    } else if isOverSea {
+      return "https://yiyong-sg.netease.im"
     } else {
       return "https://yiyong.netease.im"
     }
   }
 
   var isDebug: Bool = false
+  var isOverSea: Bool = false
   var deviceId: String {
     getDeviceId()
   }
@@ -106,10 +109,12 @@ public class NEOneOnOneNetwork {
                body: [String: Any]? = nil,
                success: @escaping ([String: Any]?) -> Void,
                failed: @escaping (NSError) -> Void) {
-    NEOneOnOneLog.networkLog(
-      tag,
-      desc: "HTTPRequest\nUrl: \(url).\nMethod: \(method)\nHeaders: \(headers)\nBody: \(body?.prettyJSON ?? "")"
-    )
+    if !url.contains("socialChat/user/reporter") {
+      NEOneOnOneLog.networkLog(
+        tag,
+        desc: "HTTPRequest\nUrl: \(url).\nMethod: \(method)\nHeaders: \(headers)\nBody: \(body?.prettyJSON ?? "")"
+      )
+    }
     guard let URL = URL(string: url) else {
       NEOneOnOneLog.errorLog(tag, desc: "\(url). Bad Url.")
       failed(makeError(NEOneOnOneErrorCode.failed, "Bad url"))
@@ -173,7 +178,7 @@ public class NEOneOnOneNetwork {
         return
       }
       // 打印requestId
-      if let requestId = response["requestId"] as? String {
+      if let requestId = response["requestId"] as? String, !url.contains("socialChat/user/reporter") {
         NEOneOnOneLog.infoLog(self.tag, desc: "RequestId:\n\(requestId)")
       }
       guard let code = response["code"] as? Int else {

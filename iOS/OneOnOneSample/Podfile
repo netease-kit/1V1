@@ -4,11 +4,11 @@
 source 'https://github.com/CocoaPods/Specs.git'
 
 def imVersion
-  '9.8.0'
+  '9.10.0'
 end
 
 def rtcVersion
-  '4.6.43'
+  '4.6.50'
 end
 
 #公共库(被多余一个组件引用，可定义多个)
@@ -45,11 +45,28 @@ skip_pod_bundle_sign
   rtcBasicPod
   thirdPartyLibraryPod
   
-  pod 'NEUIKit', :path => '../UIKit/NEUIKit/NEUIKit.podspec'
+
   
   # OneOnOne
+  pod 'NEUIKit', :path => '../UIKit/NEUIKit/NEUIKit.podspec'
   pod 'NEOneOnOneUIKit', :path => '../OneOnOneUIKit/NEOneOnOneUIKit.podspec'
   pod 'NEOneOnOneKit', :path => '../OneOnOneKit/NEOneOnOneKit.podspec'
+  pod 'NEOneOnOneChatUIKit', :path => '../OneOnOneChatUIKit/NEOneOnOneChatUIKit.podspec'
+  pod 'LottieSwift', :path => '../lottie/LottieSwift.podspec'
+  pod 'NECommonUIKit','9.5.5-alpha01'
+  pod 'NECommonKit','9.5.5-alpha01'
+  pod 'NEConversationUIKit','9.5.5-alpha01'
+  pod 'NEChatUIKit','9.5.5-alpha01'
+  pod 'NEMapKit','9.5.5-alpha01'
+  pod 'NECommonExt'
+  pod 'NECoreIMKit','9.5.5-alpha01'
+  pod 'NECoreKit','9.5.5-alpha01'
+  
+  
+  
+#  pod 'UITextView+Placeholder'
+#  pod 'SDWebImageWebPCoder'
+#  pod 'SDWebImageSVGKitPlugin'
   
 
   target 'OneOnOneSampleTests' do
@@ -71,8 +88,8 @@ post_install do |installer|
         config.build_settings['ENABLE_BITCODE'] = 'NO'
       end
   end
-#  # M1 模拟器运行打开一下代码
-#  installer.pods_project.build_configurations.each do |config|
-#     config.build_settings["EXCLUDED_ARCHS[sdk=iphonesimulator*]"] = "arm64"
-#   end
+  # M1 模拟器运行打开一下代码
+  installer.pods_project.build_configurations.each do |config|
+     config.build_settings["EXCLUDED_ARCHS[sdk=iphonesimulator*]"] = "arm64"
+   end
 end

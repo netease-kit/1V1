@@ -48,14 +48,23 @@ internal class _NEOneOnOneCustomMessageDataVideo: NSObject, Codable {
 
 @objcMembers
 internal class _NEOneOnOneAccountInfo: NSObject, Codable {
-  // 手机号
-  var mobile: String = ""
   // im账号
-  var imAccid: String = ""
+  var imToken: String = ""
   // 头像
-  var avatar: String = ""
+  var icon: String = ""
   // 昵称
-  var nickname: String = ""
+  var userName: String = ""
+  // 用户id
+  var userUuid: String = ""
+  // rtcuid
+//    var rtcUid:String = ""
+  // userToken
+  var userToken: String = ""
+  // sex
+  var sex: Int = 0
+  // mobile
+  var mobile: String = ""
+  var rtcUid: Int?
 }
 
 @objcMembers
@@ -66,7 +75,7 @@ internal class _NEOneOnOneOnlineUserList: NSObject, Codable {
 @objcMembers
 internal class _NEOneOnOneOnlineUser: NSObject, Codable {
   // 用户信息
-  var accountId: String?
+  var userUuid: String?
   // 昵称
   var userName: String?
   // 头像

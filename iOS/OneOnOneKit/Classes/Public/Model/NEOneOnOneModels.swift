@@ -41,6 +41,8 @@ public class NEOneOnOneUser: NSObject, Codable {
   public var isCaller: Bool = false
 
   public var nickName: String = ""
+  // RTCUid
+  public var rtcUid: Int = 0
   override public init() {
     super.init()
   }
@@ -96,12 +98,11 @@ public class NEOneOnOneCustomMessageDataAudio: NSObject {
   public var action: Int = -1
   // 违规信息对应的用户ID
   public var uid: Int64 = 0
-  init(_ audioData: _NEOneOnOneCustomMessageDataAudio?) {
-    if let audioData = audioData {
-      content = audioData.content
-      action = audioData.action
-      uid = audioData.uid
-    }
+  init?(_ audioData: _NEOneOnOneCustomMessageDataAudio?) {
+    guard let audioData = audioData else { return nil }
+    content = audioData.content
+    action = audioData.action
+    uid = audioData.uid
   }
 }
 
@@ -114,31 +115,45 @@ public class NEOneOnOneCustomMessageDataVideo: NSObject {
   // 违规信息对应的用户ID
   public var uid: Int64 = 0
 
-  init(_ videoData: _NEOneOnOneCustomMessageDataVideo?) {
-    if let videoData = videoData {
-      type = videoData.type
-      url = videoData.url
-      uid = videoData.uid
-    }
+  init?(_ videoData: _NEOneOnOneCustomMessageDataVideo?) {
+    guard let videoData = videoData else { return nil }
+    type = videoData.type
+    url = videoData.url
+    uid = videoData.uid
   }
 }
 
 @objcMembers
 public class NEOneOnOneAccountInfo: NSObject {
-  // 手机号
-  public var mobile: String = ""
   // im账号
-  public var imAccid: String = ""
-
-  public var avatar: String = ""
+  public var imToken: String = ""
+  // 头像
+  public var icon: String = ""
   // 昵称
-  public var nickname: String = ""
+  public var userName: String = ""
+  // 用户id
+  public var userUuid: String = ""
+  // rtcuid
+//    public var rtcUid:String = ""
+  // userToken
+  public var userToken: String = ""
+  // mobile
+  public var mobile: String = ""
+  // sex
+  public var sex: Int = 0
+
+  public var rtcUid: Int?
   init(_ create: _NEOneOnOneAccountInfo?) {
     if let create = create {
+      imToken = create.imToken
+      icon = create.icon
+      userName = create.userName
+      userUuid = create.userUuid
+//            self.rtcUid = create.rtcUid
+      userToken = create.userToken
+      sex = create.sex
       mobile = create.mobile
-      imAccid = create.imAccid
-      avatar = create.avatar
-      nickname = create.nickname
+      rtcUid = create.rtcUid
     }
   }
 }
@@ -158,7 +173,7 @@ public class NEOneOnOneOnlineUserList: NSObject {
 @objcMembers
 public class NEOneOnOneOnlineUser: NSObject {
   // 用户信息
-  public var accountId: String?
+  public var userUuid: String?
   // 昵称
   public var userName: String?
   // 头像
@@ -172,10 +187,28 @@ public class NEOneOnOneOnlineUser: NSObject {
 
   internal init(_ create: _NEOneOnOneOnlineUser?) {
     if let create = create {
-      accountId = create.accountId
+      userUuid = create.userUuid
       userName = create.userName
       icon = create.icon
       mobile = create.mobile
     }
   }
+}
+
+@objcMembers
+public class NEOneOnOneOneGift: NSObject {
+  // 消息发送者用户编号
+  public var senderUserUuid: String?
+  // 打赏者昵称
+  public var rewarderUserName: String?
+  // 发送消息时间
+  public var sendTime: Int = 0
+  // 礼物个数
+  public var giftCount: Int = 0
+  // 礼物编号
+  public var giftId: Int = 0
+  // 打赏者用户编号
+  public var targetUserUuid: String?
+  // 打赏者昵称
+  public var targetUserName: String?
 }

@@ -5,8 +5,13 @@
 #import <NEUIKit/NEUIBaseViewController.h>
 
 NS_ASSUME_NONNULL_BEGIN
+
+typedef void (^PrivateLatterBlock)(NSString *sessionId);
+
 /// 1v1列表
 @interface NEOneOnOneRoomListViewController : NEUIBaseViewController
+
+@property(nonatomic, copy) PrivateLatterBlock privateLatter;
 @end
 
 NS_ASSUME_NONNULL_END

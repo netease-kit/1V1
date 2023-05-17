@@ -16,6 +16,13 @@
 #import "NEOneOnOneUIKitUtils.h"
 #import "NERtcCallKit+Party.h"
 
+static NERtcChannelProfileType RTCConfig_channelProfile = kNERtcChannelProfileLiveBroadcasting;
+static NERtcAudioProfileType RTCConfig_audioProfile = kNERtcAudioProfileHighQuality;
+static NERtcAudioScenarioType RTCConfig_scenario = kNERtcAudioScenarioSpeech;
+static NERtcVideoFrameRate RTCConfig_videoFrame = kNERtcVideoFrameRateFps24;
+static int RTCConfig_videoWidth = 640;
+static int RTCConfig_videoHeight = 360;
+
 @implementation NEOneOnOneCallViewController (RtcCall)
 
 - (void)onUserCancel:(NSString *)userID {
@@ -37,6 +44,14 @@
 }
 /// 自己加入成功的回调，通常用来上报、统计等
 - (void)onJoinChannel:(NERtcCallKitJoinChannelEvent *)event {
+  [NERtcEngine.sharedEngine setChannelProfile:RTCConfig_channelProfile];
+  [NERtcEngine.sharedEngine setAudioProfile:RTCConfig_audioProfile scenario:RTCConfig_scenario];
+  NERtcVideoEncodeConfiguration *videoConfig = [[NERtcVideoEncodeConfiguration alloc] init];
+  videoConfig.frameRate = RTCConfig_videoFrame;
+  videoConfig.width = RTCConfig_videoWidth;
+  videoConfig.height = RTCConfig_videoHeight;
+  [NERtcEngine.sharedEngine setLocalVideoConfig:videoConfig];
+
   [NEOneOnOneLog infoLog:tag desc:[NSString stringWithFormat:@"%@:onJoinChannel", tag]];
   [self userAccept];
   [self userEnterVideo];

@@ -1,0 +1,11 @@
+// Copyright (c) 2022 NetEase, Inc. All rights reserved.
+// Use of this source code is governed by a MIT license that can be
+// found in the LICENSE file.
+
+Recreation = "娱乐社交";
+
+One_On_One = "1对1社交";
+One_On_One_Description = "提高通话接通率，享受低延时、高清视频带来的极致体验";
+
+Message = "消息";
+

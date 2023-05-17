@@ -32,7 +32,7 @@
 "超时未接，已结束连接" = "Calling timeout and disconnected";
 "呼叫未成功发出" = "Call failed";
 "网络异常，请稍后重试" = "Network error, try again later";
-"暂无在线用户" = "No online users";
+"还没有在线用户哦\n和你的好友一起来体验吧" = "There are no online users yet\nExperience it with your friends";
 "对方不在线，请稍后再试" = "The peer is offline, try again later";
 "网络异常，通话已结束" = "Network error, the call ended";
 
@@ -42,3 +42,16 @@
 "下拉更新" = "Swipe to refresh";
 "更新中..." = "Updating...";
 "无更多内容" = "No more content";
+"搭讪" = "搭讪";
+"私信" = "私信";
+"语音" = "语音";
+"视频" = "视频";
+"真心交友，愿意聊聊吗？\n很喜欢你呢~" = "真心交友，愿意聊聊吗？\n很喜欢你呢~";
+"搭讪成功" = "搭讪成功";
+"礼物" = "Gift";
+"安排" = "Arrange";
+"跑车" = "Sports car";
+"火箭" = "Rocket";
+"荧光棒" = "Glow stick";
+"赠送" = "Send";
+"你收到" = "received";

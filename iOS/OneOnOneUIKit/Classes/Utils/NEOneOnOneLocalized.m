@@ -10,10 +10,7 @@
   static NSBundle *localBundle = nil;
   if (localBundle == nil) {
     // 这里不使用mainBundle是为了适配pod 1.x和0.x
-    localBundle =
-        [NSBundle bundleWithPath:[[NSBundle bundleForClass:[NEOneOnOneRoomListViewController class]]
-                                     pathForResource:@"NEOneOnOneUIKit"
-                                              ofType:@"bundle"]];
+    localBundle = [NSBundle bundleForClass:[self class]];
   }
   return localBundle;
 }
@@ -29,12 +26,8 @@
     NSString *language = [NSLocale preferredLanguages].firstObject;
     if ([language hasPrefix:@"en"]) {
       language = @"en";
-    } else if ([language hasPrefix:@"zh"]) {
-      if ([language rangeOfString:@"Hans"].location != NSNotFound) {
-        language = @"zh-Hans";
-      } else {
-        language = @"zh-Hant";
-      }
+    } else if ([language hasPrefix:@"zh-Hans"]) {
+      language = @"zh-Hans";
     } else {
       language = @"en";
     }

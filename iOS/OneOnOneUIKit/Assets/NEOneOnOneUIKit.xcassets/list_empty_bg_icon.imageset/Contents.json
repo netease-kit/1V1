@@ -1,6 +1,7 @@
 {
   "images" : [
     {
+      "filename" : "list_empty_bg_icon.png",
       "idiom" : "universal",
       "scale" : "1x"
     },
