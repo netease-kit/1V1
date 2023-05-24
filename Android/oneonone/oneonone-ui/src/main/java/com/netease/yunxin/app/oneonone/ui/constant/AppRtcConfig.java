@@ -19,7 +19,7 @@ public class AppRtcConfig {
   /** 码率 */
   public static final int BITRATE = 1000;
 
-  public static final int PROFILE = NERtcConstants.AudioProfile.STANDARD;
+  public static final int PROFILE = NERtcConstants.AudioProfile.HIGH_QUALITY;
   public static final int SCENARIO = NERtcConstants.AudioScenario.SPEECH;
   public static final int CHANNEL_PROFILE = NERtcConstants.RTCChannelProfile.LIVE_BROADCASTING;
 

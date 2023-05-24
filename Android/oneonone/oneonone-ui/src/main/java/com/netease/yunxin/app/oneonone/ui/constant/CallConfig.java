@@ -13,4 +13,8 @@ public class CallConfig {
   public static final int PSTN_CALL_TOTAL_DURATION_SECONDS = 30 * 60;
   /** 短信总可用条数 */
   public static final int SMS_TOTAL_COUNT = 100;
+  /** 是否支持PSTN呼叫 */
+  public static final boolean enablePstnCall = false;
+  /** 是否支持虚拟人呼叫 */
+  public static final boolean enableVirtualCall = true;
 }

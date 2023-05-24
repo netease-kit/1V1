@@ -155,8 +155,25 @@
     <string name="one_on_one_other_you_are_in_the_chatroom">您当前处于语聊房中\n请先结束后再试</string>
     <string name="one_on_one_notification_new_incoming_audio_call">邀请您语音聊天</string>
     <string name="one_on_one_notification_new_incoming_video_call">邀请您视频聊天</string>
-    <string name="one_on_one_empty_online_user">暂无在线用户</string>
+    <string name="one_on_one_empty_online_user">还没有在线用户哦\n和你的好友一起来体验吧</string>
     <string name="one_on_one_network_error">网络异常，请稍后重试</string>
+    <string name="one_on_one_accost">搭讪</string>
+    <string name="one_on_one_private_letter">私信</string>
+    <string name="one_on_one_audio">语音</string>
+    <string name="one_on_one_video">视频</string>
+    <string name="one_on_one_ignore_unread_tip_titile">是否忽略所有未读提醒</string>
+    <string name="one_on_one_ignore_unread_tip_content">消息的未读红点会清除，忽略未读不会删除相关聊天记录</string>
+    <string name="one_on_one_delete_conversation_tip_title">删除会话</string>
+    <string name="one_on_one_delete_conversation_tip_content">删除会话并永久删除聊天记录</string>
+    <string name="one_on_one_report">举报</string>
+    <string name="one_on_one_continue_send_gift">继续送礼</string>
+    <string name="one_on_one_send_gift_return">回赠礼物</string>
+    <string name="one_on_one_send_gift_to_other">送给对方</string>
+    <string name="one_on_one_send_gift_to_you">送给你礼物</string>
+    <string name="one_on_one_message_gift">[礼物消息]</string>
+    <string name="one_on_one_send_success">发送成功</string>
+    <string name="one_on_one_send_failed">发送失败</string>
+    <string name="app_receive_gift_tip">你收到 %s 个%s</string>
 
     <string-array name="beauty_option_tags">
         <item>美肤</item>
@@ -210,5 +227,45 @@
         <item>https://yx-web-nosdn.netease.im/quickhtml%2Fassets%2Fyunxin%2Fdefault%2Fphotos%2Fphoto4.png</item>
     </string-array>
 
+    <string-array name="hot_topic">
+        <item>哈喽，在忙吗？</item>
+        <item>感觉我们很合拍，能认识一下吗？</item>
+        <item>我在这里等了一段时间，想和你聊聊天</item>
+        <item>刚好看到你，感觉很有缘</item>
+        <item>你的照片很好看，能聊聊吗？</item>
+        <item>你成功引起了我的注意</item>
+    </string-array>
 
+    <string-array name="recommend_topic">
+        <item>嗨！我们距离很近</item>
+        <item>缘分让我相遇</item>
+        <item>喜欢你的人匆匆赶来了</item>
+    </string-array>
+
+    <string-array name="report_content">
+        <item>政治造谣</item>
+        <item>色情低俗</item>
+        <item>广告营销</item>
+        <item>欺诈信息</item>
+    </string-array>
+
+    <string name="one_on_one_chat_hot_topic">热聊话题</string>
+    <string name="one_on_one_chat_audio_title">按住说话</string>
+    <string name="one_on_one_accost_text">真心交友，愿意聊聊吗？\n很喜欢你呢~</string>
+    <string name="one_on_one_chat_accost_message">缘分妙不可言，快来聊聊吧</string>
+    <string name="one_on_one_chat_try_audio_call">试试语音通话，体验TA的声音</string>
+    <string name="one_on_one_call_now">立即拨打</string>
+    <string name="one_on_one_chat_try_video_call">试试视频通话，一睹TA的美貌</string>
+    <string name="one_on_one_chat_privacy_risk_message">⚠️ 注意保护个人隐私安全 ⚠️\n请勿提供第三方联系方式</string>
+    <string name="one_on_one_chat_common_risk_message">⚠️ 消息内容涉嫌违规 ⚠️\n请注意内容的合法合规 </string>
+    <string name="one_on_one_chat_online">在线</string>
+    <string name="one_on_one_release_send">松开发送</string>
+    <string name="one_on_one_release_cancel">松开取消</string>
+    <string name="one_on_one_accost_success">搭讪成功</string>
+    <string name="one_on_one_chat_text_hint">请输入信息</string>
+    <string name="one_on_one_chat_inputing">对方正在输入中...</string>
+    <string name="one_one_one_littie_secre">云信派对小秘书</string>
+    <string name="one_one_one_report_success">举报成功</string>
+    <string name="one_on_one_virtual_call_error">网络异常，请重新拨打</string>
+    <string name="one_on_one_virtual_call_end">通话已结束哦~</string>
 </resources>

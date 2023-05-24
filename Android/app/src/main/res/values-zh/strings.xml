@@ -229,58 +229,6 @@
     <string name="app_application">应用</string>
     <string name="app_1v1">1对1社交</string>
     <string name="app_1v1_desc">提高通话接通率，享受低延时、高清视频带来的极致体验</string>
-
-    <string-array name="beauty_option_tags">
-        <item>美肤</item>
-        <item>美型</item>
-        <item>滤镜</item>
-    </string-array>
-
-    <string-array name="mock_nicknames">
-        <item>小花花</item>
-        <item>茉莉花</item>
-        <item>向日葵</item>
-        <item>小辣椒</item>
-        <item>小脑虎</item>
-        <item>蜡笔小新</item>
-        <item>甜妹</item>
-        <item>午后咖啡馆</item>
-        <item>温柔港湾</item>
-        <item>拾柒Iris</item>
-    </string-array>
-
-    <string-array name="mock_avatars">
-        <item>https://yx-web-nosdn.netease.im/quickhtml%2Fassets%2Fyunxin%2Fdefault%2Favatars%2Favatar1.png</item>
-        <item>https://yx-web-nosdn.netease.im/quickhtml%2Fassets%2Fyunxin%2Fdefault%2Favatars%2Favatar2.png</item>
-        <item>https://yx-web-nosdn.netease.im/quickhtml%2Fassets%2Fyunxin%2Fdefault%2Favatars%2Favatar3.png</item>
-        <item>https://yx-web-nosdn.netease.im/quickhtml%2Fassets%2Fyunxin%2Fdefault%2Favatars%2Favatar4.png</item>
-        <item>https://yx-web-nosdn.netease.im/quickhtml%2Fassets%2Fyunxin%2Fdefault%2Favatars%2Favatar5.png</item>
-        <item>https://yx-web-nosdn.netease.im/quickhtml%2Fassets%2Fyunxin%2Fdefault%2Favatars%2Favatar6.png</item>
-        <item>https://yx-web-nosdn.netease.im/quickhtml%2Fassets%2Fyunxin%2Fdefault%2Favatars%2Favatar7.png</item>
-        <item>https://yx-web-nosdn.netease.im/quickhtml%2Fassets%2Fyunxin%2Fdefault%2Favatars%2Favatar8.png</item>
-        <item>https://yx-web-nosdn.netease.im/quickhtml%2Fassets%2Fyunxin%2Fdefault%2Favatars%2Favatar9.png</item>
-        <item>https://yx-web-nosdn.netease.im/quickhtml%2Fassets%2Fyunxin%2Fdefault%2Favatars%2Favatar10.png</item>
-    </string-array>
-
-    <integer-array name="mock_ages">
-        <item>22</item>
-        <item>22</item>
-        <item>22</item>
-        <item>22</item>
-        <item>22</item>
-        <item>22</item>
-        <item>22</item>
-        <item>25</item>
-        <item>23</item>
-        <item>20</item>
-    </integer-array>
-
-    <string-array name="mock_albums">
-        <item>https://yx-web-nosdn.netease.im/quickhtml%2Fassets%2Fyunxin%2Fdefault%2Fphotos%2Fphoto1.png</item>
-        <item>https://yx-web-nosdn.netease.im/quickhtml%2Fassets%2Fyunxin%2Fdefault%2Fphotos%2Fphoto2.png</item>
-        <item>https://yx-web-nosdn.netease.im/quickhtml%2Fassets%2Fyunxin%2Fdefault%2Fphotos%2Fphoto3.png</item>
-        <item>https://yx-web-nosdn.netease.im/quickhtml%2Fassets%2Fyunxin%2Fdefault%2Fphotos%2Fphoto4.png</item>
-    </string-array>
-
+    <string name="one_on_one_message">消息</string>
 
 </resources>

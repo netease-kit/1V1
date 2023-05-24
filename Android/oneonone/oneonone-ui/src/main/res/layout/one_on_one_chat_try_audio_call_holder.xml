@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ /*
+  ~  * Copyright (c) 2022 NetEase, Inc.  All rights reserved.
+  ~  * Use of this source code is governed by a MIT license that can be found in the LICENSE file.
+  ~  */
+  -->
+
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_gravity="center_horizontal"
+    android:layout_height="44dp">
+
+  <androidx.constraintlayout.widget.ConstraintLayout
+      android:background="@drawable/one_on_one_chat_notification_tips_bg"
+      app:layout_constraintLeft_toLeftOf="parent"
+      app:layout_constraintRight_toRightOf="parent"
+      app:layout_constraintTop_toTopOf="parent"
+      android:layout_width="wrap_content"
+      android:layout_height="44dp">
+      <TextView
+          app:layout_constraintTop_toTopOf="parent"
+          app:layout_constraintBottom_toBottomOf="parent"
+          app:layout_constraintLeft_toLeftOf="parent"
+          android:paddingStart="12dp"
+          android:paddingEnd="8dp"
+          android:gravity="center"
+          android:textSize="12sp"
+          android:textColor="@android:color/white"
+          android:id="@+id/tv"
+          android:text="@string/one_on_one_chat_try_audio_call"
+          android:layout_width="wrap_content"
+          android:layout_height="match_parent" />
+
+      <LinearLayout
+          android:id="@+id/call_now"
+          app:layout_constraintTop_toTopOf="parent"
+          app:layout_constraintBottom_toBottomOf="parent"
+          android:background="@drawable/one_on_one_chat_call_button_bg"
+          app:layout_constraintLeft_toRightOf="@+id/tv"
+          android:gravity="center_vertical"
+          android:layout_width="wrap_content"
+          android:layout_height="28dp" >
+
+          <ImageView
+              android:layout_marginStart="12dp"
+              android:background="@drawable/one_on_one_audio_call_icon"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content" />
+
+          <TextView
+              android:paddingStart="4dp"
+              android:textColor="@android:color/white"
+              android:paddingEnd="12dp"
+              android:text="@string/one_on_one_call_now"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content" />
+      </LinearLayout>
+
+      <View
+          app:layout_constraintLeft_toRightOf="@+id/call_now"
+          android:layout_width="12dp"
+          android:layout_height="match_parent" />
+  </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

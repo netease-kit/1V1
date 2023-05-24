@@ -15,14 +15,14 @@ public class AppConfig {
   private static final String APP_KEY_OVERSEA = "your oversea appKey"; // 海外用户填写
   public static final boolean IS_OVERSEA= false; // 海外用户填ture,国内用户填false
 
-  // 获取IM_ACCID和对应的IM_TOKEN，请参考https://doc.yunxin.163.com/messaging/docs/DQ3Nzk1MTY?platform=server
+  // 生成账号参考1对1服务端工程
   public static final String IM_ACCID = "your im accid";
   public static final String IM_TOKEN = "your im token";
   public static final String IM_AVATAR = "your im avatar";
   public static final String IM_NICKNAME = "your im nickname";
   public static final String PHONE_NUMBER = "your phone number";
-
-
+  public static final String USER_TOKEN = "your user token";
+  public static final String BASE_URL="http://127.0.0.1:9981";
 
   private static final String ZH = "zh";
 
@@ -56,10 +56,6 @@ public class AppConfig {
   }
 
   public static String getOneOnOneBaseUrl() {
-    if (isOversea()) {
-      return "http://yiyong.netease.im";
-    } else {
-      return "http://yiyong.netease.im";
-    }
+     return BASE_URL;
   }
 }

@@ -5,12 +5,12 @@
 package com.netease.yunxin.app.oneonone;
 
 import android.app.Application;
-
-import com.netease.nimlib.sdk.NIMClient;
 import com.netease.nimlib.sdk.SDKOptions;
 import com.netease.nimlib.sdk.ServerAddresses;
 import com.netease.yunxin.app.oneonone.config.AppConfig;
+import com.netease.yunxin.app.oneonone.config.NimSDKOptionConfig;
 import com.netease.yunxin.app.oneonone.config.OverSeaConfig;
+import com.netease.yunxin.app.oneonone.ui.utils.IMUIKitUtil;
 import com.netease.yunxin.kit.alog.ALog;
 import com.netease.yunxin.kit.beauty.BeautyManager;
 import com.netease.yunxin.kit.entertainment.common.AppStatusManager;
@@ -18,17 +18,17 @@ import com.netease.yunxin.kit.entertainment.common.utils.IconFontUtil;
 
 public class OneOnOneApplication extends Application {
 
-  private static final String TAG = "VoiceRoomApplication";
+  private static final String TAG = "OneOnOneApplication";
 
   @Override
   public void onCreate() {
     super.onCreate();
     ALog.init(this, ALog.LEVEL_ALL);
     AppConfig.init(this);
-    NIMClient.init(this, null, options());
     AppStatusManager.init(this);
     IconFontUtil.getInstance().init(this);
     BeautyManager.getInstance().init(OneOnOneApplication.this);
+    IMUIKitUtil.initIMUIKit(this, NimSDKOptionConfig.getSDKOptions(this, AppConfig.getAppKey()));
   }
   // 如果返回值为 null，则全部使用默认参数。
   private SDKOptions options() {

@@ -17,8 +17,8 @@ android {
         applicationId = "com.netease.yunxin.app.oneonone"
         minSdk = 21
         targetSdk = 30
-        versionCode = 3
-        versionName = "1.3.0"
+        versionCode = 4
+        versionName = "1.4.0"
         multiDexEnabled = true
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -94,11 +94,16 @@ dependencies {
     implementation("io.reactivex.rxjava2:rxandroid:2.1.1")
     implementation("androidx.navigation:navigation-fragment-ktx:2.4.2")
     implementation("androidx.navigation:navigation-ui-ktx:2.4.2")
-    implementation("com.netease.yunxin.kit.common:common-ui:1.1.16")
+    implementation("com.netease.yunxin.kit.common:common-ui:1.1.20")
+    implementation("com.netease.nimlib:chatroom:9.10.0")
+    implementation("com.netease.nimlib:avsignalling:9.10.0")
 //    implementation("com.android.support:support-v4:28.0.0")
     implementation(project(":oneonone:oneonone-ui"))
     implementation(project(":entertainment:entertainment-common"))
     implementation(project(":beauty:beauty-ui"))
-
+    //会话列表组件
+    api("com.netease.yunxin.kit.conversation:conversationkit-ui:9.5.5-alpha01")
+    implementation("com.github.bumptech.glide:glide:4.13.1")
+    annotationProcessor("com.github.bumptech.glide:compiler:4.13.1")
 
 }

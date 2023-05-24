@@ -6,23 +6,26 @@ package com.netease.yunxin.app.oneonone.ui.fragment;
 
 import android.content.Context;
 import android.content.DialogInterface;
+import android.graphics.SurfaceTexture;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
+import android.view.Surface;
+import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.RelativeLayout;
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
-import androidx.fragment.app.Fragment;
-import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProvider;
 import com.blankj.utilcode.util.ToastUtils;
 import com.netease.lava.nertc.sdk.NERtcConstants;
 import com.netease.lava.nertc.sdk.NERtcEx;
 import com.netease.lava.nertc.sdk.video.NERtcVideoView;
+import com.netease.neliveplayer.sdk.NELivePlayer;
+import com.netease.yunxin.app.oneonone.ui.OneOnOneUI;
 import com.netease.yunxin.app.oneonone.ui.R;
 import com.netease.yunxin.app.oneonone.ui.activity.CallActivity;
 import com.netease.yunxin.app.oneonone.ui.databinding.FragmentInVideoCallBinding;
@@ -34,17 +37,16 @@ import com.netease.yunxin.app.oneonone.ui.utils.TimeUtil;
 import com.netease.yunxin.app.oneonone.ui.utils.security.SecurityTipsModel;
 import com.netease.yunxin.app.oneonone.ui.utils.security.SecurityType;
 import com.netease.yunxin.app.oneonone.ui.view.InTheVideoCallBottomBar;
-import com.netease.yunxin.app.oneonone.ui.viewmodel.CallViewModel;
+import com.netease.yunxin.kit.alog.ALog;
 import com.netease.yunxin.kit.beauty.BeautyManager;
 import com.netease.yunxin.kit.common.image.ImageLoader;
-import com.netease.yunxin.kit.common.utils.NetworkUtils;
 import com.netease.yunxin.nertc.nertcvideocall.model.NERTCVideoCall;
+import com.netease.yunxin.nertc.nertcvideocall.model.impl.NERtcCallbackExTemp;
 import com.netease.yunxin.nertc.ui.base.CallParam;
 
-public class InTheVideoCallFragment extends Fragment {
+public class InTheVideoCallFragment extends InTheBaseCallFragment {
   private static final String TAG = "InTheVideoCallFragment";
   private FragmentInVideoCallBinding binding;
-  private CallViewModel viewModel;
   private CallActivity activity;
   private boolean muteLocal = false;
   private boolean muteRemote = false;
@@ -58,6 +60,30 @@ public class InTheVideoCallFragment extends Fragment {
   private NERTCVideoCall rtcCall;
   private String otherUid;
   private SecurityTipsModel securityTipsModel;
+
+  private void handleVideoSizeChanged(int videoWidth, int videoHeight) {
+    if (videoWidth > 0 && videoHeight > 0) {
+      // 计算缩放比例
+      float scaleX = (float) binding.textureView.getWidth() / videoWidth;
+      float scaleY = (float) binding.textureView.getHeight() / videoHeight;
+      float scale;
+      if (videoWidth > videoHeight) {
+        scale = Math.min(scaleX, scaleY);
+      } else {
+        scale = Math.max(scaleX, scaleY);
+      }
+
+      // 缩放后的视频尺寸
+      int scaledWidth = Math.round(videoWidth * scale);
+      int scaledHeight = Math.round(videoHeight * scale);
+      // 更新TextureView的布局参数
+      RelativeLayout.LayoutParams layoutParams =
+          (RelativeLayout.LayoutParams) binding.textureView.getLayoutParams();
+      layoutParams.width = scaledWidth;
+      layoutParams.height = scaledHeight;
+      binding.textureView.setLayoutParams(layoutParams);
+    }
+  }
 
   @Override
   public void onAttach(@NonNull Context context) {
@@ -102,12 +128,65 @@ public class InTheVideoCallFragment extends Fragment {
       @NonNull LayoutInflater inflater,
       @Nullable ViewGroup container,
       @Nullable Bundle savedInstanceState) {
-    binding = FragmentInVideoCallBinding.inflate(inflater, container, false);
-    viewModel = new ViewModelProvider(requireActivity()).get(CallViewModel.class);
     rtcCall = activity.getRtcCall();
     BeautyManager.getInstance().startBeauty();
-    subscribeUi();
-    initEvent();
+    return super.onCreateView(inflater, container, savedInstanceState);
+  }
+
+  public void handleInTheVideoCallUI() {
+    if (activity.isVirtualCall() && virtualCallViewModel != null) {
+      binding.textureViewContainer.setVisibility(View.VISIBLE);
+      binding.bigVideo.setVisibility(View.GONE);
+      NELivePlayer player = virtualCallViewModel.getPlayer();
+      if (virtualCallViewModel.isVideoType()) {
+        if (binding.textureView.isAvailable()) {
+          Surface surface = new Surface(binding.textureView.getSurfaceTexture());
+          player.setSurface(surface);
+        } else {
+          binding.textureView.setSurfaceTextureListener(
+              new TextureView.SurfaceTextureListener() {
+                @Override
+                public void onSurfaceTextureAvailable(
+                    @NonNull SurfaceTexture surface, int width, int height) {
+                  player.setSurface(new Surface(surface));
+                }
+
+                @Override
+                public void onSurfaceTextureSizeChanged(
+                    @NonNull SurfaceTexture surface, int width, int height) {}
+
+                @Override
+                public boolean onSurfaceTextureDestroyed(@NonNull SurfaceTexture surface) {
+                  return false;
+                }
+
+                @Override
+                public void onSurfaceTextureUpdated(@NonNull SurfaceTexture surface) {}
+              });
+        }
+      }
+      try {
+        NERtcEx.getInstance().release();
+        NERtcEx.getInstance()
+            .init(
+                requireContext(),
+                OneOnOneUI.getInstance().getAppKey(),
+                new NERtcCallbackExTemp(),
+                null);
+        NERtcEx.getInstance().setupLocalVideoCanvas(binding.smallVideo);
+        NERtcEx.getInstance().startVideoPreview();
+      } catch (Exception e) {
+        ALog.e(TAG, "handleInTheVideoCallUI exception:" + e);
+      }
+    } else {
+      binding.textureViewContainer.setVisibility(View.GONE);
+      binding.bigVideo.setVisibility(View.VISIBLE);
+    }
+  }
+
+  @Override
+  protected View getRoot(@NonNull LayoutInflater inflater, @Nullable ViewGroup container) {
+    binding = FragmentInVideoCallBinding.inflate(inflater, container, false);
     return binding.getRoot();
   }
 
@@ -118,11 +197,12 @@ public class InTheVideoCallFragment extends Fragment {
     NERtcEx.getInstance().setupLocalVideoCanvas(videoView);
   }
 
-  private void subscribeUi() {
+  @Override
+  protected void subscribeUi() {
+    super.subscribeUi();
     binding.smallVideo.setZOrderMediaOverlay(true);
     binding.bigVideo.setZOrderMediaOverlay(false);
     viewModel.refresh(activity.getCallParams());
-    LifecycleOwner viewLifecycleOwner = getViewLifecycleOwner();
     viewModel
         .getOtherInfo()
         .observe(
@@ -131,7 +211,6 @@ public class InTheVideoCallFragment extends Fragment {
               @Override
               public void onChanged(OtherUserInfo otherUserInfo) {
                 otherUid = otherUserInfo.accId;
-                rtcCall.setupRemoteView(binding.bigVideo, otherUid);
                 setupLocalView(binding.smallVideo);
                 binding.tvNickname.setText(otherUserInfo.nickname);
                 ImageLoader.with(AppGlobals.getApplication())
@@ -171,6 +250,27 @@ public class InTheVideoCallFragment extends Fragment {
                 handleUi();
               }
             });
+    viewModel
+        .getOtherRtcUid()
+        .observe(
+            viewLifecycleOwner,
+            aLong -> {
+              rtcCall.setupRemoteView(binding.bigVideo, otherUid);
+            });
+
+    if (virtualCallViewModel != null) {
+      virtualCallViewModel
+          .getVideoSizeChanged()
+          .observe(
+              viewLifecycleOwner,
+              integerIntegerPair ->
+                  handleVideoSizeChanged(integerIntegerPair.first, integerIntegerPair.second));
+      virtualCallViewModel
+          .getInTheCallDuration()
+          .observe(
+              viewLifecycleOwner,
+              aLong -> binding.tvDuration.setText(TimeUtil.formatSecondTime(aLong)));
+    }
   }
 
   private void handleUi() {
@@ -301,12 +401,14 @@ public class InTheVideoCallFragment extends Fragment {
     }
   }
 
-  private void initEvent() {
+  @Override
+  protected void initEvent() {
+    super.initEvent();
     binding.flSmallVideo.setOnClickListener(
         new View.OnClickListener() {
           @Override
           public void onClick(View view) {
-            if (TextUtils.isEmpty(otherUid)) {
+            if (TextUtils.isEmpty(otherUid) || activity.isVirtualCall()) {
               return;
             }
             isSelfInSmallUi = !isSelfInSmallUi;
@@ -351,7 +453,10 @@ public class InTheVideoCallFragment extends Fragment {
             handleHangupEvent();
           }
         });
-
+    binding.sendGift.setOnClickListener(
+        v -> {
+          showGiftDialog();
+        });
     binding.ivEar.setOnClickListener(
         new View.OnClickListener() {
           @Override
@@ -359,30 +464,14 @@ public class InTheVideoCallFragment extends Fragment {
             ToastUtils.showShort(R.string.earphone_tips);
           }
         });
-
-    binding.ivGift.setOnClickListener(
-        new View.OnClickListener() {
-          @Override
-          public void onClick(View view) {
-            ToastUtils.showShort(R.string.gift_tips);
-          }
-        });
   }
 
   private void handleSwitchCamera() {
-    if (!NetworkUtils.isConnected()) {
-      ToastUtils.showShort(getString(R.string.one_on_one_network_error));
-      return;
-    }
     activity.getRtcCall().switchCamera();
   }
 
   private void handleHangupEvent() {
-    if (!NetworkUtils.isConnected()) {
-      ToastUtils.showShort(getString(R.string.one_on_one_network_error));
-    } else {
-      ToastUtils.showShort(R.string.end_video);
-    }
+    ToastUtils.showShort(R.string.end_video);
     activity.rtcHangup(
         new NECallback<Integer>() {
           @Override
@@ -397,16 +486,16 @@ public class InTheVideoCallFragment extends Fragment {
   }
 
   private void handleMuteAudioEvent() {
-    if (!NetworkUtils.isConnected()) {
-      ToastUtils.showShort(getString(R.string.one_on_one_network_error));
-      return;
-    }
     muteRemote = !muteRemote;
-    CallParam callParam = activity.getCallParams();
-    if (callParam.isCalled()) {
-      activity.getRtcCall().setAudioMute(muteRemote, callParam.getCallerAccId());
+    if (activity.isVirtualCall()) {
+      virtualCallViewModel.muteAudio(muteRemote);
     } else {
-      activity.getRtcCall().setAudioMute(muteRemote, callParam.getCalledAccIdList().get(0));
+      CallParam callParam = activity.getCallParams();
+      if (callParam.isCalled()) {
+        activity.getRtcCall().setAudioMute(muteRemote, callParam.getCallerAccId());
+      } else {
+        activity.getRtcCall().setAudioMute(muteRemote, callParam.getCalledAccIdList().get(0));
+      }
     }
     if (muteRemote) {
       binding.bottomBar.getViewBinding().ivAudio.setImageResource(R.drawable.icon_audio_mute);
@@ -416,10 +505,6 @@ public class InTheVideoCallFragment extends Fragment {
   }
 
   private void handleMircoPhoneEvent() {
-    if (!NetworkUtils.isConnected()) {
-      ToastUtils.showShort(getString(R.string.one_on_one_network_error));
-      return;
-    }
     muteLocal = !muteLocal;
     activity.getRtcCall().muteLocalAudio(muteLocal);
     if (muteLocal) {
@@ -448,5 +533,6 @@ public class InTheVideoCallFragment extends Fragment {
     super.onDestroyView();
     BeautyManager.getInstance().stopBeauty();
     binding = null;
+    giftRender.release();
   }
 }

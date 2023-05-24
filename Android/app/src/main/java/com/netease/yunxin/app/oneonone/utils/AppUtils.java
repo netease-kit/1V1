@@ -5,7 +5,6 @@
 package com.netease.yunxin.app.oneonone.utils;
 
 import com.netease.yunxin.app.oneonone.config.AppConfig;
-
 import java.util.Locale;
 
 public class AppUtils {

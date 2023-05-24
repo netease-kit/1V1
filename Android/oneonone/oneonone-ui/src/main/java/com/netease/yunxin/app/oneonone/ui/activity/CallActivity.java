@@ -35,6 +35,9 @@ import com.netease.yunxin.app.oneonone.ui.utils.LogUtil;
 import com.netease.yunxin.app.oneonone.ui.utils.NECallback;
 import com.netease.yunxin.app.oneonone.ui.viewmodel.CallViewModel;
 import com.netease.yunxin.app.oneonone.ui.viewmodel.PstnCallViewModel;
+import com.netease.yunxin.app.oneonone.ui.viewmodel.VirtualCallViewModel;
+import com.netease.yunxin.kit.alog.ALog;
+import com.netease.yunxin.kit.entertainment.common.utils.BluetoothHeadsetUtil;
 import com.netease.yunxin.kit.login.AuthorManager;
 import com.netease.yunxin.kit.login.model.EventType;
 import com.netease.yunxin.kit.login.model.LoginEvent;
@@ -58,6 +61,37 @@ public class CallActivity extends CommonCallActivity {
   private CallParam callParam;
   private CallViewModel viewModel;
   private PstnCallViewModel pstnCallViewModel;
+  private VirtualCallViewModel virtualCallViewModel;
+  private Fragment inTheCallFragment;
+  private final Observer<Boolean> callFinishObserver = aBoolean -> finish();
+  private final Observer<String> toastObserver = s -> ToastUtils.showLong(s);
+  private final Observer<Boolean> switchToInTheNormalCallObserver =
+      b -> switchToInTheCallFragment();
+  private final Observer<Boolean> playErrorObserver =
+      aBoolean -> {
+        ToastUtils.showShort(getString(R.string.one_on_one_virtual_call_error));
+        finish();
+      };
+  private final Observer<Boolean> switchInToTheVirtualCallObserver =
+      aBoolean -> switchToInTheCallFragment();
+  private final Observer<Boolean> releaseAndFinishObserver =
+      aBoolean -> {
+        ToastUtils.showShort(getString(R.string.one_on_one_virtual_call_end));
+        finish();
+      };
+  private final BluetoothHeadsetUtil.BluetoothHeadsetStatusObserver
+      bluetoothHeadsetStatusChangeListener =
+          new BluetoothHeadsetUtil.BluetoothHeadsetStatusObserver() {
+            @Override
+            public void connect() {
+              if (!BluetoothHeadsetUtil.hasBluetoothConnectPermission()) {
+                BluetoothHeadsetUtil.requestBluetoothConnectPermission();
+              }
+            }
+
+            @Override
+            public void disconnect() {}
+          };
   private LoginObserver<LoginEvent> loginObserver =
       new LoginObserver<LoginEvent>() {
 
@@ -75,11 +109,17 @@ public class CallActivity extends CommonCallActivity {
     adapterStatusBar();
     super.doOnCreate(savedInstanceState);
     callParam = getCallParam();
-    viewModel = new ViewModelProvider(this).get(CallViewModel.class);
     if (needPstnCall()) {
       pstnCallViewModel = new ViewModelProvider(this).get(PstnCallViewModel.class);
     }
+    if (isVirtualCall() && !callParam.isCalled()) {
+      virtualCallViewModel = new ViewModelProvider(this).get(VirtualCallViewModel.class);
+      virtualCallViewModel.setCallParam(callParam);
+    } else {
+      viewModel = new ViewModelProvider(this).get(CallViewModel.class);
+    }
     showCallingUI(savedInstanceState, false);
+    loadInTheCallFragment(savedInstanceState);
     if (callParam.getChannelType() == ChannelType.AUDIO.getValue()) {
       handlePermission(savedInstanceState, Manifest.permission.RECORD_AUDIO);
     } else if (callParam.getChannelType() == ChannelType.VIDEO.getValue()) {
@@ -88,49 +128,47 @@ public class CallActivity extends CommonCallActivity {
     }
     AuthorManager.INSTANCE.registerLoginObserver(loginObserver);
     if (savedInstanceState == null && !getSupportFragmentManager().isDestroyed()) {
-      handleInTheCallEvent();
-      handleToastEvent();
-      handleFinishEvent();
+      if (virtualCallViewModel != null) {
+        handleVirtualRoomEvent();
+      } else if (viewModel != null) {
+        handleInTheCallEvent();
+        handleToastEvent();
+        handleFinishEvent();
+      }
     }
   }
 
+  private void loadInTheCallFragment(Bundle savedInstanceState) {
+    if (savedInstanceState == null && !getSupportFragmentManager().isDestroyed()) {
+      if (callParam.getChannelType() == ChannelType.VIDEO.getValue()) {
+        inTheCallFragment = new InTheVideoCallFragment();
+      } else {
+        inTheCallFragment = new InTheAudioCallFragment();
+      }
+      getSupportFragmentManager()
+          .beginTransaction()
+          .setReorderingAllowed(true)
+          .replace(R.id.fragment_in_the_call, inTheCallFragment)
+          .commit();
+    }
+  }
+
+  private void handleVirtualRoomEvent() {
+    virtualCallViewModel.getSwitchToInTheCall().observeForever(switchInToTheVirtualCallObserver);
+    virtualCallViewModel.getReleaseAndFinish().observeForever(releaseAndFinishObserver);
+    virtualCallViewModel.getPlayError().observeForever(playErrorObserver);
+  }
+
   private void handleInTheCallEvent() {
-    viewModel
-        .getSwitchToInTheCall()
-        .observe(
-            CallActivity.this,
-            new Observer<Boolean>() {
-              @Override
-              public void onChanged(Boolean b) {
-                switchToInTheCallFragment();
-              }
-            });
+    viewModel.getSwitchToInTheCall().observeForever(switchToInTheNormalCallObserver);
   }
 
   private void handleFinishEvent() {
-    viewModel
-        .getCallFinished()
-        .observe(
-            this,
-            new Observer<Boolean>() {
-              @Override
-              public void onChanged(Boolean aBoolean) {
-                finish();
-              }
-            });
+    viewModel.getCallFinished().observeForever(callFinishObserver);
   }
 
   private void handleToastEvent() {
-    viewModel
-        .getToastData()
-        .observe(
-            this,
-            new Observer<String>() {
-              @Override
-              public void onChanged(String s) {
-                ToastUtils.showLong(s);
-              }
-            });
+    viewModel.getToastData().observeForever(toastObserver);
   }
 
   private void handlePermission(Bundle savedInstanceState, String... permissions) {
@@ -189,6 +227,12 @@ public class CallActivity extends CommonCallActivity {
           .setReorderingAllowed(true)
           .replace(R.id.fragment_container_view, CallFragment.class, bundle)
           .commit();
+      BluetoothHeadsetUtil.registerBluetoothHeadsetStatusObserver(
+          bluetoothHeadsetStatusChangeListener);
+      if (BluetoothHeadsetUtil.isBluetoothHeadsetConnected()
+          && !BluetoothHeadsetUtil.hasBluetoothConnectPermission()) {
+        BluetoothHeadsetUtil.requestBluetoothConnectPermission();
+      }
     }
   }
 
@@ -205,20 +249,14 @@ public class CallActivity extends CommonCallActivity {
 
   public void switchToInTheCallFragment() {
     stopRing();
-    if (getSupportFragmentManager().isDestroyed()) {
-      return;
+    findViewById(R.id.fragment_in_the_call).setVisibility(View.VISIBLE);
+    findViewById(R.id.fragment_container_view).setVisibility(View.GONE);
+    if (inTheCallFragment instanceof InTheVideoCallFragment) {
+      ((InTheVideoCallFragment) inTheCallFragment).handleInTheVideoCallUI();
     }
-    Fragment inTheCallFragment = null;
-    if (callParam.getChannelType() == ChannelType.VIDEO.getValue()) {
-      inTheCallFragment = new InTheVideoCallFragment();
-    } else {
-      inTheCallFragment = new InTheAudioCallFragment();
+    if (isVirtualCall() && virtualCallViewModel != null && !callParam.isCalled()) {
+      virtualCallViewModel.getPlayer().prepareAsync();
     }
-    getSupportFragmentManager()
-        .beginTransaction()
-        .setReorderingAllowed(true)
-        .replace(R.id.fragment_container_view, inTheCallFragment)
-        .commit();
   }
 
   public void rtcCall(NECallback<ChannelFullInfo> callback) {
@@ -301,6 +339,18 @@ public class CallActivity extends CommonCallActivity {
   @Override
   protected void onDestroy() {
     AuthorManager.INSTANCE.unregisterLoginObserver(loginObserver);
+    BluetoothHeadsetUtil.unregisterBluetoothHeadsetStatusObserver(
+        bluetoothHeadsetStatusChangeListener);
+    if (viewModel != null) {
+      viewModel.getSwitchToInTheCall().removeObserver(switchToInTheNormalCallObserver);
+      viewModel.getToastData().removeObserver(toastObserver);
+      viewModel.getCallFinished().removeObserver(callFinishObserver);
+    }
+    if (virtualCallViewModel != null) {
+      virtualCallViewModel.getReleaseAndFinish().removeObserver(releaseAndFinishObserver);
+      virtualCallViewModel.getSwitchToInTheCall().removeObserver(switchInToTheVirtualCallObserver);
+      virtualCallViewModel.getPlayError().removeObserver(playErrorObserver);
+    }
     super.onDestroy();
   }
 
@@ -313,15 +363,29 @@ public class CallActivity extends CommonCallActivity {
     AVChatSoundPlayer.Companion.instance().stop(CallActivity.this);
   }
 
-  private boolean needPstnCall() {
+  public boolean needPstnCall() {
     try {
-      if (callParam.getChannelType() == ChannelType.AUDIO.getValue()
+      if (CallConfig.enablePstnCall
+          && callParam.getChannelType() == ChannelType.AUDIO.getValue()
           && callParam.getCallExtraInfo() != null
           && new JSONObject(callParam.getCallExtraInfo()).getBoolean(AppParams.NEED_PSTN_CALL)) {
         return true;
       }
     } catch (JSONException e) {
-      e.printStackTrace();
+      ALog.e(TAG, "needPstnCall json parse exception:" + e);
+    }
+    return false;
+  }
+
+  public boolean isVirtualCall() {
+    try {
+      if (CallConfig.enableVirtualCall
+          && callParam.getCallExtraInfo() != null
+          && new JSONObject(callParam.getCallExtraInfo()).getBoolean(AppParams.CALLED_IS_VIRTUAL)) {
+        return true;
+      }
+    } catch (JSONException e) {
+      ALog.e(TAG, "isVirtualCall json parse exception:" + e);
     }
     return false;
   }

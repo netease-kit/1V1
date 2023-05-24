@@ -15,7 +15,7 @@ import com.netease.nimlib.sdk.avsignalling.model.ChannelFullInfo;
 import com.netease.yunxin.app.oneonone.ui.R;
 import com.netease.yunxin.app.oneonone.ui.utils.AccountAmountHelper;
 import com.netease.yunxin.app.oneonone.ui.utils.LogUtil;
-import com.netease.yunxin.app.oneonone.ui.utils.UserInfoManager;
+import com.netease.yunxin.kit.entertainment.common.utils.UserInfoManager;
 import com.netease.yunxin.nertc.nertcvideocall.model.NERTCVideoCall;
 import com.netease.yunxin.nertc.nertcvideocall.model.impl.NERtcCallbackExTemp;
 import com.netease.yunxin.nertc.nertcvideocall.model.impl.NERtcCallbackProxyMgr;
@@ -130,6 +130,9 @@ public class PstnCallViewModel extends AndroidViewModel {
         @Override
         public void onDirectStartCall(int code, @Nullable String errorMsg) {
           LogUtil.i(TAG, "onDirectStartCall,code:" + code + ",errorMsg:" + errorMsg);
+          if (code != 0) {
+            releaseAndFinish.postValue(true);
+          }
         }
 
         @Override

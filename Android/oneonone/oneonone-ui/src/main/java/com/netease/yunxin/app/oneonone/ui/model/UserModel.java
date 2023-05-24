@@ -15,7 +15,10 @@ public final class UserModel implements Serializable {
   public String imToken; //String  IM令牌，重新生成的新令牌
   public long avRoomUid; //String  音视频房间内成员编号
   public String avatar; //String  头像地址
-  public String nickname; //String  头像地址
+  public String nickname; //String  昵称
+  public String audioUrl;
+  public String videoUrl;
+  public int callType; // 0表示正常呼叫，1表示呼叫虚拟人
 
   @Override
   public boolean equals(Object o) {

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ /*
+  ~  * Copyright (c) 2022 NetEase, Inc.  All rights reserved.
+  ~  * Use of this source code is governed by a MIT license that can be found in the LICENSE file.
+  ~  */
+  -->
+
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <TextView android:id="@+id/chat_message_input_audio_tv"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dimen_40_dp"
+        android:background="@color/color_f9627c"
+        android:text="@string/one_on_one_chat_audio_title"
+        android:textSize="@dimen/text_size_16"
+        android:textColor="@color/white"
+        android:gravity="center"
+        android:visibility="visible"/>
+</FrameLayout>
