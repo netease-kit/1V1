@@ -89,4 +89,79 @@ extension NEOneOnOneKit: NIMPassThroughManagerDelegate {
       }
     }
   }
+
+  private func notifityNotificationCustomMsg(message: _NEOneOnOneCustomMessage?) {
+    for pointerListener in listeners.allObjects {
+      guard pointerListener is NEOneOnOneListener else { continue }
+      let listener = pointerListener as! NEOneOnOneListener
+      if listener
+        .responds(to: #selector(NEOneOnOneListener.onReceiveNotificationCustomMessage(message:))) {
+        listener.onReceiveNotificationCustomMessage?(message: NEOneOnOneCustomMessage(data: message))
+      }
+    }
+  }
+}
+
+extension NEOneOnOneKit: NIMSystemNotificationManagerDelegate {
+  public func onReceive(_ notification: NIMCustomSystemNotification) {
+    NEOneOnOneLog.infoLog(
+      kitTag,
+      desc: #function + ", notification.description:" + notification.description
+    )
+
+    guard let body = notification.content,
+          let dict = try? JSONSerialization.jsonObject(
+            with: body.data(using: String.Encoding.utf8)!,
+            options: .mutableContainers
+          ) as? [String: Any] else { return }
+
+    guard let cmd = dict["type"] as? Int else { return }
+
+    let msgType = NEOneOnOneMsgType(rawValue: cmd) ?? .unknow
+
+    var audioOrVideo = false
+    switch msgType {
+    case .audioOrVideoRealTimePassThroughMessage, .audioOrVideoCloudPassThroughMessage, .audioOrVideoNormal:
+      audioOrVideo = true
+    default: break
+    }
+    /// 透传 处理
+    guard audioOrVideo else {
+      return
+    }
+
+    NEOneOnOneLog.infoLog(kitTag, desc: "✉️  \(msgType.describe())\n\(dict.prettyJSON)")
+
+    let passThrough = NEOneOnOneDecoder.decode(_NEOneOnOneCustomMessage.self, param: dict)
+
+    notifityNotificationCustomMsg(message: passThrough)
+  }
+}
+
+extension NEOneOnOneKit: NIMChatManagerDelegate {
+  public func onRecvMessages(_ messages: [NIMMessage]) {
+    for msg in messages {
+      if let rawAttachContent = msg.rawAttachContent,
+         let data = rawAttachContent.data(using: .utf8),
+         let infoDict = try? JSONSerialization.jsonObject(with: data, options: .mutableContainers) as? [String: Any],
+         let type = infoDict["type"] as? Int,
+         type == 1004,
+         let data = infoDict["data"] as? [String: Any] {
+        let gift = NEOneOnOneOneGift()
+        gift.senderUserUuid = data["senderUserUuid"] as? String
+        gift.rewarderUserName = data["rewarderUserName"] as? String
+        gift.targetUserUuid = data["targetUserUuid"] as? String
+        gift.targetUserName = data["targetUserName"] as? String
+        gift.sendTime = data["sendTime"] as? Int ?? 0
+        gift.giftCount = data["giftCount"] as? Int ?? 0
+        gift.giftId = data["giftId"] as? Int ?? 0
+        for pointerListener in listeners.allObjects {
+          if let listener = pointerListener as? NEOneOnOneListener,
+             listener.responds(to: #selector(NEOneOnOneListener.onReceiveGift(gift:))) {
+            listener.onReceiveGift?(gift: gift)
+          }
+        }
+      }
+    }
+  }
 }

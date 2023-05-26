@@ -157,12 +157,12 @@ static NSString *engineTag = @"NEOneOnOneUIKitEngine";
         onlineUser.userName = nickName;
         onlineUser.icon = avatar;
         onlineUser.mobile = mobile;
-        onlineUser.accountId = invitor;
+        onlineUser.userUuid = invitor;
         controller.remoteUser = onlineUser;
 
         controller.enterStatus = enterType;
         dispatch_async(dispatch_get_main_queue(), ^{
-          controller.modalPresentationStyle = UIModalPresentationFullScreen;
+          controller.modalPresentationStyle = UIModalPresentationOverFullScreen;
           [currentViewController presentViewController:controller animated:YES completion:nil];
         });
       }
@@ -197,6 +197,11 @@ static NSString *engineTag = @"NEOneOnOneUIKitEngine";
                     desc:[NSString stringWithFormat:@"收到Invite信息 %@,%@,%ld,%@,", invitor,
                                                     userIDs, (long)type, attachment]];
   NSLog(@"收到Invite信息 %@,%@,%ld,%@,", invitor, userIDs, (long)type, attachment);
+  // 如果是黑名单成员，直接拒接
+  if ([NIMSDK.sharedSDK.userManager isUserInBlackList:invitor]) {
+    [[NERtcCallKit sharedInstance] reject:nil];
+    return;
+  }
   // 处理异常case，如果上一个target还处于销毁中，那么循环等待吧
   if (type == NEOneOnOneRtcCallTypeAudio) {
     [[NERtcCallKit sharedInstance] setTimeOutSeconds:15];

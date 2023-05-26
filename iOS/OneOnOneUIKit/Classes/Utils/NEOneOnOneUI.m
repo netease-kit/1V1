@@ -6,10 +6,7 @@
 
 @implementation NEOneOnOneUI
 + (UIImage *)ne_imageName:(NSString *)imageName {
-  NSString *path = [[NSBundle bundleForClass:self.class].resourcePath
-      stringByAppendingPathComponent:@"NEOneOnOneUIKit.bundle"];
-
-  NSBundle *bundle = [NSBundle bundleWithPath:path];
+  NSBundle *bundle = [NSBundle bundleForClass:self.class];
   if (@available(iOS 13.0, *)) {
     UIImage *image = [UIImage imageNamed:imageName inBundle:bundle withConfiguration:nil];
     return image;
@@ -17,10 +14,7 @@
   return [UIImage imageNamed:imageName inBundle:bundle compatibleWithTraitCollection:nil];
 }
 + (NSBundle *_Nullable)ne_sourceBundle {
-  NSString *path = [[NSBundle bundleForClass:self.class].resourcePath
-      stringByAppendingPathComponent:@"NEOneOnOneUIKit.bundle"];
-
-  NSBundle *bundle = [NSBundle bundleWithPath:path];
+  NSBundle *bundle = [NSBundle bundleForClass:self.class];
   return bundle;
 }
 

@@ -34,6 +34,7 @@ typedef void (^BusyBlock)(void);
                                                                   NERtcEngineDelegateEx>
 @property(nonatomic, strong) NEOneOnOneConnectingView *connectingView;
 @property(nonatomic, strong) NEOneOnOneVideoConnectedView *videoConnectedView;
+@property(nonatomic, strong) UIButton *giftButton;
 
 // 是否已经由于其他原因挂断，并关闭房间，如果是，在endroom的时候不需要再跳出toast
 @property(nonatomic, strong) NSString *hasEndRoom;

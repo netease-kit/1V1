@@ -5,6 +5,7 @@
 import Foundation
 import NERtcCallKit
 import NIMSDK
+import NECoreIMKit
 
 let kitTag = "NEOneOnOneKit"
 @objcMembers
@@ -46,6 +47,7 @@ public class NEOneOnOneKit: NSObject {
       }
     }
     NE.config.isDebug = isDebug
+    NE.config.isOverSea = isOversea
     let option = NERtcCallOptions()
     option.apnsCerName = config.APNSCerName
     option.voIPCerName = config.VoIPCerName ?? ""
@@ -57,12 +59,28 @@ public class NEOneOnOneKit: NSObject {
       NIMSDK.shared().serverSetting.linkAddress = "link-sg.netease.im:7000"
     }
 //    NERtcCallKit.sharedInstance().setupAppKey(config.appKey, withRtcUid: UInt64(account.longLongValue), options: option)
-    NERtcCallKit.sharedInstance().setupAppKey(config.appKey, options: option)
+    /// CallKit 初始化
+    let context = NERtcEngineContext()
+    context.appKey = config.appKey
+    let logSetting = NERtcLogSetting()
+    logSetting.logLevel = .info
+    logSetting.logDir = rtcLogPath()
+    context.logSetting = logSetting
+    NERtcCallKit.sharedInstance().setupAppKey(config.appKey, options: option, with: context)
+    /// CoreImKit 初始化
+    let NIMOption = NIMSDKOption()
+    NIMOption.appKey = config.appKey
+    NIMOption.apnsCername = config.APNSCerName
+    IMKitClient.instance.setupCoreKitIM(NIMOption)
 
     isInitialized = true
     NEOneOnOneLog.successLog(kitTag, desc: "Successfully initialize.")
 
     callback?(NEOneOnOneErrorCode.success, nil, nil)
+  }
+
+  func rtcLogPath() -> String {
+    NSHomeDirectory() + "/Documents/NIMSDK/Logs/extra_log"
   }
 
   /// 初始化状态
@@ -96,6 +114,8 @@ public class NEOneOnOneKit: NSObject {
     NERtcCallKit.sharedInstance().add(self)
     NIMSDK.shared().loginManager.add(self)
     NIMSDK.shared().passThroughManager.add(self)
+    NIMSDK.shared().chatManager.add(self)
+    NIMSDK.shared().systemNotificationManager.add(self)
   }
 
   deinit {
@@ -103,6 +123,7 @@ public class NEOneOnOneKit: NSObject {
     NERtcCallKit.sharedInstance().remove(self)
     NIMSDK.shared().loginManager.remove(self)
     NIMSDK.shared().passThroughManager.remove(self)
+    NIMSDK.shared().systemNotificationManager.remove(self)
   }
 
   private static let instance = NEOneOnOneKit()
