@@ -18,11 +18,11 @@ import com.netease.nimlib.sdk.avsignalling.event.ChannelCommonEvent;
 import com.netease.nimlib.sdk.avsignalling.event.InviteAckEvent;
 import com.netease.yunxin.app.oneonone.ui.fragment.HomeFragment;
 import com.netease.yunxin.app.oneonone.ui.utils.AssetUtils;
-import com.netease.yunxin.app.oneonone.ui.utils.DialogUtil;
 import com.netease.yunxin.app.oneonone.ui.utils.ThreadUtils;
 import com.netease.yunxin.kit.alog.ALog;
 import com.netease.yunxin.kit.beauty.BeautyManager;
 import com.netease.yunxin.kit.beauty.module.NEAssetsEnum;
+import com.netease.yunxin.kit.entertainment.common.utils.DialogUtil;
 import com.netease.yunxin.nertc.nertcvideocall.TerminalCode;
 import com.netease.yunxin.nertc.nertcvideocall.utils.ExtraInfoUtils;
 import java.io.File;
@@ -60,7 +60,7 @@ public class OneOnOneHomeActivity extends AppCompatActivity {
                     new Handler(Looper.getMainLooper())
                         .postDelayed(
                             () ->
-                                DialogUtil.showConfirmDialog(
+                                DialogUtil.showAlertDialog(
                                     OneOnOneHomeActivity.this,
                                     getString(
                                         com.netease

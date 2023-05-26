@@ -14,7 +14,6 @@ import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
-import androidx.fragment.app.Fragment;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
@@ -23,6 +22,7 @@ import com.netease.lava.nertc.sdk.NERtcEx;
 import com.netease.yunxin.app.oneonone.ui.R;
 import com.netease.yunxin.app.oneonone.ui.activity.CallActivity;
 import com.netease.yunxin.app.oneonone.ui.constant.AppParams;
+import com.netease.yunxin.app.oneonone.ui.constant.CallConfig;
 import com.netease.yunxin.app.oneonone.ui.databinding.FragmentInAudioCallBinding;
 import com.netease.yunxin.app.oneonone.ui.model.OtherUserInfo;
 import com.netease.yunxin.app.oneonone.ui.utils.AppGlobals;
@@ -31,22 +31,19 @@ import com.netease.yunxin.app.oneonone.ui.utils.TimeUtil;
 import com.netease.yunxin.app.oneonone.ui.utils.security.SecurityTipsModel;
 import com.netease.yunxin.app.oneonone.ui.utils.security.SecurityType;
 import com.netease.yunxin.app.oneonone.ui.view.InTheAudioCallBottomBar;
-import com.netease.yunxin.app.oneonone.ui.viewmodel.CallViewModel;
 import com.netease.yunxin.app.oneonone.ui.viewmodel.PstnCallViewModel;
 import com.netease.yunxin.kit.common.image.ImageLoader;
-import com.netease.yunxin.kit.common.utils.NetworkUtils;
 import com.netease.yunxin.nertc.pstn.base.PstnFunctionMgr;
 import com.netease.yunxin.nertc.ui.base.CallParam;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class InTheAudioCallFragment extends Fragment {
+public class InTheAudioCallFragment extends InTheBaseCallFragment {
   private static final String TAG = "InTheAudioCallFragment";
   private FragmentInAudioCallBinding binding;
   private CallActivity activity;
   private boolean muteLocal = false;
   private boolean muteRemote = false;
-  private CallViewModel viewModel;
   private PstnCallViewModel pstnCallViewModel;
   private long otherRtcUid;
 
@@ -93,15 +90,21 @@ public class InTheAudioCallFragment extends Fragment {
       @NonNull LayoutInflater inflater,
       @Nullable ViewGroup container,
       @Nullable Bundle savedInstanceState) {
+    if (CallConfig.enablePstnCall) {
+      pstnCallViewModel = new ViewModelProvider(requireActivity()).get(PstnCallViewModel.class);
+    }
+    return super.onCreateView(inflater, container, savedInstanceState);
+  }
+
+  @Override
+  protected View getRoot(@NonNull LayoutInflater inflater, @Nullable ViewGroup container) {
     binding = FragmentInAudioCallBinding.inflate(inflater, container, false);
-    viewModel = new ViewModelProvider(requireActivity()).get(CallViewModel.class);
-    pstnCallViewModel = new ViewModelProvider(requireActivity()).get(PstnCallViewModel.class);
-    subscribeUi();
-    initEvent();
     return binding.getRoot();
   }
 
-  private void subscribeUi() {
+  @Override
+  protected void subscribeUi() {
+    super.subscribeUi();
     viewModel.refresh(activity.getCallParams());
     LifecycleOwner viewLifecycleOwner = getViewLifecycleOwner();
     viewModel
@@ -147,49 +150,58 @@ public class InTheAudioCallFragment extends Fragment {
                 otherRtcUid = aLong;
               }
             });
+    if (pstnCallViewModel != null) {
+      pstnCallViewModel
+          .getPstnToastData()
+          .observe(
+              viewLifecycleOwner,
+              new Observer<String>() {
+                @Override
+                public void onChanged(String s) {
+                  ToastUtils.showShort(s);
+                }
+              });
+      pstnCallViewModel
+          .getReleaseAndFinish()
+          .observe(
+              viewLifecycleOwner,
+              new Observer<Boolean>() {
+                @Override
+                public void onChanged(Boolean aBoolean) {
+                  finishActivity();
+                }
+              });
 
-    pstnCallViewModel
-        .getPstnToastData()
-        .observe(
-            viewLifecycleOwner,
-            new Observer<String>() {
-              @Override
-              public void onChanged(String s) {
-                ToastUtils.showShort(s);
-              }
-            });
-    pstnCallViewModel
-        .getReleaseAndFinish()
-        .observe(
-            viewLifecycleOwner,
-            new Observer<Boolean>() {
-              @Override
-              public void onChanged(Boolean aBoolean) {
-                finishActivity();
-              }
-            });
+      pstnCallViewModel
+          .getOtherRtcUid()
+          .observe(
+              viewLifecycleOwner,
+              new Observer<Long>() {
+                @Override
+                public void onChanged(Long aLong) {
+                  otherRtcUid = aLong;
+                }
+              });
 
-    pstnCallViewModel
-        .getOtherRtcUid()
-        .observe(
-            viewLifecycleOwner,
-            new Observer<Long>() {
-              @Override
-              public void onChanged(Long aLong) {
-                otherRtcUid = aLong;
-              }
-            });
+      pstnCallViewModel
+          .getInTheCallDuration()
+          .observe(
+              viewLifecycleOwner,
+              new Observer<Long>() {
+                @Override
+                public void onChanged(Long aLong) {
+                  binding.tvSubtitle.setText(TimeUtil.formatSecondTime(aLong));
+                }
+              });
+    }
 
-    pstnCallViewModel
-        .getInTheCallDuration()
-        .observe(
-            viewLifecycleOwner,
-            new Observer<Long>() {
-              @Override
-              public void onChanged(Long aLong) {
-                binding.tvSubtitle.setText(TimeUtil.formatSecondTime(aLong));
-              }
-            });
+    if (virtualCallViewModel != null) {
+      virtualCallViewModel
+          .getInTheCallDuration()
+          .observe(
+              viewLifecycleOwner,
+              aLong -> binding.tvSubtitle.setText(TimeUtil.formatSecondTime(aLong)));
+    }
   }
 
   private void handleSecurityTips(SecurityTipsModel securityTipsModel) {
@@ -205,7 +217,9 @@ public class InTheAudioCallFragment extends Fragment {
     }
   }
 
-  private void initEvent() {
+  @Override
+  protected void initEvent() {
+    super.initEvent();
     binding.bottomBar.setOnItemClickListener(
         new InTheAudioCallBottomBar.OnItemClickListener() {
           @Override
@@ -224,30 +238,19 @@ public class InTheAudioCallFragment extends Fragment {
           }
         });
 
-    binding.ivEar.setOnClickListener(
-        new View.OnClickListener() {
-          @Override
-          public void onClick(View view) {
-            ToastUtils.showShort(R.string.earphone_tips);
-          }
-        });
-
-    binding.ivGift.setOnClickListener(
-        new View.OnClickListener() {
-          @Override
-          public void onClick(View view) {
-            ToastUtils.showShort(R.string.gift_tips);
-          }
+    binding.sendGift.setOnClickListener(
+        v -> {
+          showGiftDialog();
         });
   }
 
   private void handleAudioEvent() {
-    if (!NetworkUtils.isConnected()) {
-      ToastUtils.showShort(getString(R.string.one_on_one_network_error));
-      return;
-    }
     muteRemote = !muteRemote;
-    subscribeRemoteAudioStream(otherRtcUid, !muteRemote);
+    if (activity.isVirtualCall()) {
+      virtualCallViewModel.muteAudio(muteRemote);
+    } else {
+      subscribeRemoteAudioStream(otherRtcUid, !muteRemote);
+    }
     if (muteRemote) {
       binding.bottomBar.getViewBinding().ivAudio.setImageResource(R.drawable.icon_audio_mute);
     } else {
@@ -256,10 +259,6 @@ public class InTheAudioCallFragment extends Fragment {
   }
 
   private void handleMicroPhoneEvent() {
-    if (!NetworkUtils.isConnected()) {
-      ToastUtils.showShort(getString(R.string.one_on_one_network_error));
-      return;
-    }
     muteLocal = !muteLocal;
     activity.getRtcCall().muteLocalAudio(muteLocal);
     if (muteLocal) {

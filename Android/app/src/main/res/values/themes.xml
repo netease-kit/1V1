@@ -19,4 +19,12 @@
         <item name="android:statusBarColor" tools:targetApi="l">?attr/colorPrimaryVariant</item>
         <!-- Customize your theme here. -->
     </style>
+
+    <style name="OneOnOne" parent="Theme.AppCompat.Light.NoActionBar">
+        <!-- Status bar color. -->
+        <item name="colorPrimaryDark">@android:color/white</item>
+        <item name="android:windowBackground">@android:color/white</item>
+        <!-- Customize your theme here. -->
+    </style>
+
 </resources>

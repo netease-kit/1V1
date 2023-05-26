@@ -6,7 +6,7 @@ package com.netease.yunxin.app.oneonone.activity;
 
 import android.text.TextUtils;
 import android.view.View;
-
+import android.widget.TextView;
 import com.blankj.utilcode.util.ProcessUtils;
 import com.blankj.utilcode.util.ToastUtils;
 import com.google.android.material.tabs.TabLayout;
@@ -22,7 +22,6 @@ import com.netease.nimlib.sdk.auth.AuthService;
 import com.netease.nimlib.sdk.auth.AuthServiceObserver;
 import com.netease.nimlib.sdk.auth.LoginInfo;
 import com.netease.nimlib.sdk.avsignalling.constant.ChannelType;
-
 import com.netease.yunxin.app.oneonone.R;
 import com.netease.yunxin.app.oneonone.adapter.MainPagerAdapter;
 import com.netease.yunxin.app.oneonone.callkit.RtcCallExtension;
@@ -35,25 +34,23 @@ import com.netease.yunxin.app.oneonone.ui.constant.AppParams;
 import com.netease.yunxin.app.oneonone.ui.constant.CallConfig;
 import com.netease.yunxin.app.oneonone.ui.http.HttpService;
 import com.netease.yunxin.app.oneonone.ui.model.ModelResponse;
+import com.netease.yunxin.app.oneonone.ui.model.User;
 import com.netease.yunxin.app.oneonone.ui.utils.AppGlobals;
 import com.netease.yunxin.app.oneonone.ui.utils.LogUtil;
-import com.netease.yunxin.app.oneonone.ui.utils.UserInfoManager;
 import com.netease.yunxin.kit.alog.ALog;
 import com.netease.yunxin.kit.common.network.Response;
 import com.netease.yunxin.kit.entertainment.common.activity.BasePartyActivity;
+import com.netease.yunxin.kit.entertainment.common.utils.UserInfoManager;
 import com.netease.yunxin.nertc.nertcvideocall.bean.InvitedInfo;
 import com.netease.yunxin.nertc.pstn.PstnUIHelper;
 import com.netease.yunxin.nertc.pstn.base.PstnCallKitOptions;
 import com.netease.yunxin.nertc.ui.CallKitNotificationConfig;
 import com.netease.yunxin.nertc.ui.CallKitUI;
 import com.netease.yunxin.nertc.ui.CallKitUIOptions;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.util.Timer;
 import java.util.TimerTask;
-
+import org.json.JSONException;
+import org.json.JSONObject;
 import retrofit2.Call;
 import retrofit2.Callback;
 
@@ -81,48 +78,64 @@ public class HomeActivity extends BasePartyActivity {
 
               NERtcOption neRtcOption = new NERtcOption();
               neRtcOption.logLevel = NERtcConstants.LogLevel.INFO;
-              long customRtcUid = 0;
-              try {
-                // UserInfoManager.getSelfImAccid() 获取到的是IM SDK的accid,本Demo的业务服务器会在登录的时候把IM SDK的accid和Rtc uid做绑定。
-                customRtcUid = Long.parseLong(UserInfoManager.getSelfImAccid());
-              } catch (NumberFormatException e) {
-                e.printStackTrace();
-              }
-              CallKitUIOptions options =
-                  new CallKitUIOptions.Builder()
-                      // 必要：音视频通话 sdk appKey，用于通话中使用
-                      .rtcAppKey(AppConfig.getAppKey())
-                      // 非必要：这里是设置自定义Rtc uid，这里主要用于本Demo的业务服务器处理安全通业务逻辑，在音视频违规时，
-                      // 本Demo的业务服务器会收到带有RTC uid的违规信息，会基于Rtc uid反查IM accId，通过IM自定义消息的方式（PassthroughServiceObserve）告知客户端音视频违规
-                      .currentUserRtcUId(customRtcUid)
-                      // 必要：当前用户 AccId
-                      .currentUserAccId(UserInfoManager.getSelfImAccid())
-                      .enableAutoJoinWhenCalled(true)
-                      // 此处为 收到来电时展示的 notification 相关配置，如图标，提示语等。
-                      .notificationConfigFetcher(
-                          invitedInfo -> {
-                            ALog.i(TAG, "invitedInfo:" + invitedInfo.toString());
-                            return generateNotificationConfig(invitedInfo);
-                          })
-                      .pushConfigProvider(new RtcPushConfigProvider())
-                      // 收到被叫时若 app 在后台，在恢复到前台时是否自动唤起被叫页面，默认为 true
-                      .resumeBGInvitation(true)
-                      .rtcCallExtension(new RtcCallExtension())
-                      .rtcSdkOption(neRtcOption)
-                      // 呼叫组件初始化 rtc 范围，true-全局初始化，false-每次通话进行初始化以及销毁
-                      // 全局初始化有助于更快进入首帧页面，当结合其他组件使用时存在rtc初始化冲突可设置false
-                      .rtcInitScope(false)
-                      .p2pAudioActivity(CallActivity.class)
-                      .p2pVideoActivity(CallActivity.class)
-                      .build();
-              // 若重复初始化会销毁之前的初始化实例，重新初始化
-              PstnCallKitOptions pstnCallKitOptions =
-                  new PstnCallKitOptions.Builder(options)
-                      .timeOutMillisecond(CallConfig.CALL_TOTAL_WAIT_TIMEOUT)
-                      .transOutMillisecond(CallConfig.CALL_PSTN_WAIT_MILLISECONDS)
-                      .build();
-              PstnUIHelper.init(AppGlobals.getApplication(), pstnCallKitOptions);
+              HttpService.getInstance()
+                  .loginOneOnOne(
+                      new Callback<ModelResponse<User>>() {
+                        @Override
+                        public void onResponse(
+                            Call<ModelResponse<User>> call,
+                            retrofit2.Response<ModelResponse<User>> response) {
+                          if (response == null
+                              || response.body() == null
+                              || response.body().data == null) {
+                            ALog.e(TAG, "loginOneOnOne failed");
+                            return;
+                          }
+                          long customRtcUid = response.body().data.getRtcUid();
+                          CallKitUIOptions options =
+                              new CallKitUIOptions.Builder()
+                                  // 必要：音视频通话 sdk appKey，用于通话中使用
+                                  .rtcAppKey(AppConfig.getAppKey())
+                                  // 非必要：这里是设置自定义Rtc uid，这里主要用于本Demo的业务服务器处理安全通业务逻辑，在音视频违规时，
+                                  // 本Demo的业务服务器会收到带有RTC uid的违规信息，会基于Rtc uid反查IM accId，通过IM自定义消息的方式（PassthroughServiceObserve）告知客户端音视频违规
+                                  .currentUserRtcUId(customRtcUid)
+                                  // 必要：当前用户 AccId
+                                  .currentUserAccId(UserInfoManager.getSelfImAccid())
+                                  .enableAutoJoinWhenCalled(true)
+                                  // 此处为 收到来电时展示的 notification 相关配置，如图标，提示语等。
+                                  .notificationConfigFetcher(
+                                      invitedInfo -> {
+                                        ALog.i(TAG, "invitedInfo:" + invitedInfo.toString());
+                                        return generateNotificationConfig(invitedInfo);
+                                      })
+                                  .pushConfigProvider(new RtcPushConfigProvider())
+                                  // 收到被叫时若 app 在后台，在恢复到前台时是否自动唤起被叫页面，默认为 true
+                                  .resumeBGInvitation(true)
+                                  .rtcCallExtension(new RtcCallExtension())
+                                  .rtcSdkOption(neRtcOption)
+                                  // 呼叫组件初始化 rtc 范围，true-全局初始化，false-每次通话进行初始化以及销毁
+                                  // 全局初始化有助于更快进入首帧页面，当结合其他组件使用时存在rtc初始化冲突可设置false
+                                  .rtcInitScope(false)
+                                  .p2pAudioActivity(CallActivity.class)
+                                  .p2pVideoActivity(CallActivity.class)
+                                  .build();
+                          // 若重复初始化会销毁之前的初始化实例，重新初始化
+                          PstnCallKitOptions pstnCallKitOptions =
+                              new PstnCallKitOptions.Builder(options)
+                                  .timeOutMillisecond(CallConfig.CALL_TOTAL_WAIT_TIMEOUT)
+                                  .transOutMillisecond(CallConfig.CALL_PSTN_WAIT_MILLISECONDS)
+                                  .build();
+                          PstnUIHelper.init(AppGlobals.getApplication(), pstnCallKitOptions);
+                        }
+
+                        @Override
+                        public void onFailure(Call<ModelResponse<User>> call, Throwable t) {
+                          ALog.e(TAG, "loginOneOnOne failed,t:" + t);
+                        }
+                      });
             }
+          } else if (status == StatusCode.KICKOUT || status == StatusCode.KICK_BY_OTHER_CLIENT) {
+            stopHeartBeatReportTask();
           }
         }
       };
@@ -175,13 +188,10 @@ public class HomeActivity extends BasePartyActivity {
         .initialize(this, AppConfig.getOneOnOneBaseUrl(), AppConfig.getAppKey());
     OneOnOneUI.getInstance().setChineseEnv(AppConfig.isChineseEnv());
     OneOnOneUI.getInstance()
-        .addHttpHeader(UserInfoManager.getSelfAccessToken(), UserInfoManager.getSelfImAccid());
+        .addHttpHeader(UserInfoManager.getSelfUserToken(), UserInfoManager.getSelfImAccid());
     NIMClient.getService(AuthServiceObserver.class)
         .observeOnlineStatus(imOnlineStatusObserver, true);
   }
-
-  @Override
-  protected void onLogin() {}
 
   private void startHeartBeatReportTask() {
     timer = new Timer();
@@ -209,7 +219,8 @@ public class HomeActivity extends BasePartyActivity {
   }
 
   private void initViews() {
-    binding.vpFragment.setAdapter(new MainPagerAdapter(getSupportFragmentManager()));
+    MainPagerAdapter pagerAdapter = new MainPagerAdapter(getSupportFragmentManager());
+    binding.vpFragment.setAdapter(pagerAdapter);
     binding.vpFragment.setOffscreenPageLimit(2);
     binding.tlTab.setupWithViewPager(binding.vpFragment);
     binding.tlTab.removeAllTabs();
@@ -218,7 +229,9 @@ public class HomeActivity extends BasePartyActivity {
     binding.tlTab.addTab(
         binding.tlTab.newTab().setCustomView(R.layout.view_item_home_tab_app), 0, true);
     binding.tlTab.addTab(
-        binding.tlTab.newTab().setCustomView(R.layout.view_item_home_tab_user), 1, false);
+        binding.tlTab.newTab().setCustomView(R.layout.view_item_home_tab_message), 1, false);
+    binding.tlTab.addTab(
+        binding.tlTab.newTab().setCustomView(R.layout.view_item_home_tab_user), 2, false);
     binding.vpFragment.addOnPageChangeListener(
         new TabLayout.TabLayoutOnPageChangeListener(binding.tlTab) {
 
@@ -229,6 +242,22 @@ public class HomeActivity extends BasePartyActivity {
               item.select();
             }
             super.onPageSelected(position);
+          }
+        });
+    pagerAdapter.setUnreadCountCallback(
+        new MainPagerAdapter.UnreadCountCallback() {
+
+          @Override
+          public void onUnreadCountChange(int unreadCount) {
+            TextView unreadTV = binding.tlTab.findViewById(R.id.tv_unread);
+            String content;
+            if (unreadCount >= 100) {
+              content = "99+";
+            } else {
+              content = String.valueOf(unreadCount);
+            }
+            unreadTV.setText(content);
+            unreadTV.setVisibility(unreadCount > 0 ? View.VISIBLE : View.GONE);
           }
         });
   }
@@ -247,12 +276,6 @@ public class HomeActivity extends BasePartyActivity {
           .observeOnlineStatus(imOnlineStatusObserver, false);
     }
     ALog.flush(true);
-  }
-
-  @Override
-  protected void onKickOut() {
-    ALog.d(TAG, "kick out");
-    stopHeartBeatReportTask();
   }
 
   private void stopHeartBeatReportTask() {
@@ -276,6 +299,7 @@ public class HomeActivity extends BasePartyActivity {
         AppConfig.IM_NICKNAME,
         AppConfig.IM_AVATAR,
         AppConfig.PHONE_NUMBER);
+    UserInfoManager.setSelfUserToken(AppConfig.USER_TOKEN);
     //登录云信IM
     LoginInfo info = new LoginInfo(imAccid, imToken);
     RequestCallback<LoginInfo> callback =

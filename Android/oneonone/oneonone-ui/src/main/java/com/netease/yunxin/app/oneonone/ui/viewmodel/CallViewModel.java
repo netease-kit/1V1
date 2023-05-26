@@ -13,20 +13,25 @@ import androidx.lifecycle.MutableLiveData;
 import com.netease.nimlib.sdk.avsignalling.constant.ChannelType;
 import com.netease.yunxin.app.oneonone.ui.R;
 import com.netease.yunxin.app.oneonone.ui.constant.AppParams;
+import com.netease.yunxin.app.oneonone.ui.custommessage.GiftAttachment;
 import com.netease.yunxin.app.oneonone.ui.model.OtherUserInfo;
 import com.netease.yunxin.app.oneonone.ui.utils.LogUtil;
 import com.netease.yunxin.app.oneonone.ui.utils.SecurityAuditManager;
-import com.netease.yunxin.app.oneonone.ui.utils.UserInfoManager;
 import com.netease.yunxin.app.oneonone.ui.utils.security.SecurityAuditModel;
 import com.netease.yunxin.app.oneonone.ui.utils.security.SecurityFoulUser;
 import com.netease.yunxin.app.oneonone.ui.utils.security.SecurityTipsModel;
 import com.netease.yunxin.app.oneonone.ui.utils.security.SecurityType;
+import com.netease.yunxin.kit.chatkit.model.IMMessageInfo;
+import com.netease.yunxin.kit.chatkit.repo.ChatObserverRepo;
+import com.netease.yunxin.kit.corekit.im.model.EventObserver;
+import com.netease.yunxin.kit.entertainment.common.utils.UserInfoManager;
 import com.netease.yunxin.nertc.nertcvideocall.model.NERTCVideoCall;
 import com.netease.yunxin.nertc.nertcvideocall.model.impl.NERtcCallbackExTemp;
 import com.netease.yunxin.nertc.nertcvideocall.model.impl.NERtcCallbackProxyMgr;
 import com.netease.yunxin.nertc.ui.base.AVChatSoundPlayer;
 import com.netease.yunxin.nertc.ui.base.CallParam;
 import com.netease.yunxin.nertc.ui.utils.SecondsTimer;
+import java.util.List;
 import kotlin.Unit;
 import kotlin.jvm.functions.Function1;
 import org.json.JSONException;
@@ -34,7 +39,7 @@ import org.json.JSONObject;
 
 public class CallViewModel extends AndroidViewModel {
   private static final String TAG = "CallViewModel";
-  private MutableLiveData<OtherUserInfo> otherUserInfo;
+  private MutableLiveData<OtherUserInfo> otherUserInfo = new MutableLiveData<>();
   private SecurityAuditManager securityAuditManager = new SecurityAuditManager();
   private MutableLiveData<SecurityTipsModel> securityTipsModel;
   private SecondsTimer inTheCallSecondTimer;
@@ -51,6 +56,7 @@ public class CallViewModel extends AndroidViewModel {
   private final MutableLiveData<Boolean> remoteVideoMute = new MutableLiveData<>();
   private final MutableLiveData<Boolean> sendSmsData = new MutableLiveData<>();
   private final MutableLiveData<Long> otherRtcUid = new MutableLiveData<>();
+  private final MutableLiveData<GiftAttachment> giftAttachmentData = new MutableLiveData<>();
   private final NERtcCallbackExTemp rtcCallback =
       new NERtcCallbackExTemp() {
         @Override
@@ -166,10 +172,31 @@ public class CallViewModel extends AndroidViewModel {
         }
       };
 
+  private EventObserver<List<IMMessageInfo>> msgObserver =
+      new EventObserver<List<IMMessageInfo>>() {
+
+        @Override
+        public void onEvent(@Nullable List<IMMessageInfo> event) {
+          if (event != null) {
+            for (IMMessageInfo messageInfo : event) {
+              if (messageInfo != null
+                  && messageInfo.getMessage().getAttachment() instanceof GiftAttachment) {
+                handleGiftMessage((GiftAttachment) messageInfo.getMessage().getAttachment());
+              }
+            }
+          }
+        }
+      };
+
+  private void handleGiftMessage(GiftAttachment giftAttachment) {
+    giftAttachmentData.postValue(giftAttachment);
+  }
+
   public CallViewModel(@NonNull Application application) {
     super(application);
     NERTCVideoCall.sharedInstance().addDelegate(neRtcCallDelegate);
     NERtcCallbackProxyMgr.getInstance().addCallback(rtcCallback);
+    ChatObserverRepo.registerReceiveMessageObserve(msgObserver);
   }
 
   public MutableLiveData<Boolean> getSwitchToInTheCall() {
@@ -196,6 +223,10 @@ public class CallViewModel extends AndroidViewModel {
     return inTheCallDuration;
   }
 
+  public MutableLiveData<GiftAttachment> getGiftAttachment() {
+    return giftAttachmentData;
+  }
+
   public MutableLiveData<Boolean> getRemoteVideoMute() {
     return remoteVideoMute;
   }
@@ -217,9 +248,9 @@ public class CallViewModel extends AndroidViewModel {
       userInfo.isCalled = callParam.isCalled();
       userInfo.callType = callParam.getChannelType();
       if (callParam.isCalled()) {
-        userInfo.nickname = jsonObject.getString(AppParams.CALLER_USER_NAME);
-        userInfo.mobile = jsonObject.getString(AppParams.CALLER_USER_MOBILE);
-        userInfo.avatar = jsonObject.getString(AppParams.CALLER_USER_AVATAR);
+        userInfo.nickname = jsonObject.optString(AppParams.CALLER_USER_NAME);
+        userInfo.mobile = jsonObject.optString(AppParams.CALLER_USER_MOBILE);
+        userInfo.avatar = jsonObject.optString(AppParams.CALLER_USER_AVATAR);
         if (callParam.getChannelType() == ChannelType.VIDEO.getValue()) {
           userInfo.title = getApplication().getString(R.string.invited_video_title);
         } else {
@@ -228,19 +259,18 @@ public class CallViewModel extends AndroidViewModel {
         userInfo.subtitle = getApplication().getString(R.string.invited_subtitle);
         userInfo.accId = callParam.getCallerAccId();
       } else {
-        userInfo.nickname = jsonObject.getString(AppParams.CALLED_USER_NAME);
-        userInfo.mobile = jsonObject.getString(AppParams.CALLED_USER_MOBILE);
-        userInfo.avatar = jsonObject.getString(AppParams.CALLED_USER_AVATAR);
+        userInfo.nickname = jsonObject.optString(AppParams.CALLED_USER_NAME);
+        userInfo.mobile = jsonObject.optString(AppParams.CALLED_USER_MOBILE);
+        userInfo.avatar = jsonObject.optString(AppParams.CALLED_USER_AVATAR);
         userInfo.title = getApplication().getString(R.string.connecting);
         userInfo.subtitle = getApplication().getString(R.string.invite_subtitle);
         userInfo.accId = callParam.getCalledAccIdList().get(0);
       }
       needPstnCall = jsonObject.getBoolean(AppParams.NEED_PSTN_CALL);
     } catch (JSONException e) {
-      e.printStackTrace();
       LogUtil.e(TAG, "json parse error,e:" + e);
     }
-    this.otherUserInfo = new MutableLiveData<>(userInfo);
+    otherUserInfo.setValue(userInfo);
     securityTipsModel = new MutableLiveData<>();
     securityAuditManager.startAudit(
         new SecurityAuditManager.SecurityAuditCallback() {
@@ -314,6 +344,7 @@ public class CallViewModel extends AndroidViewModel {
     cancelInTheCallTimer();
     NERTCVideoCall.sharedInstance().removeDelegate(neRtcCallDelegate);
     NERtcCallbackProxyMgr.getInstance().removeCallback(rtcCallback);
+    ChatObserverRepo.unregisterReceiveMessageObserve(msgObserver);
     securityAuditManager.stopAudit();
     securityAuditManager = null;
   }

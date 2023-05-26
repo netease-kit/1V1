@@ -28,8 +28,8 @@ import com.netease.yunxin.app.oneonone.ui.utils.AccountAmountHelper;
 import com.netease.yunxin.app.oneonone.ui.utils.LogUtil;
 import com.netease.yunxin.app.oneonone.ui.utils.NavUtils;
 import com.netease.yunxin.app.oneonone.ui.utils.PhoneBindUtil;
-import com.netease.yunxin.app.oneonone.ui.utils.UserInfoManager;
 import com.netease.yunxin.app.oneonone.ui.viewmodel.UserInfoViewModel;
+import com.netease.yunxin.kit.entertainment.common.utils.UserInfoManager;
 import retrofit2.Call;
 import retrofit2.Callback;
 

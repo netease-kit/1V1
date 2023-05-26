@@ -6,6 +6,7 @@ package com.netease.yunxin.app.oneonone.ui.http;
 
 import com.netease.yunxin.app.oneonone.ui.model.HomeItemModel;
 import com.netease.yunxin.app.oneonone.ui.model.ModelResponse;
+import com.netease.yunxin.app.oneonone.ui.model.User;
 import com.netease.yunxin.app.oneonone.ui.model.UserModel;
 import com.netease.yunxin.kit.common.network.Response;
 import java.util.List;
@@ -25,14 +26,26 @@ public interface ServerApi {
   Call<ModelResponse<Response>> sendSms(@Body Map<String, Object> body);
 
   /** 上报用户心跳 */
-  @POST("/user/reporter")
+  @POST("/nemo/socialChat/user/reporter")
   Call<ModelResponse<Response>> reportHeartBeat();
 
   /** 获取用户列表 */
-  @POST("/user/getUserList")
+  @POST("/nemo/socialChat/user/getOnlineUser")
   Call<ModelResponse<List<HomeItemModel>>> getUserList(@Body Map<String, Object> body);
 
   /** 获取用户在线状态 */
-  @POST("/user/getUserState")
+  @POST("/nemo/socialChat/user/getUserState")
   Call<ModelResponse<String>> getUserState(@Body Map<String, Object> body);
+
+  /** 发送礼物 */
+  @POST("/nemo/socialChat/user/reward")
+  Call<ModelResponse<Boolean>> reward(@Body Map<String, Object> body);
+
+  /** 获取登录RTCUID */
+  @POST("/nemo/socialChat/user/login")
+  Call<ModelResponse<User>> loginOneOnOne(@Body Map<String, Object> body);
+
+  /** 根据userUuid获取账号信息 */
+  @POST("/nemo/socialChat/user/getUserInfo")
+  Call<ModelResponse<User>> getUserInfo(@Body Map<String, Object> body);
 }

@@ -8,6 +8,7 @@ import android.content.Context;
 import com.netease.yunxin.app.oneonone.ui.BuildConfig;
 import com.netease.yunxin.app.oneonone.ui.model.HomeItemModel;
 import com.netease.yunxin.app.oneonone.ui.model.ModelResponse;
+import com.netease.yunxin.app.oneonone.ui.model.User;
 import com.netease.yunxin.app.oneonone.ui.model.UserModel;
 import com.netease.yunxin.kit.common.network.Response;
 import com.netease.yunxin.kit.common.network.ServiceCreator;
@@ -88,6 +89,32 @@ public class HttpService {
     map.put("mobile", mobile);
     if (serverApi != null) {
       serverApi.getUserState(map).enqueue(callback);
+    }
+  }
+
+  public void reward(
+      int giftId, int giftCount, String target, Callback<ModelResponse<Boolean>> callback) {
+    Map<String, Object> map = new HashMap<>();
+    map.put("giftId", giftId);
+    map.put("giftCount", giftCount);
+    map.put("target", target);
+    if (serverApi != null) {
+      serverApi.reward(map).enqueue(callback);
+    }
+  }
+
+  public void loginOneOnOne(Callback<ModelResponse<User>> callback) {
+    Map<String, Object> map = new HashMap<>();
+    if (serverApi != null) {
+      serverApi.loginOneOnOne(map).enqueue(callback);
+    }
+  }
+
+  public void getUserInfo(String userUuid, Callback<ModelResponse<User>> callback) {
+    Map<String, Object> map = new HashMap<>();
+    map.put("userUuid", userUuid);
+    if (serverApi != null) {
+      serverApi.getUserInfo(map).enqueue(callback);
     }
   }
 }

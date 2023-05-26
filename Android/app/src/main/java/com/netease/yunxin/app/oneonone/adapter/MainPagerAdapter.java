@@ -11,10 +11,16 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
 import com.netease.yunxin.app.oneonone.fragment.AppEntranceFragment;
 import com.netease.yunxin.app.oneonone.fragment.UserCenterFragment;
+import com.netease.yunxin.app.oneonone.ui.fragment.MessageFragment;
+import com.netease.yunxin.kit.conversationkit.ui.page.interfaces.IConversationCallback;
 
 public class MainPagerAdapter extends FragmentPagerAdapter {
   /** fragment 缓存 */
   private SparseArray<Fragment> fragmentCache = new SparseArray<>(2);
+
+  private MessageFragment messageFragment;
+
+  private UnreadCountCallback unreadCountCallback;
 
   public MainPagerAdapter(@NonNull FragmentManager fm) {
     super(fm, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT);
@@ -28,7 +34,7 @@ public class MainPagerAdapter extends FragmentPagerAdapter {
 
   @Override
   public int getCount() {
-    return 2;
+    return 3;
   }
 
   /**
@@ -45,9 +51,34 @@ public class MainPagerAdapter extends FragmentPagerAdapter {
     if (position == 0) {
       fragment = new AppEntranceFragment();
     } else if (position == 1) {
+      messageFragment = new MessageFragment();
+      messageFragment.setConversationCallback(
+          new IConversationCallback() {
+
+            @Override
+            public void updateUnreadCount(int unreadCount) {
+              if (unreadCountCallback != null) {
+                unreadCountCallback.onUnreadCountChange(unreadCount);
+              }
+            }
+          });
+      fragment = messageFragment;
+    } else if (position == 2) {
       fragment = new UserCenterFragment();
     }
     fragmentCache.put(position, fragment);
     return fragment;
+  }
+
+  public MessageFragment getMessageFragment() {
+    return messageFragment;
+  }
+
+  public void setUnreadCountCallback(UnreadCountCallback unreadCountCallback) {
+    this.unreadCountCallback = unreadCountCallback;
+  }
+
+  public interface UnreadCountCallback {
+    void onUnreadCountChange(int unreadCount);
   }
 }

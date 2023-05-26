@@ -21,6 +21,7 @@ import com.gyf.immersionbar.ImmersionBar;
 import com.netease.lava.api.IVideoRender;
 import com.netease.lava.nertc.sdk.AbsNERtcCallbackEx;
 import com.netease.lava.nertc.sdk.NERtcEx;
+import com.netease.yunxin.kit.alog.ALog;
 import com.netease.yunxin.kit.beauty.databinding.ActivityBeautySettingBinding;
 import com.netease.yunxin.kit.beauty.module.NEEffect;
 import com.netease.yunxin.kit.beauty.module.NEFilter;
@@ -109,7 +110,9 @@ public class BeautySettingActivity extends BeautyBaseActivity {
   }
 
   private void initRTC() {
+
     try {
+      NERtcEx.getInstance().release();
       NERtcEx.getInstance()
           .init(
               BeautySettingActivity.this,
@@ -148,7 +151,7 @@ public class BeautySettingActivity extends BeautyBaseActivity {
               },
               null);
     } catch (Exception e) {
-      throw new RuntimeException(e);
+      ALog.e(TAG, "e:" + e);
     }
   }
 

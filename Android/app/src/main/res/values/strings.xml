@@ -161,50 +161,5 @@
     <string name="login_tips">By logging in, you agree to CommsEase Privacy Policy and Terms of Service</string>
     <string name="terms_of_service">Terms of Service</string>
     <string name="general_settings">General settings</string>
-    <string-array name="mock_nicknames">
-        <item>Lina</item>
-        <item>Amelia</item>
-        <item>Evelyn</item>
-        <item>Sofia</item>
-        <item>Ella</item>
-        <item>Grace</item>
-        <item>Choloe</item>
-        <item>Victoria</item>
-        <item>Lily</item>
-        <item>Layla</item>
-    </string-array>
-
-    <string-array name="mock_avatars">
-        <item>https://yx-web-nosdn.netease.im/common/addd8ce87aa1d9280e1084ddb34972d3/oversea_avatar1.png</item>
-        <item>https://yx-web-nosdn.netease.im/common/8e053ef20b88d063d039927ca6001a88/oversea_avatar2.png</item>
-        <item>https://yx-web-nosdn.netease.im/common/2a32d52d776d9c97e9dfc2730fe81b32/oversea_avatar3.png</item>
-        <item>https://yx-web-nosdn.netease.im/common/69f3fdea0adc6a92c314b9c90aeecc71/oversea_avatar4.png</item>
-        <item>https://yx-web-nosdn.netease.im/common/203f4d04a8f1b3d0d883ca4a6ce1c4ae/oversea_avatar5.png</item>
-        <item>https://yx-web-nosdn.netease.im/common/6ba0726541ed9287a842de6b4ee3754a/oversea_avatar6.png</item>
-        <item>https://yx-web-nosdn.netease.im/common/b4c6bc0b2258160a335cb2840f58baf5/oversea_avatar7.png</item>
-        <item>https://yx-web-nosdn.netease.im/common/018d68e50059f98e1d9496dc5014fb05/oversea_avatar8.png</item>
-        <item>https://yx-web-nosdn.netease.im/common/300ca286474de787efc5f444ba8ff514/oversea_avatar9.png</item>
-        <item>https://yx-web-nosdn.netease.im/common/2e188a54717e471d2c49491d18e49c88/oversea_avatar10.png</item>
-
-    </string-array>
-
-    <integer-array name="mock_ages">
-        <item>22</item>
-        <item>22</item>
-        <item>22</item>
-        <item>22</item>
-        <item>22</item>
-        <item>22</item>
-        <item>22</item>
-        <item>25</item>
-        <item>23</item>
-        <item>20</item>
-    </integer-array>
-
-    <string-array name="mock_albums">
-        <item>https://yx-web-nosdn.netease.im/common/addd8ce87aa1d9280e1084ddb34972d3/oversea_avatar1.png</item>
-        <item>https://yx-web-nosdn.netease.im/common/8e053ef20b88d063d039927ca6001a88/oversea_avatar2.png</item>
-        <item>https://yx-web-nosdn.netease.im/common/2a32d52d776d9c97e9dfc2730fe81b32/oversea_avatar3.png</item>
-        <item>https://yx-web-nosdn.netease.im/common/69f3fdea0adc6a92c314b9c90aeecc71/oversea_avatar4.png</item>
-    </string-array>
+    <string name="one_on_one_message">Message</string>
 </resources>

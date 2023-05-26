@@ -7,6 +7,7 @@ package com.netease.yunxin.app.oneonone.ui;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import com.netease.yunxin.app.oneonone.ui.http.HttpService;
+import com.netease.yunxin.kit.common.network.DeviceId;
 
 public class OneOnOneUI {
 
@@ -49,8 +50,10 @@ public class OneOnOneUI {
   }
 
   public void addHttpHeader(String accessToken, String accountId) {
-    HttpService.getInstance().addHeader("accessToken", accessToken);
-    HttpService.getInstance().addHeader("accountId", accountId);
+    HttpService.getInstance().addHeader("token", accessToken);
+    HttpService.getInstance().addHeader("user", accountId);
+    //    HttpService.getInstance().addHeader("accessToken", accessToken);
+    HttpService.getInstance().addHeader("deviceId", DeviceId.INSTANCE.getValue());
   }
 
   public void setChineseEnv(boolean chineseEnv) {
@@ -67,5 +70,9 @@ public class OneOnOneUI {
 
   public String getBaseUrl() {
     return baseUrl;
+  }
+
+  public Context getContext() {
+    return context;
   }
 }

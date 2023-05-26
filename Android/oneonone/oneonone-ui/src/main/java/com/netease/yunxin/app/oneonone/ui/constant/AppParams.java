@@ -11,6 +11,10 @@ public class AppParams {
   public static final String CALLED_USER_NAME = "called_userName";
   public static final String CALLED_USER_MOBILE = "called_userMobile";
   public static final String CALLED_USER_AVATAR = "called_userAvatar";
+  public static final String CALLED_IS_VIRTUAL = "called_isVirtual";
+  public static final String CALLED_AUDIO_URL = "called_audio_url";
+  public static final String CALLED_VIDEO_URL = "called_video_url";
+  public static final String CALL_TYPE = "callType";
   public static final String NEED_PSTN_CALL = "needPstnCall";
   public static final String CALL_PSTN_WAIT_MILLISECONDS = "callPstnWaitMilliseconds";
   public static final String AUTO_CALL = "autoCall";

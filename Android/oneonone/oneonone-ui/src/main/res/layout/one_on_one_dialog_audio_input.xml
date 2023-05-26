@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ /*
+  ~  * Copyright (c) 2022 NetEase, Inc.  All rights reserved.
+  ~  * Use of this source code is governed by a MIT license that can be found in the LICENSE file.
+  ~  */
+  -->
+
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/rootview"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <FrameLayout
+        app:layout_constraintBottom_toTopOf="@+id/tv_desc"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        android:id="@+id/fl"
+        android:background="@drawable/one_on_one_audio_inputing_bg"
+        android:layout_width="100dp"
+        android:layout_height="100dp">
+        <com.airbnb.lottie.LottieAnimationView
+            android:id="@+id/lottie_view"
+            android:layout_width="70dp"
+            android:layout_height="70dp"
+            android:layout_gravity="center"
+            app:lottie_rawRes="@raw/one_on_one_audio_inputing"
+            app:lottie_autoPlay="true"
+            app:lottie_loop="true"
+            android:visibility="gone"
+            />
+
+        <ImageView
+            android:id="@+id/iv_delete"
+            android:visibility="gone"
+            android:layout_gravity="center"
+            android:background="@drawable/one_on_one_delete"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <com.netease.yunxin.app.oneonone.ui.view.RingBar
+            android:id="@+id/rb"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    </FrameLayout>
+
+    <TextView
+        app:layout_constraintBottom_toTopOf="@+id/chat_message_input_audio_tv"
+        android:id="@+id/tv_desc"
+        android:text="@string/one_on_one_release_send"
+        android:textColor="@android:color/white"
+        android:textSize="15sp"
+        android:paddingTop="16dp"
+        android:paddingBottom="44dp"
+        android:gravity="center"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+    <TextView
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        android:id="@+id/chat_message_input_audio_tv"
+        android:layout_width="220dp"
+        android:layout_height="@dimen/dimen_40_dp"
+        android:background="@drawable/one_on_one_audio_input_btn_bg"
+        android:layout_gravity="center_horizontal"
+        android:text="@string/one_on_one_chat_audio_title"
+        android:textSize="@dimen/text_size_16"
+        android:textColor="@color/white"
+        android:gravity="center"
+        android:visibility="visible"/>
+<!--<LinearLayout-->
+<!--    app:layout_constraintBottom_toBottomOf="parent"-->
+<!--    app:layout_constraintLeft_toLeftOf="parent"-->
+<!--    android:layout_gravity="bottom"-->
+<!--    android:orientation="vertical"-->
+<!--    android:gravity="center_horizontal"-->
+<!--    android:layout_width="match_parent"-->
+<!--    android:layout_height="wrap_content">-->
+<!-- -->
+
+<!--   -->
+<!--</LinearLayout>-->
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -65,7 +65,12 @@
         android:networkSecurityConfig="@xml/network_security_config"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.AppCompat.NoActionBar">
+        android:theme="@style/OneOnOne">
+        <meta-data
+            android:name="com.amap.api.v2.apikey"
+            android:value="your amap key" />
+        <service android:name="com.amap.api.location.APSService" />
+
         <meta-data
             android:name="android.max_aspect"
             android:value="2.4"
@@ -78,9 +83,21 @@
         <meta-data
             android:name="notch.config"
             android:value="portrait|landscape" />
+
+        <activity
+            android:name=".activity.SplashActivity"
+            android:theme="@style/LaunchTheme"
+            android:screenOrientation="portrait"
+            android:exported="true"
+            android:launchMode="singleTop">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
         <activity
             android:name=".activity.HomeActivity"
-            android:theme="@style/Theme.AppCompat.NoActionBar"
             android:screenOrientation="portrait"
             android:exported="false"
             android:launchMode="singleTask">
@@ -142,7 +159,6 @@
         <provider
             android:name="com.netease.nimlib.ipc.cp.provider.PreferenceContentProvider"
             android:authorities="com.netease.yunxin.app.oneonone.ipc.provider.preference"
-            tools:replace="android:authorities"
             android:exported="false" />
 
         <service android:name="com.netease.lava.nertc.foreground.ForegroundService"

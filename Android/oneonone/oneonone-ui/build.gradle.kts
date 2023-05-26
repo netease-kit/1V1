@@ -23,7 +23,7 @@ dependencies {
     implementation("androidx.constraintlayout:constraintlayout:2.1.3")
     implementation("androidx.recyclerview:recyclerview:1.2.1")
 
-    api("com.netease.yunxin:nertc-base:4.6.43")
+    api("com.netease.yunxin:nertc-base:4.6.50")
     api("com.netease.yunxin.kit.call:call-pstn:1.8.2"){
         exclude("com.netease.yunxin","nertc-base")
     }
@@ -41,14 +41,22 @@ dependencies {
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("androidx.navigation:navigation-fragment-ktx:2.4.2")
     implementation("androidx.navigation:navigation-ui-ktx:2.4.2")
-    implementation("com.netease.yunxin.kit.common:common-ui:1.1.16")
+    implementation("com.netease.yunxin.kit.common:common-ui:1.1.20")
     implementation("com.scwang.smart:refresh-layout-kernel:2.0.1")
     api("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
 
     implementation(project(":beauty:beauty-ui"))
     implementation("com.netease.yunxin.kit.core:corekit:1.3.0")
     api(project(":entertainment:entertainment-common"))
+    // 会话列表功能组件
+    api("com.netease.yunxin.kit.conversation:conversationkit-ui:9.5.5-alpha01")
+    // 聊天功能组件
+    api("com.netease.yunxin.kit.chat:chatkit-ui:9.5.5-alpha01")
+    //位置消息模块
+    api("com.netease.yunxin.kit.locationkit:locationkit:9.5.5-alpha01")
+    implementation("com.airbnb.android:lottie:5.0.3")
 
-
+    implementation("com.netease.nimlib:neliveplayer:3.2.2")
+    implementation("com.netease:gslb:1.1.4")
 
 }

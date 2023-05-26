@@ -5,36 +5,40 @@
 package com.netease.yunxin.app.oneonone.ui.fragment.adapter;
 
 import android.annotation.SuppressLint;
-import android.app.Dialog;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
 import com.blankj.utilcode.util.ToastUtils;
 import com.netease.nimlib.sdk.avsignalling.constant.ChannelType;
+import com.netease.nimlib.sdk.msg.constant.SessionTypeEnum;
 import com.netease.yunxin.app.oneonone.ui.OneOnOneUI;
 import com.netease.yunxin.app.oneonone.ui.R;
 import com.netease.yunxin.app.oneonone.ui.constant.CallConfig;
 import com.netease.yunxin.app.oneonone.ui.databinding.OneOnOneRvItemHomeBinding;
-import com.netease.yunxin.app.oneonone.ui.dialog.SelectCallTypeDialog;
+import com.netease.yunxin.app.oneonone.ui.dialog.ContactUserDialog;
 import com.netease.yunxin.app.oneonone.ui.http.HttpService;
 import com.netease.yunxin.app.oneonone.ui.model.HomeItemModel;
 import com.netease.yunxin.app.oneonone.ui.model.ModelResponse;
 import com.netease.yunxin.app.oneonone.ui.model.UserModel;
 import com.netease.yunxin.app.oneonone.ui.utils.AccountAmountHelper;
 import com.netease.yunxin.app.oneonone.ui.utils.AppGlobals;
-import com.netease.yunxin.app.oneonone.ui.utils.DialogUtil;
+import com.netease.yunxin.app.oneonone.ui.utils.ChatUtil;
 import com.netease.yunxin.app.oneonone.ui.utils.DisplayUtils;
 import com.netease.yunxin.app.oneonone.ui.utils.NavUtils;
-import com.netease.yunxin.app.oneonone.ui.utils.UserInfoManager;
+import com.netease.yunxin.app.oneonone.ui.utils.OneOnOneUtils;
 import com.netease.yunxin.kit.alog.ALog;
 import com.netease.yunxin.kit.common.image.ImageLoader;
 import com.netease.yunxin.kit.common.ui.dialog.CommonAlertDialog;
 import com.netease.yunxin.kit.common.utils.NetworkUtils;
-import com.netease.yunxin.kit.corekit.service.XKitServiceManager;
+import com.netease.yunxin.kit.corekit.im.model.UserInfo;
+import com.netease.yunxin.kit.corekit.im.provider.FetchCallback;
 import com.netease.yunxin.kit.entertainment.common.utils.ClickUtils;
+import com.netease.yunxin.kit.entertainment.common.utils.DialogUtil;
+import com.netease.yunxin.kit.entertainment.common.utils.UserInfoManager;
 import java.util.ArrayList;
 import java.util.List;
 import retrofit2.Call;
@@ -104,11 +108,53 @@ public class HomeAdapter extends RecyclerView.Adapter {
                   return;
                 }
 
-                SelectCallTypeDialog dialog = new SelectCallTypeDialog(activity);
+                ContactUserDialog dialog = new ContactUserDialog();
                 dialog.setDialogCallback(
-                    new SelectCallTypeDialog.SelectCallTypeCallback() {
+                    new ContactUserDialog.SelectCallTypeCallback() {
                       @Override
-                      public void onVideoCall(Dialog dialog) {
+                      public void onAccost(ContactUserDialog dialog) {
+                        if (!NetworkUtils.isConnected()) {
+                          ToastUtils.showShort(context.getString(R.string.voiceroom_net_error));
+                          return;
+                        }
+                        ChatUtil.sendTextMessage(
+                            homeItemModel.userUuid,
+                            SessionTypeEnum.P2P,
+                            context.getString(R.string.one_on_one_accost_text),
+                            false,
+                            new FetchCallback<Void>() {
+                              @Override
+                              public void onSuccess(@Nullable Void param) {
+                                ToastUtils.showShort(
+                                    context.getString(R.string.one_on_one_accost_success));
+                              }
+
+                              @Override
+                              public void onFailed(int code) {
+                                ALog.e(TAG, "sendTextMessage failed,code:" + code);
+                              }
+
+                              @Override
+                              public void onException(@Nullable Throwable exception) {
+                                ALog.e(TAG, "sendTextMessage failed,exception:" + exception);
+                              }
+                            });
+                        dialog.dismiss();
+                      }
+
+                      @Override
+                      public void onPrivateLetter(ContactUserDialog dialog) {
+                        //跳转到单聊界面
+                        UserInfo userInfo =
+                            new UserInfo(
+                                homeItemModel.userUuid, homeItemModel.userName, homeItemModel.icon);
+                        userInfo.setMobile(homeItemModel.mobile);
+                        NavUtils.toP2pPage(context, userInfo, null);
+                        dialog.dismiss();
+                      }
+
+                      @Override
+                      public void onVideoCall(ContactUserDialog dialog) {
                         if (!NetworkUtils.isConnected()) {
                           ToastUtils.showShort(
                               context.getString(R.string.one_on_one_network_error));
@@ -119,7 +165,7 @@ public class HomeAdapter extends RecyclerView.Adapter {
                       }
 
                       @Override
-                      public void onAudioCall(Dialog dialog) {
+                      public void onAudioCall(ContactUserDialog dialog) {
                         if (!NetworkUtils.isConnected()) {
                           ToastUtils.showShort(
                               context.getString(R.string.one_on_one_network_error));
@@ -129,7 +175,7 @@ public class HomeAdapter extends RecyclerView.Adapter {
                         dialog.dismiss();
                       }
                     });
-                dialog.show();
+                dialog.show(activity.getSupportFragmentManager(), ContactUserDialog.TAG);
               });
       //            binding.onlineState.setVisibility(View.VISIBLE);
       //            binding.viewOnlineState.setVisibility(View.VISIBLE);
@@ -137,16 +183,9 @@ public class HomeAdapter extends RecyclerView.Adapter {
 
     private void handleCall(int channelType, HomeItemModel homeItemModel) {
 
-      Object result =
-          XKitServiceManager.Companion.getInstance()
-              .callService("VoiceRoomXKitService", "getCurrentRoomInfo", null);
-      if (result instanceof Boolean) {
-        boolean isInVoiceRoom = (boolean) result;
-        ALog.d(TAG, "isInVoiceRoom:" + isInVoiceRoom);
-        if (isInVoiceRoom) {
-          showTipsDialog(activity.getString(R.string.one_on_one_other_you_are_in_the_chatroom));
-          return;
-        }
+      if (OneOnOneUtils.isInVoiceRoom()) {
+        showTipsDialog(activity.getString(R.string.one_on_one_other_you_are_in_the_chatroom));
+        return;
       }
       HttpService.getInstance()
           .getUserState(
@@ -159,12 +198,20 @@ public class HomeAdapter extends RecyclerView.Adapter {
                     String onlineState = response.body().data;
                     if (ONLINE.equals(onlineState)) {
                       if (channelType == ChannelType.AUDIO.getValue()) {
-                        gotoCallPage(
-                            ChannelType.AUDIO.getValue(),
-                            AccountAmountHelper.allowPstnCall(UserInfoManager.getSelfImAccid())
-                                && OneOnOneUI.getInstance().isChineseEnv(),
-                            homeItemModel,
-                            CallConfig.CALL_PSTN_WAIT_MILLISECONDS);
+                        if (CallConfig.enablePstnCall) {
+                          gotoCallPage(
+                              channelType,
+                              AccountAmountHelper.allowPstnCall(UserInfoManager.getSelfImAccid())
+                                  && OneOnOneUI.getInstance().isChineseEnv(),
+                              homeItemModel,
+                              CallConfig.CALL_PSTN_WAIT_MILLISECONDS);
+                        } else {
+                          gotoCallPage(
+                              channelType,
+                              false,
+                              homeItemModel,
+                              CallConfig.CALL_PSTN_WAIT_MILLISECONDS);
+                        }
                       } else {
                         gotoCallPage(
                             channelType,
@@ -174,25 +221,23 @@ public class HomeAdapter extends RecyclerView.Adapter {
                       }
                     } else {
                       if (channelType == ChannelType.AUDIO.getValue()) {
-                        // 对方不在线，直接走PSTN呼叫
-                        gotoCallPage(
-                            ChannelType.AUDIO.getValue(),
-                            AccountAmountHelper.allowPstnCall(UserInfoManager.getSelfImAccid())
-                                && OneOnOneUI.getInstance().isChineseEnv(),
-                            homeItemModel,
-                            0);
+                        if (CallConfig.enablePstnCall) {
+                          // 对方不在线，直接走PSTN呼叫
+                          gotoCallPage(
+                              channelType,
+                              AccountAmountHelper.allowPstnCall(UserInfoManager.getSelfImAccid())
+                                  && OneOnOneUI.getInstance().isChineseEnv(),
+                              homeItemModel,
+                              0);
+                        } else {
+                          DialogUtil.showAlertDialog(
+                              activity,
+                              activity.getString(R.string.one_on_one_other_is_not_online));
+                        }
+
                       } else {
-                        DialogUtil.showConfirmDialog(
-                            activity,
-                            activity.getString(
-                                com.netease
-                                    .yunxin
-                                    .app
-                                    .oneonone
-                                    .ui
-                                    .R
-                                    .string
-                                    .one_on_one_other_is_not_online));
+                        DialogUtil.showAlertDialog(
+                            activity, activity.getString(R.string.one_on_one_other_is_not_online));
                       }
                     }
                   }
@@ -211,10 +256,15 @@ public class HomeAdapter extends RecyclerView.Adapter {
         HomeItemModel homeItemModel,
         long callPstnWaitMilliseconds) {
       UserModel userModel = new UserModel();
-      userModel.imAccid = homeItemModel.accountId;
+      userModel.imAccid = homeItemModel.userUuid;
       userModel.nickname = homeItemModel.userName;
       userModel.avatar = homeItemModel.icon;
       userModel.mobile = homeItemModel.mobile;
+      if (CallConfig.enableVirtualCall) {
+        userModel.callType = homeItemModel.callType;
+        userModel.audioUrl = homeItemModel.audioUrl;
+        userModel.videoUrl = homeItemModel.videoUrl;
+      }
       NavUtils.toCallPage(activity, userModel, channelType, needPstnCall, callPstnWaitMilliseconds);
     }
 

@@ -39,13 +39,14 @@ import com.netease.yunxin.app.oneonone.ui.utils.CallTimeOutHelper;
 import com.netease.yunxin.app.oneonone.ui.utils.DisplayUtils;
 import com.netease.yunxin.app.oneonone.ui.utils.LogUtil;
 import com.netease.yunxin.app.oneonone.ui.utils.NECallback;
-import com.netease.yunxin.app.oneonone.ui.utils.UserInfoManager;
+import com.netease.yunxin.app.oneonone.ui.utils.NERTCCallStateManager;
 import com.netease.yunxin.app.oneonone.ui.viewmodel.CallViewModel;
 import com.netease.yunxin.app.oneonone.ui.viewmodel.PstnCallViewModel;
 import com.netease.yunxin.kit.alog.ALog;
 import com.netease.yunxin.kit.common.image.ImageLoader;
 import com.netease.yunxin.kit.common.network.Response;
 import com.netease.yunxin.kit.common.utils.NetworkUtils;
+import com.netease.yunxin.kit.entertainment.common.utils.UserInfoManager;
 import com.netease.yunxin.nertc.pstn.base.PstnCallParam;
 import com.netease.yunxin.nertc.pstn.base.PstnFunctionMgr;
 import com.netease.yunxin.nertc.ui.base.AVChatSoundPlayer;
@@ -62,7 +63,6 @@ public class CallFragment extends Fragment {
   private CallViewModel viewModel;
   private CallParam callParams;
   private PstnCallViewModel pstnCallViewModel;
-  private boolean needPstnCall = false;
   private boolean callFinished = true;
   private String calledMobile;
   private String callerUserName;
@@ -121,8 +121,11 @@ public class CallFragment extends Fragment {
     viewModel = new ViewModelProvider(requireActivity()).get(CallViewModel.class);
     callParams = activity.getCallParams();
     Bundle bundle = getArguments();
-    if (bundle != null && bundle.getBoolean(AppParams.AUTO_CALL, false)) {
+    if (bundle != null && bundle.getBoolean(AppParams.AUTO_CALL, false) && !callParams.isCalled()) {
       handleCall();
+    }
+    if (callParams.isCalled()) {
+      playRing(AVChatSoundPlayer.RingerTypeEnum.RING);
     }
     subscribeUi();
     initEvent();
@@ -139,12 +142,12 @@ public class CallFragment extends Fragment {
       callParamExtraInfo = new JSONObject(callParams.getCallExtraInfo());
       if (!callParams.isCalled()) {
         callFinished = false;
-        needPstnCall = callParamExtraInfo.getBoolean(AppParams.NEED_PSTN_CALL);
         callPstnWaitMilliseconds =
             callParamExtraInfo.getLong(AppParams.CALL_PSTN_WAIT_MILLISECONDS);
         calledMobile = callParamExtraInfo.getString(AppParams.CALLED_USER_MOBILE);
         callerUserName = callParamExtraInfo.getString(AppParams.CALLER_USER_NAME);
-        if (callParams.getChannelType() == ChannelType.AUDIO.getValue() && needPstnCall) {
+        if (callParams.getChannelType() == ChannelType.AUDIO.getValue()
+            && activity.needPstnCall()) {
           pstnCallViewModel = new ViewModelProvider(requireActivity()).get(PstnCallViewModel.class);
           CallTimeOutHelper.configTimeOut(
               CallConfig.CALL_TOTAL_WAIT_TIMEOUT, callPstnWaitMilliseconds);
@@ -152,24 +155,26 @@ public class CallFragment extends Fragment {
           PstnFunctionMgr.callWithCor(pstnCallParam);
           LogUtil.i(TAG, "handleCall->pstnCall");
         } else {
-          CallTimeOutHelper.configTimeOut(
-              CallConfig.CALL_TOTAL_WAIT_TIMEOUT, CallConfig.CALL_TOTAL_WAIT_TIMEOUT);
-          activity.rtcCall(
-              new NECallback<ChannelFullInfo>() {
-                @Override
-                public void onSuccess(ChannelFullInfo channelFullInfo) {
-                  callFinished = true;
-                }
+          if (activity.isVirtualCall()) {
+            NERTCCallStateManager.setCallOutState();
+          } else {
+            CallTimeOutHelper.configTimeOut(
+                CallConfig.CALL_TOTAL_WAIT_TIMEOUT, CallConfig.CALL_TOTAL_WAIT_TIMEOUT);
+            activity.rtcCall(
+                new NECallback<ChannelFullInfo>() {
+                  @Override
+                  public void onSuccess(ChannelFullInfo channelFullInfo) {
+                    callFinished = true;
+                  }
 
-                @Override
-                public void onError(int code, String errorMsg) {
-                  ToastUtils.showShort(R.string.call_failed);
-                }
-              });
+                  @Override
+                  public void onError(int code, String errorMsg) {
+                    ToastUtils.showShort(R.string.call_failed);
+                  }
+                });
+          }
           LogUtil.i(TAG, "handleCall->rtcCall");
         }
-      } else {
-        playRing(AVChatSoundPlayer.RingerTypeEnum.RING);
       }
     } catch (JSONException e) {
       e.printStackTrace();
@@ -380,7 +385,7 @@ public class CallFragment extends Fragment {
       ToastUtils.showShort(getString(R.string.one_on_one_network_error));
       return;
     }
-    if (needPstnCall && callParams.getChannelType() == ChannelType.AUDIO.getValue()) {
+    if (activity.needPstnCall()) {
       PstnFunctionMgr.hangup();
       finishActivity();
     } else {
