@@ -1,3 +1,11 @@
 // Copyright (c) 2022 NetEase, Inc. All rights reserved.
 // Use of this source code is governed by a MIT license that can be
 // found in the LICENSE file.
+
+Recreation = "Apps";
+
+One_On_One = "One-on-one Hangout";
+One_On_One_Description = "Higher call answer rate and a more engaging experience with low latency and HD video.";
+
+Message = "Message";
+

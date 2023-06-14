@@ -37,11 +37,11 @@ class NEOneOnOneRoomService {
     }
   }
 
-  /// 根据手机号获取用户信息
-  func getAccountInfo(_ mobile: String, success: ((NEOneOnOneAccountInfo?) -> Void)? = nil,
+  /// 根据userUuid获取账号信息
+  func getAccountInfo(_ userUuid: String, success: ((NEOneOnOneAccountInfo?) -> Void)? = nil,
                       failure: ((NSError) -> Void)? = nil) {
     let params: [String: Any] = [
-      "mobile": mobile,
+      "userUuid": userUuid,
     ]
     NEAPI.OneOnOne.accountInfo.request(params, returnType: _NEOneOnOneAccountInfo.self) { data in
       guard let data = data else {
@@ -72,10 +72,39 @@ class NEOneOnOneRoomService {
     }
   }
 
+  /// 登录获取RTCUID
+  func loginGetRTCUid(_ success: ((NEOneOnOneAccountInfo?) -> Void)? = nil,
+                      failure: ((NSError) -> Void)? = nil) {
+    NEAPI.OneOnOne.loginGetRTCUid.request(returnType: _NEOneOnOneAccountInfo.self) { data in
+      guard let data = data else {
+        success?(nil)
+        return
+      }
+      let accountInfo = NEOneOnOneAccountInfo(data)
+      success?(accountInfo)
+    } failed: { error in
+      failure?(error)
+    }
+  }
+
   /// 心跳上报
   func userReport(success: (() -> Void)? = nil,
                   failure: ((NSError) -> Void)? = nil) {
     NEAPI.OneOnOne.userReport.request { _ in
+      success?()
+    } failed: { error in
+      failure?(error)
+    }
+  }
+
+  func reward(giftId: Int, giftCount: Int, target: String, success: (() -> Void)? = nil,
+              failure: ((NSError) -> Void)? = nil) {
+    let params: [String: Any] = [
+      "giftId": giftId,
+      "giftCount": giftCount,
+      "target": target,
+    ]
+    NEAPI.OneOnOne.reward.request(params) { _ in
       success?()
     } failed: { error in
       failure?(error)
@@ -96,9 +125,7 @@ class NEOneOnOneRoomService {
   }
 
   @objc func reportTimerAction() {
-    userReport {
-      print("上报完成")
-    } failure: { error in
+    userReport {} failure: { error in
       print("error:\(error.description)")
     }
   }

@@ -39,10 +39,9 @@ Pod::Spec.new do |s|
   s.dependency 'libextobjc'
   s.dependency 'NECallKitPstn'
   s.dependency 'NERtcCallKit'
-  
-  s.resource_bundles = {
-    'NEOneOnOneUIKit' => ['Assets/**/*']
-  }
+  s.dependency 'NECommonUIKit'
+  s.dependency 'SnapKit'
+  s.resource = 'Assets/**/*'
   
   s.pod_target_xcconfig = {
     'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'arm64',

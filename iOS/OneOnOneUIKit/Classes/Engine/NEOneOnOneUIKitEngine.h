@@ -34,6 +34,9 @@ typedef NSString *_Nullable (^NEOneOnOneUITransducer)(void);
 - (void)setRTCIdle;
 - (void)setRTCCaling;
 
+/// 获取当前视图控制器
+- (UIViewController *)findVisibleViewController;
+
 @end
 
 NS_ASSUME_NONNULL_END

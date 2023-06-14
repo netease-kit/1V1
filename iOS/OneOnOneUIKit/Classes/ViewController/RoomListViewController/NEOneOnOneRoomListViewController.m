@@ -10,11 +10,13 @@
 #import <NEOneOnOneKit/NEOneOnOneKit-Swift.h>
 #import <NERtcCallKit/NERtcCallKit.h>
 #import <NEUIKit/NEUIKit.h>
+#import <NIMSDK/NIMSDK.h>
 #import <ReactiveObjC/ReactiveObjC.h>
 #import "NEOneOnOneBottomPresentView.h"
 #import "NEOneOnOneCallViewController.h"
 #import "NEOneOnOneEmptyListView.h"
 #import "NEOneOnOneLocalized.h"
+#import "NEOneOnOneReachability.h"
 #import "NEOneOnOneRoomListViewModel.h"
 #import "NEOneOnOneToast.h"
 #import "NEOneOnOneUI.h"
@@ -24,6 +26,7 @@
 #import "NEOneOnOneUIKitUtils.h"
 #import "NEOneOnOneUILiveListCell.h"
 #import "NEOneOnOneUserBusyView.h"
+
 @interface NEOneOnOneRoomListViewController () <UICollectionViewDelegate,
                                                 UICollectionViewDataSource,
                                                 UIAlertViewDelegate>
@@ -40,6 +43,9 @@
 @property(nonatomic, strong) NEOneOnOneOnlineUser *roomInfoModel;
 // 音频还是视频
 @property(nonatomic, assign) BOOL isAudio;
+/// 网络监听
+@property(nonatomic, strong) NEOneOnOneReachability *reachability;
+
 @end
 
 @implementation NEOneOnOneRoomListViewController
@@ -104,8 +110,16 @@
                                            selector:@selector(busyViewShouHide:)
                                                name:NEOneOnOneCallViewControllerAppear
                                              object:nil];
+  [[NSNotificationCenter defaultCenter] addObserver:self
+                                           selector:@selector(receiveInvite:)
+                                               name:@"receiveInvite"
+                                             object:nil];
 }
 
+- (void)receiveInvite:(NSNotification *)notification {
+  [self.bottomPresentView dismiss:^{
+  }];
+}
 - (void)busyViewShouHide:(NSNotification *)notification {
   [self.busyView removeFromSuperview];
 }
@@ -129,6 +143,9 @@
     if (self.roomListViewModel.isLoading == NO) {
       [self.collectionView.mj_header endRefreshing];
       [self.collectionView.mj_footer endRefreshing];
+      [NEOneOnOneToast hideLoading];
+    } else {
+      [NEOneOnOneToast showLoading];
     }
   }];
 
@@ -152,8 +169,8 @@
   [self.collectionView mas_makeConstraints:^(MASConstraintMaker *make) {
     make.left.equalTo(self.view).offset(16);
     make.right.equalTo(self.view).offset(-16);
-    make.bottom.equalTo(self.view).offset(-7);
-    make.top.equalTo(self.view).offset([NEOneOnOneUIDeviceSizeInfo get_iPhoneNavBarHeight] + 16);
+    make.bottom.equalTo(self.view);
+    make.height.mas_equalTo(UIScreenHeight - [NEOneOnOneUIDeviceSizeInfo get_iPhoneNavBarHeight]);
   }];
 
   [self.emptyView mas_makeConstraints:^(MASConstraintMaker *make) {
@@ -182,6 +199,11 @@
       [self.roomListViewModel requestMoreDataWithLiveType:NEOneOnOneLiveRoomTypeMultiAudio];
     }
   }];
+}
+
+- (void)dealloc {
+  [NEOneOnOneToast hideLoading];
+  [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
 #pragma mark - UICollectionView delegate
@@ -275,6 +297,39 @@
             @strongify(self) NSLog(@"点击视频通话");
             [self dealWithAction:NO];
           }];
+    };
+    _bottomPresentView.clickChatUpAction = ^{
+      @strongify(self) NetworkStatus status = [self.reachability currentReachabilityStatus];
+      if (status == NotReachable) {
+        [NEOneOnOneToast showToast:NELocalizedString(@"网络异常，请稍后重试")];
+        return;
+      }
+
+      // 搭讪
+      [self.bottomPresentView dismiss:^{
+        NIMSession *session = [NIMSession session:self.roomInfoModel.userUuid
+                                             type:NIMSessionTypeP2P];
+        NIMMessage *message = [[NIMMessage alloc] init];
+        NIMMessageSetting *setting = [[NIMMessageSetting alloc] init];
+        setting.teamReceiptEnabled = YES;
+        message.setting = setting;
+        message.text = NELocalizedString(@"真心交友，愿意聊聊吗？\n很喜欢你呢~");
+        NSError *error;
+        [NIMSDK.sharedSDK.chatManager sendMessage:message toSession:session error:&error];
+        if (error) {
+        } else {
+          [NEOneOnOneToast showToast:NELocalizedString(@"搭讪成功")];
+        }
+      }];
+    };
+
+    _bottomPresentView.clickPrivateLatterAction = ^{
+      // 私信
+      @strongify(self)[self.bottomPresentView dismiss:^{
+        if (self.privateLatter) {
+          self.privateLatter(self.roomInfoModel.userUuid);
+        }
+      }];
     };
   }
   return _bottomPresentView;
@@ -493,7 +548,7 @@
       [[NERtcCallKit sharedInstance] addDelegate:callViewController];
     }
     @weakify(
-        self)[[NERtcCallKit sharedInstance] call:self.roomInfoModel.accountId
+        self)[[NERtcCallKit sharedInstance] call:self.roomInfoModel.userUuid
                                             type:(isAudio) ? NERtcCallTypeAudio : NERtcCallTypeVideo
                                       attachment:jsonString
                                      globalExtra:nil
@@ -519,7 +574,7 @@
   // 进入呼叫流程
   NEOneOnOneOnlineUser *remoteUser = [[NEOneOnOneOnlineUser alloc] init];
 
-  remoteUser.accountId = self.roomInfoModel.accountId;
+  remoteUser.userUuid = self.roomInfoModel.userUuid;
   remoteUser.userName = self.roomInfoModel.userName;
   remoteUser.mobile = self.roomInfoModel.mobile;
   remoteUser.icon = self.roomInfoModel.icon;
@@ -529,7 +584,7 @@
   } else {
     callViewController.enterStatus = video_call;
   }
-  callViewController.modalPresentationStyle = UIModalPresentationFullScreen;
+  callViewController.modalPresentationStyle = UIModalPresentationOverFullScreen;
   [self presentViewController:callViewController animated:YES completion:nil];
   //  [self.navigationController pushViewController:callViewController animated:YES];
   // 取消已点击通话数据
@@ -538,4 +593,11 @@
                    self.isEnterRoom = NO;
                  });
 }
+- (NEOneOnOneReachability *)reachability {
+  if (!_reachability) {
+    _reachability = [NEOneOnOneReachability reachabilityForInternetConnection];
+  }
+  return _reachability;
+}
+
 @end

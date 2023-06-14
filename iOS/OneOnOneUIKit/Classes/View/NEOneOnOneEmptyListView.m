@@ -45,8 +45,6 @@
   if (_tintColor == tintColor) {
     return;
   }
-  self.imgView.image =
-      [[NEOneOnOneUI ne_imageName:@"list_empty_bg_icon"] ne_imageWithTintColor:tintColor];
   //    self.tipLabel.textColor = tintColor;
 }
 
@@ -66,7 +64,7 @@
     _tipLabel.font = [UIFont systemFontOfSize:13];
     _tipLabel.textColor = [UIColor ne_colorWithHex:0x999999];
     _tipLabel.textAlignment = NSTextAlignmentCenter;
-    _tipLabel.text = NELocalizedString(@"暂无在线用户");
+    _tipLabel.text = NELocalizedString(@"还没有在线用户哦\n和你的好友一起来体验吧");
     _tipLabel.numberOfLines = 0;
   }
   return _tipLabel;

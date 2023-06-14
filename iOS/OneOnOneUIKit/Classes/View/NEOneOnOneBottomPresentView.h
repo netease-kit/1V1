@@ -17,6 +17,12 @@ typedef void (^ClickAction)(void);
 @property(nonatomic, copy) ClickAction clickAudioAction;
 // 点击视频通话
 @property(nonatomic, copy) ClickAction clickVideoAction;
+
+// 点击搭讪
+@property(nonatomic, copy) ClickAction clickChatUpAction;
+// 点击私信
+@property(nonatomic, copy) ClickAction clickPrivateLatterAction;
+
 @end
 
 ;

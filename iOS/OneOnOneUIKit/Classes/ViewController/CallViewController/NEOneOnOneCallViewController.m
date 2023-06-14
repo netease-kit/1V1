@@ -5,19 +5,22 @@
 #import "NEOneOnOneCallViewController.h"
 #import <AVFoundation/AVFoundation.h>
 #import <Masonry/Masonry.h>
+#import <NEOneOnOneKit/NEOneOnOneKit-Swift.h>
 #import <NEOneOnOneKit/NEOneOnOneLog.h>
+#import <NEOneOnOneUIKit/NEOneOnOneUIKit-Swift.h>
 #import <NERtcCallKit/NERtcCallKit.h>
 #import <NEUIKit/NEUIKit.h>
 #import <libextobjc/extobjc.h>
 #import "NEOneOnOneCallViewController+RtcCall.h"
 #import "NEOneOnOneCustomTimer.h"
+#import "NEOneOnOneGiftView.h"
 #import "NEOneOnOneLocalized.h"
 #import "NEOneOnOneReachability.h"
 #import "NEOneOnOneToast.h"
 #import "NEOneOnOneUI.h"
 #import "NEOneOnOneUIKitUtils.h"
 
-@interface NEOneOnOneCallViewController ()
+@interface NEOneOnOneCallViewController () <NEOneOnOneGiftViewDelegate>
 
 @property(nonatomic, strong) dispatch_queue_t timeQueue;
 @property(nonatomic, strong) NEOneOnOneCustomTimer *timer;
@@ -26,6 +29,7 @@
 @property(nonatomic, strong) NSString *timerIdentifier;
 /// 网络监听
 @property(nonatomic, strong) NEOneOnOneReachability *reachability;
+@property(nonatomic, strong) NEOneOnOneGiftView *giftAnimation;  // 礼物动画
 
 @end
 
@@ -33,6 +37,7 @@
 
 - (void)viewDidLoad {
   [super viewDidLoad];
+  [[UIApplication sharedApplication] setIdleTimerDisabled:YES];
   NSError *active_err;
   NSError *setCategory_err;
   //    try AVAudioSession.sharedInstance().setCategory(AVAudioSessionCategoryPlayAndRecord, with:
@@ -58,6 +63,7 @@
   /// 页面展示，销毁列表页面提示框
   [[NSNotificationCenter defaultCenter] postNotificationName:NEOneOnOneCallViewControllerAppear
                                                       object:nil];
+  [[NSNotificationCenter defaultCenter] postNotificationName:@"kCallKitShowNoti" object:nil];
 
   [self addNetworkObserver];
   self.isPstnCall = NO;
@@ -275,6 +281,13 @@
   [self.videoConnectedView mas_makeConstraints:^(MASConstraintMaker *make) {
     make.left.top.right.bottom.equalTo(self.view);
   }];
+
+  [self.view addSubview:self.giftButton];
+  [self.giftButton mas_makeConstraints:^(MASConstraintMaker *make) {
+    make.right.equalTo(self.view).offset(-15);
+    make.width.height.equalTo(@40);
+    make.bottom.equalTo(self.view).offset(-170);
+  }];
   self.videoConnectedView.hidden = YES;
 
   self.videoConnectedView.itemExpand = ^(Item item, BOOL close) {
@@ -380,12 +393,96 @@
   }
   return _videoConnectedView;
 }
+
+- (UIButton *)giftButton {
+  if (!_giftButton) {
+    _giftButton = [[UIButton alloc] init];
+    [_giftButton setImage:[NEOneOnOneUI ne_imageName:@"gift_ico"] forState:UIControlStateNormal];
+    [_giftButton addTarget:self
+                    action:@selector(chosenGift)
+          forControlEvents:UIControlEventTouchUpInside];
+    _giftButton.hidden = YES;
+  }
+  return _giftButton;
+}
+
+- (void)chosenGift {
+  [NSNotificationCenter.defaultCenter
+      postNotification:[NSNotification notificationWithName:@"oneOnOneGift" object:nil]];
+  [NEOneOnOneGiftViewController showWithViewController:self delegate:self];
+}
+
+- (void)giftView:(NEOneOnOneGiftViewController *)giftView
+        sendGift:(NEOneOnOneGiftItem *)gift
+           count:(NSInteger)count {
+  if (self.reachability.currentReachabilityStatus == NotReachable) {
+    [NEOneOnOneToast showToast:NELocalizedString(@"网络异常，请稍后重试")];
+    return;
+  }
+  @weakify(self)[[NEOneOnOneKit getInstance]
+      rewardWithGiftId:gift.giftId
+             giftCount:count
+                target:self.remoteUser.userUuid
+              callback:^(NSInteger code, NSString *_Nullable msg, id _Nullable obj) {
+                if (code == 0) {
+                  @strongify(self)[self
+                      playGiftWithName:[NSString stringWithFormat:@"anim_gift_0%zd", gift.giftId]];
+                }
+              }];
+}
+
+- (void)onReceiveGiftWithGift:(NEOneOnOneOneGift *)gift {
+  if (![gift.senderUserUuid isEqualToString:self.remoteUser.userUuid]) {
+    return;
+  }
+  [self playGiftWithName:[NSString stringWithFormat:@"anim_gift_0%zd", gift.giftId]];
+  NSString *giftName = @"荧光棒";
+  switch (gift.giftId) {
+    case 1:
+      giftName = @"荧光棒";
+      break;
+    case 2:
+      giftName = @"安排";
+      break;
+    case 3:
+      giftName = @"跑车";
+      break;
+    case 4:
+      giftName = @"火箭";
+      break;
+    default:
+      break;
+  }
+  [NEOneOnOneToast
+      showToast:[NSString stringWithFormat:@"%@ %zd %@", NELocalizedString(@"你收到"),
+                                           gift.giftCount, NELocalizedString(giftName)]];
+}
+
+#pragma mark - gift animation
+
+/// 播放礼物动画
+- (void)playGiftWithName:(NSString *)name {
+  dispatch_async(dispatch_get_main_queue(), ^{
+    [self.view addSubview:self.giftAnimation];
+    [self.view bringSubviewToFront:self.giftAnimation];
+    [self.giftAnimation addGift:name];
+  });
+}
+
+- (NEOneOnOneGiftView *)giftAnimation {
+  if (!_giftAnimation) {
+    _giftAnimation = [[NEOneOnOneGiftView alloc] init];
+  }
+  return _giftAnimation;
+}
+
 - (void)userAccept {
   @weakify(self) NSLog(@"用户同意");
   if (self.enterStatus == audio_call || self.enterStatus == audio_invited) {
     dispatch_async(dispatch_get_main_queue(), ^{
       @strongify(self) self.connectingView.hidden = NO;
       self.videoConnectedView.hidden = YES;
+      self.giftButton.hidden = NO;
       [self.connectingView updateUI:self.remoteUser.icon
                          remoteName:self.remoteUser.userName
                              status:audio_call_connecting];
@@ -425,6 +522,7 @@
   @weakify(self) dispatch_async(dispatch_get_main_queue(), ^{
     @strongify(self) self.connectingView.hidden = YES;
     self.videoConnectedView.hidden = NO;
+    self.giftButton.hidden = NO;
     [self.videoConnectedView updateUI:self.remoteUser.icon remoteName:self.remoteUser.userName];
   });
   //   dispatch_async(self.timeQueue, ^() {
@@ -455,13 +553,13 @@
     NSLog(@"self.status == NERtcCallStatusInCall enableLocalVideo:YES");
     [[NERtcCallKit sharedInstance] setupRemoteView:convert ? self.videoConnectedView.localVideoView
                                                            : self.videoConnectedView.remoteVideoView
-                                           forUser:self.remoteUser.accountId];
+                                           forUser:self.remoteUser.userUuid];
   });
 }
 
 /// 摄像头变化回调
 - (void)onVideoMute:(BOOL)mute userID:(NSString *)userID {
-  if ([self isLocalUser:userID]) {
+  if ([self isLocalUser:(long)userID]) {
     // 本端用户
     [self.videoConnectedView showLocalBlackView:mute];
   } else {
@@ -508,13 +606,21 @@
   [NEOneOnOneLog infoLog:tag desc:[NSString stringWithFormat:@"%@:endRoom", tag]];
   NSLog(@"定时器----%@", self.timer);
   dispatch_async(dispatch_get_main_queue(), ^{
-    [self dismissViewControllerAnimated:YES completion:nil];
-    //    [self.navigationController popViewControllerAnimated:YES];
+    if (self.presentedViewController) {
+      [self.presentedViewController dismissViewControllerAnimated:NO
+                                                       completion:^{
+                                                         [self dismissViewControllerAnimated:YES
+                                                                                  completion:nil];
+                                                       }];
+    } else {
+      [self dismissViewControllerAnimated:YES completion:nil];
+    }
   });
 }
 
 - (void)dealloc {
   NSLog(@"dealloc - 控制器释放");
+  [[UIApplication sharedApplication] setIdleTimerDisabled:NO];
   /// 恢复其他音乐播放
   [[AVAudioSession sharedInstance] setActive:NO
                                  withOptions:AVAudioSessionSetActiveOptionNotifyOthersOnDeactivation
@@ -522,39 +628,36 @@
 
   [[NEOneOnOneKit getInstance] removeOneOnOneListener:self];
   [self destroyNetworkObserver];
+  [[NSNotificationCenter defaultCenter] postNotificationName:@"kCallKitDismissNoti" object:nil];
 }
 
-- (BOOL)isLocalUser:(NSString *)uid {
-  if ([[NEOneOnOneKit getInstance].localMember.imAccid isEqualToString:uid]) {
+- (BOOL)isLocalUser:(long)uid {
+  if ([NEOneOnOneKit getInstance].localMember.rtcUid == uid) {
     return YES;
   }
   return NO;
 }
 #pragma mark OneOnOneListener
 
-- (void)onReceiveCustomMessageWithMessage:(NEOneOnOneCustomMessage *)message {
+- (void)onReceiveNotificationCustomMessageWithMessage:(NEOneOnOneCustomMessage *)message {
   if (message.type == 400 || message.type == 401) {
     if (message.data.audio) {
-      NSString *uid = [NSString stringWithFormat:@"%lld", message.data.audio.uid];
-      if (uid.length > 0 && [uid intValue] > 0) {
-        if ([self isLocalUser:uid]) {
-          [NEOneOnOneToast showToast:NELocalizedString(@"您的言语涉及敏感内容，请文明用语哦~")];
-        }
+      long uid = message.data.audio.uid;
+      if ([self isLocalUser:uid]) {
+        [NEOneOnOneToast showToast:NELocalizedString(@"您的言语涉及敏感内容，请文明用语哦~")];
       }
     }
     if (message.data.video) {
-      NSString *uid = [NSString stringWithFormat:@"%lld", message.data.video.uid];
-      if (uid.length > 0 && [uid intValue] > 0) {
-        // 判断是否为本端用户
-        if ([self isLocalUser:uid]) {
-          // 屏蔽本端画面
-          [self.videoConnectedView showSmallEffectView:YES];
-          [NEOneOnOneToast showToast:@"您的画面涉及敏感内容，请文明互动~\n画面已自动屏蔽"];
-        } else {
-          // 屏蔽对端画面
-          [self.videoConnectedView showLargeEffectView:YES];
-          [NEOneOnOneToast showToast:@"对方画面涉及敏感内容,\n画面已自动屏蔽"];
-        }
+      long uid = message.data.video.uid;
+      // 判断是否为本端用户
+      if ([self isLocalUser:uid]) {
+        // 屏蔽本端画面
+        [self.videoConnectedView showSmallEffectView:YES];
+        [NEOneOnOneToast showToast:@"您的画面涉及敏感内容，请文明互动~\n画面已自动屏蔽"];
+      } else {
+        // 屏蔽对端画面
+        [self.videoConnectedView showLargeEffectView:YES];
+        [NEOneOnOneToast showToast:@"对方画面涉及敏感内容,\n画面已自动屏蔽"];
       }
     }
   } else if (message.type == 3000) {

@@ -31,10 +31,7 @@ Pod::Spec.new do |s|
   s.dependency 'NECoreKit'
   s.dependency 'NERtcCallKit'
   s.dependency 'NERtcSDK/RtcBasic'
-  
-  s.resource_bundles = {
-    'NEOneOnOneKit' => ['NEOneOnOneKit/Assets/**/*']
-  }
+  s.dependency 'NECoreIMKit'
   
   s.pod_target_xcconfig = {
     'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'arm64',

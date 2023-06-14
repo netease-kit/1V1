@@ -33,10 +33,10 @@ public extension NEOneOnOneKit {
     }, failure: callback)
   }
 
-  func getAccountInfo(_ mobile: String, callback: NEOneOnOneCallback<NEOneOnOneAccountInfo>? = nil) {
+  func getAccountInfo(_ userUuid: String, callback: NEOneOnOneCallback<NEOneOnOneAccountInfo>? = nil) {
     NEOneOnOneLog.apiLog(kitTag, desc: "getAccountInfo")
     Judge.initCondition({
-      self.roomService.getAccountInfo(mobile) { info in
+      self.roomService.getAccountInfo(userUuid) { info in
         NEOneOnOneLog.successLog(kitTag, desc: "Successfully get account info.")
         callback?(NEOneOnOneErrorCode.success, nil, info)
       } failure: { error in
@@ -45,11 +45,36 @@ public extension NEOneOnOneKit {
     }, failure: callback)
   }
 
+  func loginGetRTCUid(_ callback: NEOneOnOneCallback<NEOneOnOneAccountInfo>? = nil) {
+    NEOneOnOneLog.apiLog(kitTag, desc: "getAccountInfo")
+    Judge.initCondition({
+      self.roomService.loginGetRTCUid({ info in
+        NEOneOnOneLog.successLog(kitTag, desc: "Successfully get account info.")
+        callback?(NEOneOnOneErrorCode.success, nil, info)
+
+      }, failure: { error in
+        callback?(error.code, error.localizedDescription, nil)
+      })
+    }, failure: callback)
+  }
+
   func getUserState(_ mobile: String, callback: NEOneOnOneCallback<String>? = nil) {
     NEOneOnOneLog.apiLog(kitTag, desc: "getUserStateIsOneline")
     Judge.initCondition({
       self.roomService.getUserState(mobile) { onlineState in
         callback?(NEOneOnOneErrorCode.success, nil, onlineState)
+      } failure: { error in
+        callback?(error.code, error.localizedDescription, nil)
+      }
+
+    }, failure: callback)
+  }
+
+  func reward(giftId: Int, giftCount: Int, target: String, callback: NEOneOnOneCallback<AnyObject>? = nil) {
+    NEOneOnOneLog.apiLog(kitTag, desc: "reward")
+    Judge.initCondition({
+      self.roomService.reward(giftId: giftId, giftCount: giftCount, target: target) {
+        callback?(NEOneOnOneErrorCode.success, nil, nil)
       } failure: { error in
         callback?(error.code, error.localizedDescription, nil)
       }

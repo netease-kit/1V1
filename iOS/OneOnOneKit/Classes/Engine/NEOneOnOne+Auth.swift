@@ -47,7 +47,6 @@ extension NEOneOnOneKit: NIMLoginManagerDelegate {
       callback?(NEOneOnOneErrorCode.failed, "error Account", nil)
       return
     }
-    NERtcCallKit.sharedInstance().setValue(NSNumber(value: accountIntValue), forKeyPath: "context.currentUserUid")
 
     if resumeLogin {
       _localMember.mobile = NIMSDK.shared().userManager.userInfo(account)?.userInfo?.mobile ?? ""
@@ -57,14 +56,28 @@ extension NEOneOnOneKit: NIMLoginManagerDelegate {
       _localMember.nickName = nickName ?? ""
       // 1v1 需要使用以下代码
       NE.addHeader([
-        "accountId": account,
-        "accessToken": token,
+        "user": account,
+        "token": token,
         "appKey": config?.appKey ?? "",
       ])
 
-      /// 启动定时器
-      roomService.startRepoty()
-      callback?(NEOneOnOneErrorCode.success, nil, nil)
+      roomService.loginGetRTCUid({ accountInfo in
+        if let rtcUid = accountInfo?.rtcUid {
+          NERtcCallKit.sharedInstance().setValue(NSNumber(value: rtcUid), forKeyPath: "context.currentUserUid")
+          self.localMember?.rtcUid = rtcUid
+          /// 启动定时器
+          self.roomService.startRepoty()
+          callback?(NEOneOnOneErrorCode.success, nil, nil)
+        } else {
+          NEOneOnOneLog.errorLog(kitTag, desc: "Failed to loginGetRTCUid.")
+          callback?(NEOneOnOneErrorCode.failed, "Failed to loginGetRTCUid.", nil)
+        }
+      }) { error in
+        if let error = error as NSError? {
+          NEOneOnOneLog.errorLog(kitTag, desc: "Failed to loginGetRTCUid. Code: \(error.code)")
+          callback?(error.code, error.debugDescription, nil)
+        }
+      }
       return
     }
 
@@ -86,14 +99,28 @@ extension NEOneOnOneKit: NIMLoginManagerDelegate {
       self._localMember.nickName = nickName ?? ""
       // 1v1 需要使用以下代码
       NE.addHeader([
-        "accountId": account,
-        "accessToken": token,
+        "user": account,
+        "token": token,
         "appKey": self.config?.appKey ?? "",
       ])
 
-      /// 启动定时器
-      self.roomService.startRepoty()
-      callback?(NEOneOnOneErrorCode.success, nil, nil)
+      self.roomService.loginGetRTCUid({ accountInfo in
+        if let rtcUid = accountInfo?.rtcUid {
+          NERtcCallKit.sharedInstance().setValue(NSNumber(value: rtcUid), forKeyPath: "context.currentUserUid")
+          self.localMember?.rtcUid = rtcUid
+          /// 启动定时器
+          self.roomService.startRepoty()
+          callback?(NEOneOnOneErrorCode.success, nil, nil)
+        } else {
+          NEOneOnOneLog.errorLog(kitTag, desc: "Failed to loginGetRTCUid.")
+          callback?(NEOneOnOneErrorCode.failed, "Failed to loginGetRTCUid.", nil)
+        }
+      }) { error in
+        if let error = error as NSError? {
+          NEOneOnOneLog.errorLog(kitTag, desc: "Failed to loginGetRTCUid. Code: \(error.code)")
+          callback?(error.code, error.debugDescription, nil)
+        }
+      }
     }
   }
 
