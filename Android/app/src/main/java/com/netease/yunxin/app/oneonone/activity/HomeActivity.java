@@ -183,7 +183,7 @@ public class HomeActivity extends BasePartyActivity {
         .initialize(this, AppConfig.getOneOnOneBaseUrl(), AppConfig.getAppKey());
     OneOnOneUI.getInstance().setChineseEnv(AppConfig.isChineseEnv());
     OneOnOneUI.getInstance()
-        .addHttpHeader(UserInfoManager.getSelfAccessToken(), UserInfoManager.getSelfImAccid());
+        .addHttpHeader(UserInfoManager.getSelfUserToken(), UserInfoManager.getSelfImAccid());
     NIMClient.getService(AuthServiceObserver.class)
         .observeOnlineStatus(imOnlineStatusObserver, true);
   }
@@ -292,8 +292,9 @@ public class HomeActivity extends BasePartyActivity {
         AppConfig.IM_ACCID,
         AppConfig.IM_TOKEN,
         AppConfig.IM_NICKNAME,
-        AppConfig.IM_AVATAR,
-        AppConfig.PHONE_NUMBER);
+        AppConfig.IM_AVATAR
+    );
+    UserInfoManager.setSelfUserToken(AppConfig.USER_TOKEN);
     //登录云信IM
     LoginInfo info = new LoginInfo(imAccid, imToken);
     RequestCallback<LoginInfo> callback =
