@@ -22,7 +22,8 @@ public class AppConfig {
   public static final String IM_NICKNAME = "your im nickname";
   public static final String PHONE_NUMBER = "your phone number";
   public static final String USER_TOKEN = "your user token";
-  public static final String BASE_URL="http://127.0.0.1:9981";
+  // 跑通Server Demo后，替换为实际的host
+  public static final String BASE_URL="";
 
   private static final String ZH = "zh";
 
