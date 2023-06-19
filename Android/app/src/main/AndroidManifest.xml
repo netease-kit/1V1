@@ -68,7 +68,7 @@
         android:theme="@style/OneOnOne">
         <meta-data
             android:name="com.amap.api.v2.apikey"
-            android:value="" />
+            android:value="your amap key" />
         <service android:name="com.amap.api.location.APSService" />
 
         <meta-data
