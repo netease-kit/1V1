@@ -4,7 +4,7 @@
 
 import Foundation
 
-/// 跑通Server Demo后，替换为实际的host,默认是https://127.0.0.1:9981 需要模拟器运行
+/// 服务器地址
 let kApiHost: String = ""
 
 /// 数据收集
