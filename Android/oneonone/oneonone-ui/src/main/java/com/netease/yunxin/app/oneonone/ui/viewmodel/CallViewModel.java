@@ -47,7 +47,6 @@ public class CallViewModel extends AndroidViewModel {
   private long selfRtcUid;
   private OtherUserInfo userInfo;
   private CallParam callParam;
-  private boolean needPstnCall = false;
   private final MutableLiveData<Boolean> switchToInTheCall = new MutableLiveData<>();
   private final MutableLiveData<String> toastData = new MutableLiveData<>();
   private final MutableLiveData<Boolean> callFinished = new MutableLiveData<>();
@@ -94,6 +93,7 @@ public class CallViewModel extends AndroidViewModel {
           if (callParam.getChannelType() == ChannelType.AUDIO.getValue()) {
             switchToInTheCall.postValue(true);
           }
+          // 对方断网重连会重新触发onUserEnter回调
           startInTheCallTimer();
         }
 
@@ -155,20 +155,13 @@ public class CallViewModel extends AndroidViewModel {
         @Override
         public void timeOut() {
           LogUtil.i(TAG, "timeOut");
-          if (needPstnCall) {
-            if (callParam.isCalled()) {
-              toastData.postValue(getApplication().getString(R.string.called_timeout_tips));
-              super.timeOut();
-            }
+          if (callParam.isCalled()) {
+            toastData.postValue(getApplication().getString(R.string.called_timeout_tips));
           } else {
-            if (callParam.isCalled()) {
-              toastData.postValue(getApplication().getString(R.string.called_timeout_tips));
-            } else {
-              toastData.postValue(getApplication().getString(R.string.caller_timeout_tips));
-              sendSmsData.postValue(true);
-            }
-            super.timeOut();
+            toastData.postValue(getApplication().getString(R.string.caller_timeout_tips));
+            sendSmsData.postValue(true);
           }
+          super.timeOut();
         }
       };
 
@@ -266,7 +259,6 @@ public class CallViewModel extends AndroidViewModel {
         userInfo.subtitle = getApplication().getString(R.string.invite_subtitle);
         userInfo.accId = callParam.getCalledAccIdList().get(0);
       }
-      needPstnCall = jsonObject.getBoolean(AppParams.NEED_PSTN_CALL);
     } catch (JSONException e) {
       LogUtil.e(TAG, "json parse error,e:" + e);
     }
@@ -351,17 +343,18 @@ public class CallViewModel extends AndroidViewModel {
 
   public void startInTheCallTimer() {
     if (inTheCallSecondTimer == null) {
+      // 通话中只触发一次计时器
       inTheCallSecondTimer = new SecondsTimer(0, 1000);
+      inTheCallSecondTimer.start(
+          new Function1<Long, Unit>() {
+            @Override
+            public Unit invoke(Long aLong) {
+              LogUtil.i(TAG, "startInTheCallTimer aLong:" + aLong);
+              inTheCallDuration.postValue(aLong);
+              return null;
+            }
+          });
     }
-    inTheCallSecondTimer.start(
-        new Function1<Long, Unit>() {
-          @Override
-          public Unit invoke(Long aLong) {
-            LogUtil.i(TAG, "startInTheCallTimer aLong:" + aLong);
-            inTheCallDuration.postValue(aLong);
-            return null;
-          }
-        });
   }
 
   public void cancelInTheCallTimer() {

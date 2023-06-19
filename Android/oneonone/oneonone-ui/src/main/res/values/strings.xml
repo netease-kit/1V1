@@ -34,7 +34,6 @@
     <string name="gift_tips">The functionality entry point for display. You can implement the feature on your own</string>
     <string name="earphone_tips">ASMR coming soon</string>
     <string name="input_other_test_account">Enter a test account</string>
-    <string name="pstn_setting_title">PSTN Settings</string>
     <string name="reject_tips">Your request was rejected</string>
     <string name="permission_request_failed_tips">Permission request failed. The service is unavailable</string>
     <string name="permission_microphone_missing_tips">Unable to access the microphone. Enable microphone access and try again</string>

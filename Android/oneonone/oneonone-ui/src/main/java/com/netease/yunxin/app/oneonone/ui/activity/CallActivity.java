@@ -30,11 +30,9 @@ import com.netease.yunxin.app.oneonone.ui.constant.CallConfig;
 import com.netease.yunxin.app.oneonone.ui.fragment.CallFragment;
 import com.netease.yunxin.app.oneonone.ui.fragment.InTheAudioCallFragment;
 import com.netease.yunxin.app.oneonone.ui.fragment.InTheVideoCallFragment;
-import com.netease.yunxin.app.oneonone.ui.utils.CallTimeOutHelper;
 import com.netease.yunxin.app.oneonone.ui.utils.LogUtil;
 import com.netease.yunxin.app.oneonone.ui.utils.NECallback;
 import com.netease.yunxin.app.oneonone.ui.viewmodel.CallViewModel;
-import com.netease.yunxin.app.oneonone.ui.viewmodel.PstnCallViewModel;
 import com.netease.yunxin.app.oneonone.ui.viewmodel.VirtualCallViewModel;
 import com.netease.yunxin.kit.alog.ALog;
 import com.netease.yunxin.kit.entertainment.common.utils.BluetoothHeadsetUtil;
@@ -60,7 +58,6 @@ public class CallActivity extends CommonCallActivity {
   private static final String TAG = "CallActivity";
   private CallParam callParam;
   private CallViewModel viewModel;
-  private PstnCallViewModel pstnCallViewModel;
   private VirtualCallViewModel virtualCallViewModel;
   private Fragment inTheCallFragment;
   private final Observer<Boolean> callFinishObserver = aBoolean -> finish();
@@ -109,9 +106,6 @@ public class CallActivity extends CommonCallActivity {
     adapterStatusBar();
     super.doOnCreate(savedInstanceState);
     callParam = getCallParam();
-    if (needPstnCall()) {
-      pstnCallViewModel = new ViewModelProvider(this).get(PstnCallViewModel.class);
-    }
     if (isVirtualCall() && !callParam.isCalled()) {
       virtualCallViewModel = new ViewModelProvider(this).get(VirtualCallViewModel.class);
       virtualCallViewModel.setCallParam(callParam);
@@ -227,6 +221,9 @@ public class CallActivity extends CommonCallActivity {
           .setReorderingAllowed(true)
           .replace(R.id.fragment_container_view, CallFragment.class, bundle)
           .commit();
+      if (autoCall && virtualCallViewModel != null) {
+        virtualCallViewModel.startCountDown();
+      }
       BluetoothHeadsetUtil.registerBluetoothHeadsetStatusObserver(
           bluetoothHeadsetStatusChangeListener);
       if (BluetoothHeadsetUtil.isBluetoothHeadsetConnected()
@@ -331,8 +328,6 @@ public class CallActivity extends CommonCallActivity {
   @Override
   public void finish() {
     stopRing();
-    CallTimeOutHelper.configTimeOut(
-        CallConfig.CALL_TOTAL_WAIT_TIMEOUT, CallConfig.CALL_TOTAL_WAIT_TIMEOUT);
     super.finish();
   }
 
@@ -361,20 +356,6 @@ public class CallActivity extends CommonCallActivity {
 
   private void stopRing() {
     AVChatSoundPlayer.Companion.instance().stop(CallActivity.this);
-  }
-
-  public boolean needPstnCall() {
-    try {
-      if (CallConfig.enablePstnCall
-          && callParam.getChannelType() == ChannelType.AUDIO.getValue()
-          && callParam.getCallExtraInfo() != null
-          && new JSONObject(callParam.getCallExtraInfo()).getBoolean(AppParams.NEED_PSTN_CALL)) {
-        return true;
-      }
-    } catch (JSONException e) {
-      ALog.e(TAG, "needPstnCall json parse exception:" + e);
-    }
-    return false;
   }
 
   public boolean isVirtualCall() {

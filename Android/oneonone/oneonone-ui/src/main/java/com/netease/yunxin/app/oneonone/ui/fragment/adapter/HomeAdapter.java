@@ -15,7 +15,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.blankj.utilcode.util.ToastUtils;
 import com.netease.nimlib.sdk.avsignalling.constant.ChannelType;
 import com.netease.nimlib.sdk.msg.constant.SessionTypeEnum;
-import com.netease.yunxin.app.oneonone.ui.OneOnOneUI;
 import com.netease.yunxin.app.oneonone.ui.R;
 import com.netease.yunxin.app.oneonone.ui.constant.CallConfig;
 import com.netease.yunxin.app.oneonone.ui.databinding.OneOnOneRvItemHomeBinding;
@@ -24,7 +23,6 @@ import com.netease.yunxin.app.oneonone.ui.http.HttpService;
 import com.netease.yunxin.app.oneonone.ui.model.HomeItemModel;
 import com.netease.yunxin.app.oneonone.ui.model.ModelResponse;
 import com.netease.yunxin.app.oneonone.ui.model.UserModel;
-import com.netease.yunxin.app.oneonone.ui.utils.AccountAmountHelper;
 import com.netease.yunxin.app.oneonone.ui.utils.AppGlobals;
 import com.netease.yunxin.app.oneonone.ui.utils.ChatUtil;
 import com.netease.yunxin.app.oneonone.ui.utils.DisplayUtils;
@@ -38,7 +36,6 @@ import com.netease.yunxin.kit.corekit.im.model.UserInfo;
 import com.netease.yunxin.kit.corekit.im.provider.FetchCallback;
 import com.netease.yunxin.kit.entertainment.common.utils.ClickUtils;
 import com.netease.yunxin.kit.entertainment.common.utils.DialogUtil;
-import com.netease.yunxin.kit.entertainment.common.utils.UserInfoManager;
 import java.util.ArrayList;
 import java.util.List;
 import retrofit2.Call;
@@ -197,48 +194,10 @@ public class HomeAdapter extends RecyclerView.Adapter {
                   if (response.body() != null && response.body().code == 200) {
                     String onlineState = response.body().data;
                     if (ONLINE.equals(onlineState)) {
-                      if (channelType == ChannelType.AUDIO.getValue()) {
-                        if (CallConfig.enablePstnCall) {
-                          gotoCallPage(
-                              channelType,
-                              AccountAmountHelper.allowPstnCall(UserInfoManager.getSelfImAccid())
-                                  && OneOnOneUI.getInstance().isChineseEnv(),
-                              homeItemModel,
-                              CallConfig.CALL_PSTN_WAIT_MILLISECONDS);
-                        } else {
-                          gotoCallPage(
-                              channelType,
-                              false,
-                              homeItemModel,
-                              CallConfig.CALL_PSTN_WAIT_MILLISECONDS);
-                        }
-                      } else {
-                        gotoCallPage(
-                            channelType,
-                            false,
-                            homeItemModel,
-                            CallConfig.CALL_PSTN_WAIT_MILLISECONDS);
-                      }
+                      gotoCallPage(channelType, homeItemModel);
                     } else {
-                      if (channelType == ChannelType.AUDIO.getValue()) {
-                        if (CallConfig.enablePstnCall) {
-                          // 对方不在线，直接走PSTN呼叫
-                          gotoCallPage(
-                              channelType,
-                              AccountAmountHelper.allowPstnCall(UserInfoManager.getSelfImAccid())
-                                  && OneOnOneUI.getInstance().isChineseEnv(),
-                              homeItemModel,
-                              0);
-                        } else {
-                          DialogUtil.showAlertDialog(
-                              activity,
-                              activity.getString(R.string.one_on_one_other_is_not_online));
-                        }
-
-                      } else {
-                        DialogUtil.showAlertDialog(
-                            activity, activity.getString(R.string.one_on_one_other_is_not_online));
-                      }
+                      DialogUtil.showAlertDialog(
+                          activity, activity.getString(R.string.one_on_one_other_is_not_online));
                     }
                   }
                 }
@@ -250,11 +209,7 @@ public class HomeAdapter extends RecyclerView.Adapter {
               });
     }
 
-    private void gotoCallPage(
-        int channelType,
-        boolean needPstnCall,
-        HomeItemModel homeItemModel,
-        long callPstnWaitMilliseconds) {
+    private void gotoCallPage(int channelType, HomeItemModel homeItemModel) {
       UserModel userModel = new UserModel();
       userModel.imAccid = homeItemModel.userUuid;
       userModel.nickname = homeItemModel.userName;
@@ -265,7 +220,7 @@ public class HomeAdapter extends RecyclerView.Adapter {
         userModel.audioUrl = homeItemModel.audioUrl;
         userModel.videoUrl = homeItemModel.videoUrl;
       }
-      NavUtils.toCallPage(activity, userModel, channelType, needPstnCall, callPstnWaitMilliseconds);
+      NavUtils.toCallPage(activity, userModel, channelType);
     }
 
     private void showTipsDialog(String content) {

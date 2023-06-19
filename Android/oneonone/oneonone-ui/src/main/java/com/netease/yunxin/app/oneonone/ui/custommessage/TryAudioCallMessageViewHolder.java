@@ -9,7 +9,6 @@ import android.view.View;
 import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import com.netease.yunxin.app.oneonone.ui.R;
-import com.netease.yunxin.app.oneonone.ui.constant.CallConfig;
 import com.netease.yunxin.app.oneonone.ui.utils.NavUtils;
 import com.netease.yunxin.kit.chatkit.ui.databinding.ChatBaseMessageViewHolderBinding;
 import com.netease.yunxin.kit.chatkit.ui.model.ChatMessageBean;
@@ -47,10 +46,6 @@ public class TryAudioCallMessageViewHolder extends ChatBaseMessageViewHolder {
     }
     view.findViewById(R.id.call_now)
         .setOnClickListener(
-            v ->
-                NavUtils.toCallAudioPage(
-                    getContainer().getContext(),
-                    attachment.getUserInfo(),
-                    CallConfig.CALL_PSTN_WAIT_MILLISECONDS));
+            v -> NavUtils.toCallAudioPage(getContainer().getContext(), attachment.getUserInfo()));
   }
 }

@@ -15,8 +15,6 @@ public class AppParams {
   public static final String CALLED_AUDIO_URL = "called_audio_url";
   public static final String CALLED_VIDEO_URL = "called_video_url";
   public static final String CALL_TYPE = "callType";
-  public static final String NEED_PSTN_CALL = "needPstnCall";
-  public static final String CALL_PSTN_WAIT_MILLISECONDS = "callPstnWaitMilliseconds";
   public static final String AUTO_CALL = "autoCall";
   public static final String PARAM_KEY_TITLE = "param_key_title";
   public static final String PARAM_KEY_URL = "param_key_url";

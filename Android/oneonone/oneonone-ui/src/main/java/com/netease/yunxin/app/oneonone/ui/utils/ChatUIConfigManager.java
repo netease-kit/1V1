@@ -19,7 +19,6 @@ import com.netease.nimlib.sdk.msg.constant.MsgTypeEnum;
 import com.netease.nimlib.sdk.msg.model.IMMessage;
 import com.netease.yunxin.app.oneonone.ui.R;
 import com.netease.yunxin.app.oneonone.ui.activity.CustomChatP2PActivity;
-import com.netease.yunxin.app.oneonone.ui.constant.CallConfig;
 import com.netease.yunxin.app.oneonone.ui.dialog.HotTopicDialog;
 import com.netease.yunxin.app.oneonone.ui.http.HttpService;
 import com.netease.yunxin.app.oneonone.ui.model.ModelResponse;
@@ -377,10 +376,9 @@ public class ChatUIConfigManager {
                 if (response.body() != null && response.body().code == 200) {
                   String onlineState = response.body().data;
                   if (ONLINE.equals(onlineState)) {
-                    NavUtils.toCallAudioPage(
-                        context, userInfo, CallConfig.CALL_PSTN_WAIT_MILLISECONDS);
+                    NavUtils.toCallAudioPage(context, userInfo);
                   } else {
-                    NavUtils.toCallAudioPage(context, userInfo, 0);
+                    NavUtils.toCallAudioPage(context, userInfo);
                   }
                 }
               }

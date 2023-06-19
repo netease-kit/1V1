@@ -24,7 +24,7 @@ public class BeautyConfig {
   public static final int CHANNEL_PROFILE = NERtcConstants.RTCChannelProfile.LIVE_BROADCASTING;
 
   public static final NERtcEncodeConfig.NERtcVideoFrameRate VIDEO_FRAME_RATE =
-      NERtcEncodeConfig.NERtcVideoFrameRate.FRAME_RATE_FPS_24;
+      NERtcEncodeConfig.NERtcVideoFrameRate.FRAME_RATE_FPS_15;
 
   public static final float DEFAULT_FILTER_LEVEL = 0.7f;
 }

@@ -46,7 +46,7 @@ dependencies {
     api("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
 
     implementation(project(":beauty:beauty-ui"))
-    implementation("com.netease.yunxin.kit.core:corekit:1.3.0")
+    implementation("com.netease.yunxin.kit.core:corekit:1.3.3")
     api(project(":entertainment:entertainment-common"))
     // 会话列表功能组件
     api("com.netease.yunxin.kit.conversation:conversationkit-ui:9.5.5-alpha01")

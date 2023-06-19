@@ -27,13 +27,11 @@ import com.netease.yunxin.kit.chatkit.ui.ChatKitClient;
 import com.netease.yunxin.kit.corekit.im.IMKitClient;
 import com.netease.yunxin.kit.corekit.im.utils.RouterConstant;
 import com.netease.yunxin.kit.corekit.route.XKitRouter;
-import com.netease.yunxin.kit.locationkit.LocationKitClient;
 
 public class IMUIKitUtil {
   public static void initIMUIKit(Context context, SDKOptions options) {
     IMKitClient.init(context, null, options);
     if (NIMUtil.isMainProcess(context)) {
-      LocationKitClient.init();
       registerCustomAttachParse();
     }
     registerPageRouter();

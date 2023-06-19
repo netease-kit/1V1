@@ -17,7 +17,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import com.blankj.utilcode.util.PermissionUtils;
@@ -28,27 +27,22 @@ import com.netease.yunxin.app.oneonone.ui.OneOnOneUI;
 import com.netease.yunxin.app.oneonone.ui.R;
 import com.netease.yunxin.app.oneonone.ui.activity.CallActivity;
 import com.netease.yunxin.app.oneonone.ui.constant.AppParams;
-import com.netease.yunxin.app.oneonone.ui.constant.CallConfig;
 import com.netease.yunxin.app.oneonone.ui.databinding.FragmentCallBinding;
 import com.netease.yunxin.app.oneonone.ui.http.HttpService;
 import com.netease.yunxin.app.oneonone.ui.model.ModelResponse;
 import com.netease.yunxin.app.oneonone.ui.model.OtherUserInfo;
 import com.netease.yunxin.app.oneonone.ui.utils.AccountAmountHelper;
 import com.netease.yunxin.app.oneonone.ui.utils.AppGlobals;
-import com.netease.yunxin.app.oneonone.ui.utils.CallTimeOutHelper;
 import com.netease.yunxin.app.oneonone.ui.utils.DisplayUtils;
 import com.netease.yunxin.app.oneonone.ui.utils.LogUtil;
 import com.netease.yunxin.app.oneonone.ui.utils.NECallback;
 import com.netease.yunxin.app.oneonone.ui.utils.NERTCCallStateManager;
 import com.netease.yunxin.app.oneonone.ui.viewmodel.CallViewModel;
-import com.netease.yunxin.app.oneonone.ui.viewmodel.PstnCallViewModel;
 import com.netease.yunxin.kit.alog.ALog;
 import com.netease.yunxin.kit.common.image.ImageLoader;
 import com.netease.yunxin.kit.common.network.Response;
 import com.netease.yunxin.kit.common.utils.NetworkUtils;
 import com.netease.yunxin.kit.entertainment.common.utils.UserInfoManager;
-import com.netease.yunxin.nertc.pstn.base.PstnCallParam;
-import com.netease.yunxin.nertc.pstn.base.PstnFunctionMgr;
 import com.netease.yunxin.nertc.ui.base.AVChatSoundPlayer;
 import com.netease.yunxin.nertc.ui.base.CallParam;
 import org.json.JSONException;
@@ -62,12 +56,9 @@ public class CallFragment extends Fragment {
   private CallActivity activity;
   private CallViewModel viewModel;
   private CallParam callParams;
-  private PstnCallViewModel pstnCallViewModel;
   private boolean callFinished = true;
   private String calledMobile;
   private String callerUserName;
-  /** 音频呼叫场景下，RTC呼叫转PSTN呼叫的等待时长 */
-  private long callPstnWaitMilliseconds;
 
   @Override
   public void onAttach(@NonNull Context context) {
@@ -142,39 +133,25 @@ public class CallFragment extends Fragment {
       callParamExtraInfo = new JSONObject(callParams.getCallExtraInfo());
       if (!callParams.isCalled()) {
         callFinished = false;
-        callPstnWaitMilliseconds =
-            callParamExtraInfo.getLong(AppParams.CALL_PSTN_WAIT_MILLISECONDS);
         calledMobile = callParamExtraInfo.getString(AppParams.CALLED_USER_MOBILE);
         callerUserName = callParamExtraInfo.getString(AppParams.CALLER_USER_NAME);
-        if (callParams.getChannelType() == ChannelType.AUDIO.getValue()
-            && activity.needPstnCall()) {
-          pstnCallViewModel = new ViewModelProvider(requireActivity()).get(PstnCallViewModel.class);
-          CallTimeOutHelper.configTimeOut(
-              CallConfig.CALL_TOTAL_WAIT_TIMEOUT, callPstnWaitMilliseconds);
-          PstnCallParam pstnCallParam = new PstnCallParam(callParams, calledMobile, null);
-          PstnFunctionMgr.callWithCor(pstnCallParam);
-          LogUtil.i(TAG, "handleCall->pstnCall");
+        if (activity.isVirtualCall()) {
+          NERTCCallStateManager.setCallOutState();
         } else {
-          if (activity.isVirtualCall()) {
-            NERTCCallStateManager.setCallOutState();
-          } else {
-            CallTimeOutHelper.configTimeOut(
-                CallConfig.CALL_TOTAL_WAIT_TIMEOUT, CallConfig.CALL_TOTAL_WAIT_TIMEOUT);
-            activity.rtcCall(
-                new NECallback<ChannelFullInfo>() {
-                  @Override
-                  public void onSuccess(ChannelFullInfo channelFullInfo) {
-                    callFinished = true;
-                  }
+          activity.rtcCall(
+              new NECallback<ChannelFullInfo>() {
+                @Override
+                public void onSuccess(ChannelFullInfo channelFullInfo) {
+                  callFinished = true;
+                }
 
-                  @Override
-                  public void onError(int code, String errorMsg) {
-                    ToastUtils.showShort(R.string.call_failed);
-                  }
-                });
-          }
-          LogUtil.i(TAG, "handleCall->rtcCall");
+                @Override
+                public void onError(int code, String errorMsg) {
+                  ToastUtils.showShort(R.string.call_failed);
+                }
+              });
         }
+        LogUtil.i(TAG, "handleCall->rtcCall");
       }
     } catch (JSONException e) {
       e.printStackTrace();
@@ -185,7 +162,6 @@ public class CallFragment extends Fragment {
     viewModel.refresh(callParams);
     handleOtherInfoUi();
     handleRingEvent();
-    handlePstnEvent();
     handleSmsEvent();
   }
 
@@ -237,67 +213,6 @@ public class CallFragment extends Fragment {
                 }
               });
     }
-  }
-
-  private void handlePstnEvent() {
-    if (pstnCallViewModel == null) {
-      return;
-    }
-    LifecycleOwner viewLifecycleOwner = getViewLifecycleOwner();
-    pstnCallViewModel
-        .getSwitchToInTheCall()
-        .observe(
-            viewLifecycleOwner,
-            new Observer<Integer>() {
-              @Override
-              public void onChanged(Integer integer) {
-                activity.switchToInTheCallFragment();
-              }
-            });
-
-    pstnCallViewModel
-        .getPstnToastData()
-        .observe(
-            viewLifecycleOwner,
-            new Observer<String>() {
-              @Override
-              public void onChanged(String s) {
-                ToastUtils.showShort(s);
-              }
-            });
-    pstnCallViewModel
-        .getReleaseAndFinish()
-        .observe(
-            viewLifecycleOwner,
-            new Observer<Boolean>() {
-              @Override
-              public void onChanged(Boolean aBoolean) {
-                releaseAndFinish(aBoolean);
-              }
-            });
-    pstnCallViewModel
-        .getRtcCallResult()
-        .observe(
-            viewLifecycleOwner,
-            new Observer<Boolean>() {
-              @Override
-              public void onChanged(Boolean aBoolean) {
-                callFinished = aBoolean;
-              }
-            });
-    pstnCallViewModel
-        .getSendSmsData()
-        .observe(
-            viewLifecycleOwner,
-            new Observer<Boolean>() {
-              @Override
-              public void onChanged(Boolean aBoolean) {
-                if (OneOnOneUI.getInstance().isChineseEnv()) {
-                  // 移除短信提醒功能
-                  //                  sendSms();
-                }
-              }
-            });
   }
 
   private void handleRingEvent() {
@@ -385,23 +300,18 @@ public class CallFragment extends Fragment {
       ToastUtils.showShort(getString(R.string.one_on_one_network_error));
       return;
     }
-    if (activity.needPstnCall()) {
-      PstnFunctionMgr.hangup();
-      finishActivity();
-    } else {
-      activity.rtcHangup(
-          new NECallback<Integer>() {
-            @Override
-            public void onSuccess(Integer integer) {
-              finishActivity();
-            }
+    activity.rtcHangup(
+        new NECallback<Integer>() {
+          @Override
+          public void onSuccess(Integer integer) {
+            finishActivity();
+          }
 
-            @Override
-            public void onError(int code, String errorMsg) {
-              finishActivity();
-            }
-          });
-    }
+          @Override
+          public void onError(int code, String errorMsg) {
+            finishActivity();
+          }
+        });
     if (callParams.isCalled()) {
       binding.ivInvitedAccept.setEnabled(false);
       binding.ivInvitedReject.setEnabled(false);
@@ -480,8 +390,6 @@ public class CallFragment extends Fragment {
   }
 
   private void pstnHangup() {
-    pstnCallViewModel.hangup();
-    PstnFunctionMgr.hangup();
     finishActivity();
   }
 

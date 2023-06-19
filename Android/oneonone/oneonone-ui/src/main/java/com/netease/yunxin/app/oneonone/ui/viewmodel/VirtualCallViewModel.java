@@ -90,7 +90,6 @@ public class VirtualCallViewModel extends AndroidViewModel {
 
   public VirtualCallViewModel(@NonNull Application application) {
     super(application);
-    countDownTimer.start();
   }
 
   public void setCallParam(CallParam callParam) {
@@ -177,5 +176,9 @@ public class VirtualCallViewModel extends AndroidViewModel {
     } else {
       player.setVolume(100);
     }
+  }
+
+  public void startCountDown() {
+    countDownTimer.start();
   }
 }

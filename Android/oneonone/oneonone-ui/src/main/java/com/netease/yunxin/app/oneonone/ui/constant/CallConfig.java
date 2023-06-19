@@ -7,14 +7,8 @@ package com.netease.yunxin.app.oneonone.ui.constant;
 public class CallConfig {
   /** 呼叫等待时间 */
   public static final long CALL_TOTAL_WAIT_TIMEOUT = 30 * 1000L;
-  /** RTC转网络电话呼叫等待时长 */
-  public static final long CALL_PSTN_WAIT_MILLISECONDS = 15 * 1000L;
-  /** 网络电话总时长 */
-  public static final int PSTN_CALL_TOTAL_DURATION_SECONDS = 30 * 60;
   /** 短信总可用条数 */
   public static final int SMS_TOTAL_COUNT = 100;
-  /** 是否支持PSTN呼叫 */
-  public static final boolean enablePstnCall = false;
   /** 是否支持虚拟人呼叫 */
   public static final boolean enableVirtualCall = true;
 }
