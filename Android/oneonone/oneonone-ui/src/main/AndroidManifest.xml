@@ -40,10 +40,6 @@
             android:name=".activity.OneOnOneHomeActivity"
             android:theme="@style/Theme.AppCompat.NoActionBar"
             android:screenOrientation="portrait" />
-        <activity
-            android:name=".activity.UserInfoActivity"
-            android:theme="@style/Theme.AppCompat.NoActionBar"
-            android:screenOrientation="portrait" />
 
         <activity
             android:name=".activity.CallActivity"

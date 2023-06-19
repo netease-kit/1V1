@@ -5,12 +5,10 @@
 package com.netease.yunxin.app.oneonone.callkit;
 
 import com.netease.lava.nertc.sdk.NERtcEx;
-import com.netease.lava.nertc.sdk.NERtcLinkEngine;
 import com.netease.yunxin.app.oneonone.ui.constant.AppRtcConfig;
 import com.netease.yunxin.app.oneonone.ui.utils.RtcUtil;
 import com.netease.yunxin.kit.alog.ALog;
 import com.netease.yunxin.nertc.nertcvideocall.model.NERtcCallExtension;
-import com.netease.yunxin.nertc.pstn.base.PstnCallbackProxyMgr;
 
 public class RtcCallExtension extends NERtcCallExtension {
   private static final String TAG = "PartyNERtcCallExtension";
@@ -31,14 +29,6 @@ public class RtcCallExtension extends NERtcCallExtension {
       ALog.e(TAG, "e:" + e);
     }
     super.initRtc();
-    try {
-      NERtcLinkEngine.getInstance().release();
-      NERtcLinkEngine.getInstance()
-          .init(context, PstnCallbackProxyMgr.INSTANCE.getMainInnerCallback());
-    } catch (Exception e) {
-      e.printStackTrace();
-      ALog.e(TAG, "e:" + e);
-    }
   }
 
   @Override

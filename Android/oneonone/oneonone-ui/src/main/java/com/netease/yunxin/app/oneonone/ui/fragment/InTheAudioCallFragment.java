@@ -16,13 +16,9 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProvider;
-import com.blankj.utilcode.util.ToastUtils;
 import com.netease.lava.nertc.sdk.NERtcEx;
 import com.netease.yunxin.app.oneonone.ui.R;
 import com.netease.yunxin.app.oneonone.ui.activity.CallActivity;
-import com.netease.yunxin.app.oneonone.ui.constant.AppParams;
-import com.netease.yunxin.app.oneonone.ui.constant.CallConfig;
 import com.netease.yunxin.app.oneonone.ui.databinding.FragmentInAudioCallBinding;
 import com.netease.yunxin.app.oneonone.ui.model.OtherUserInfo;
 import com.netease.yunxin.app.oneonone.ui.utils.AppGlobals;
@@ -31,12 +27,8 @@ import com.netease.yunxin.app.oneonone.ui.utils.TimeUtil;
 import com.netease.yunxin.app.oneonone.ui.utils.security.SecurityTipsModel;
 import com.netease.yunxin.app.oneonone.ui.utils.security.SecurityType;
 import com.netease.yunxin.app.oneonone.ui.view.InTheAudioCallBottomBar;
-import com.netease.yunxin.app.oneonone.ui.viewmodel.PstnCallViewModel;
 import com.netease.yunxin.kit.common.image.ImageLoader;
-import com.netease.yunxin.nertc.pstn.base.PstnFunctionMgr;
 import com.netease.yunxin.nertc.ui.base.CallParam;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 public class InTheAudioCallFragment extends InTheBaseCallFragment {
   private static final String TAG = "InTheAudioCallFragment";
@@ -44,7 +36,6 @@ public class InTheAudioCallFragment extends InTheBaseCallFragment {
   private CallActivity activity;
   private boolean muteLocal = false;
   private boolean muteRemote = false;
-  private PstnCallViewModel pstnCallViewModel;
   private long otherRtcUid;
 
   @Override
@@ -90,9 +81,6 @@ public class InTheAudioCallFragment extends InTheBaseCallFragment {
       @NonNull LayoutInflater inflater,
       @Nullable ViewGroup container,
       @Nullable Bundle savedInstanceState) {
-    if (CallConfig.enablePstnCall) {
-      pstnCallViewModel = new ViewModelProvider(requireActivity()).get(PstnCallViewModel.class);
-    }
     return super.onCreateView(inflater, container, savedInstanceState);
   }
 
@@ -150,50 +138,6 @@ public class InTheAudioCallFragment extends InTheBaseCallFragment {
                 otherRtcUid = aLong;
               }
             });
-    if (pstnCallViewModel != null) {
-      pstnCallViewModel
-          .getPstnToastData()
-          .observe(
-              viewLifecycleOwner,
-              new Observer<String>() {
-                @Override
-                public void onChanged(String s) {
-                  ToastUtils.showShort(s);
-                }
-              });
-      pstnCallViewModel
-          .getReleaseAndFinish()
-          .observe(
-              viewLifecycleOwner,
-              new Observer<Boolean>() {
-                @Override
-                public void onChanged(Boolean aBoolean) {
-                  finishActivity();
-                }
-              });
-
-      pstnCallViewModel
-          .getOtherRtcUid()
-          .observe(
-              viewLifecycleOwner,
-              new Observer<Long>() {
-                @Override
-                public void onChanged(Long aLong) {
-                  otherRtcUid = aLong;
-                }
-              });
-
-      pstnCallViewModel
-          .getInTheCallDuration()
-          .observe(
-              viewLifecycleOwner,
-              new Observer<Long>() {
-                @Override
-                public void onChanged(Long aLong) {
-                  binding.tvSubtitle.setText(TimeUtil.formatSecondTime(aLong));
-                }
-              });
-    }
 
     if (virtualCallViewModel != null) {
       virtualCallViewModel
@@ -284,24 +228,14 @@ public class InTheAudioCallFragment extends InTheBaseCallFragment {
             public void onError(int code, String errorMsg) {}
           });
     } else {
-      try {
-        JSONObject jsonObject = new JSONObject(callParams.getCallExtraInfo());
-        if (jsonObject.getBoolean(AppParams.NEED_PSTN_CALL)) {
-          PstnFunctionMgr.hangup();
+      activity.rtcHangup(
+          new NECallback<Integer>() {
+            @Override
+            public void onSuccess(Integer integer) {}
 
-        } else {
-          activity.rtcHangup(
-              new NECallback<Integer>() {
-                @Override
-                public void onSuccess(Integer integer) {}
-
-                @Override
-                public void onError(int code, String errorMsg) {}
-              });
-        }
-      } catch (JSONException e) {
-        e.printStackTrace();
-      }
+            @Override
+            public void onError(int code, String errorMsg) {}
+          });
     }
     finishActivity();
   }

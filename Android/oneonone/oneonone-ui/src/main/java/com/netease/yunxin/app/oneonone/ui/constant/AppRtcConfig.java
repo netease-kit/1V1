@@ -19,10 +19,10 @@ public class AppRtcConfig {
   /** 码率 */
   public static final int BITRATE = 1000;
 
-  public static final int PROFILE = NERtcConstants.AudioProfile.HIGH_QUALITY;
+  public static final int PROFILE = NERtcConstants.AudioProfile.STANDARD;
   public static final int SCENARIO = NERtcConstants.AudioScenario.SPEECH;
   public static final int CHANNEL_PROFILE = NERtcConstants.RTCChannelProfile.LIVE_BROADCASTING;
 
   public static final NERtcEncodeConfig.NERtcVideoFrameRate VIDEO_FRAME_RATE =
-      NERtcEncodeConfig.NERtcVideoFrameRate.FRAME_RATE_FPS_24;
+      NERtcEncodeConfig.NERtcVideoFrameRate.FRAME_RATE_FPS_15;
 }

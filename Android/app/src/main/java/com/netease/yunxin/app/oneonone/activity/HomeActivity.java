@@ -41,9 +41,8 @@ import com.netease.yunxin.kit.alog.ALog;
 import com.netease.yunxin.kit.common.network.Response;
 import com.netease.yunxin.kit.entertainment.common.activity.BasePartyActivity;
 import com.netease.yunxin.kit.entertainment.common.utils.UserInfoManager;
+import com.netease.yunxin.kit.locationkit.LocationKitClient;
 import com.netease.yunxin.nertc.nertcvideocall.bean.InvitedInfo;
-import com.netease.yunxin.nertc.pstn.PstnUIHelper;
-import com.netease.yunxin.nertc.pstn.base.PstnCallKitOptions;
 import com.netease.yunxin.nertc.ui.CallKitNotificationConfig;
 import com.netease.yunxin.nertc.ui.CallKitUI;
 import com.netease.yunxin.nertc.ui.CallKitUIOptions;
@@ -101,6 +100,7 @@ public class HomeActivity extends BasePartyActivity {
                                   .currentUserRtcUId(customRtcUid)
                                   // 必要：当前用户 AccId
                                   .currentUserAccId(UserInfoManager.getSelfImAccid())
+                                  .timeOutMillisecond(CallConfig.CALL_TOTAL_WAIT_TIMEOUT)
                                   .enableAutoJoinWhenCalled(true)
                                   // 此处为 收到来电时展示的 notification 相关配置，如图标，提示语等。
                                   .notificationConfigFetcher(
@@ -119,13 +119,7 @@ public class HomeActivity extends BasePartyActivity {
                                   .p2pAudioActivity(CallActivity.class)
                                   .p2pVideoActivity(CallActivity.class)
                                   .build();
-                          // 若重复初始化会销毁之前的初始化实例，重新初始化
-                          PstnCallKitOptions pstnCallKitOptions =
-                              new PstnCallKitOptions.Builder(options)
-                                  .timeOutMillisecond(CallConfig.CALL_TOTAL_WAIT_TIMEOUT)
-                                  .transOutMillisecond(CallConfig.CALL_PSTN_WAIT_MILLISECONDS)
-                                  .build();
-                          PstnUIHelper.init(AppGlobals.getApplication(), pstnCallKitOptions);
+                          CallKitUI.init(AppGlobals.getApplication(), options);
                         }
 
                         @Override
@@ -179,6 +173,7 @@ public class HomeActivity extends BasePartyActivity {
   @Override
   protected void init() {
     curTabIndex = -1;
+    LocationKitClient.init();
     login(AppConfig.IM_ACCID, AppConfig.IM_TOKEN);
     initViews();
   }
@@ -188,7 +183,7 @@ public class HomeActivity extends BasePartyActivity {
         .initialize(this, AppConfig.getOneOnOneBaseUrl(), AppConfig.getAppKey());
     OneOnOneUI.getInstance().setChineseEnv(AppConfig.isChineseEnv());
     OneOnOneUI.getInstance()
-        .addHttpHeader(UserInfoManager.getSelfUserToken(), UserInfoManager.getSelfImAccid());
+        .addHttpHeader(UserInfoManager.getSelfAccessToken(), UserInfoManager.getSelfImAccid());
     NIMClient.getService(AuthServiceObserver.class)
         .observeOnlineStatus(imOnlineStatusObserver, true);
   }
@@ -299,7 +294,6 @@ public class HomeActivity extends BasePartyActivity {
         AppConfig.IM_NICKNAME,
         AppConfig.IM_AVATAR,
         AppConfig.PHONE_NUMBER);
-    UserInfoManager.setSelfUserToken(AppConfig.USER_TOKEN);
     //登录云信IM
     LoginInfo info = new LoginInfo(imAccid, imToken);
     RequestCallback<LoginInfo> callback =

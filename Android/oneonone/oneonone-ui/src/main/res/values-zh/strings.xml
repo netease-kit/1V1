@@ -30,7 +30,6 @@
     <string name="gift_tips">只作为入口展示，请客户自行实现</string>
     <string name="earphone_tips">耳语功能敬请期待</string>
     <string name="input_other_test_account">填写对方测试账号</string>
-    <string name="pstn_setting_title">高接通配置</string>
     <string name="reject_tips">对方已拒绝</string>
     <string name="permission_request_failed_tips">权限申请失败，暂无法使用！</string>
     <string name="permission_microphone_missing_tips">麦克风权限已关闭，请开启后重试</string>
