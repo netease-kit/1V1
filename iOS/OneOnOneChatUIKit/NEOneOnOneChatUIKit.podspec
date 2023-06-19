@@ -34,7 +34,6 @@ Pod::Spec.new do |s|
   s.dependency 'SnapKit'
   s.dependency 'NEOneOnOneUIKit'
   s.dependency 'NERtcCallKit'
-  s.dependency 'NEContactKit'
   s.dependency 'LottieSwift'
   
 #  s.dependency 'NERtcCallKit'
