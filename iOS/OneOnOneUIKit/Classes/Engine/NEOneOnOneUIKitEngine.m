@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 #import "NEOneOnOneUIKitEngine.h"
-#import <NECallKitPstn/NECallKitPstn.h>
 #import <NEOneOnOneKit/NEOneOnOneLog.h>
 #import <NERtcCallKit/NERtcCallKit.h>
 #import "NEOneOnOneCallViewController.h"
@@ -15,7 +14,6 @@
 static NSString *engineTag = @"NEOneOnOneUIKitEngine";
 
 @interface NEOneOnOneUIKitEngine () <NERtcLinkEngineDelegate,
-                                     NECallKitPstnDelegate,
                                      NERtcCallKitDelegate,
                                      NEOneOnOneListener>
 // 通话中视图控制器
@@ -65,75 +63,12 @@ static NSString *engineTag = @"NEOneOnOneUIKitEngine";
 }
 
 #pragma mark utilMehod
-/// 获取当前视图控制器
-- (UIViewController *)findVisibleViewController {
-  UIViewController *currentViewController = [self getRootViewController];
-
-  BOOL runLoopFind = YES;
-  while (runLoopFind) {
-    if (currentViewController.presentedViewController) {
-      currentViewController = currentViewController.presentedViewController;
-    } else {
-      if ([currentViewController isKindOfClass:[UINavigationController class]]) {
-        currentViewController =
-            ((UINavigationController *)currentViewController).visibleViewController;
-      } else if ([currentViewController isKindOfClass:[UITabBarController class]]) {
-        currentViewController =
-            ((UITabBarController *)currentViewController).selectedViewController;
-      } else {
-        break;
-      }
-    }
-  }
-
-  return currentViewController;
-}
-
-//- (UIViewController *)getRootViewController {
-//  id<UIApplicationDelegate> delegate = [[UIApplication sharedApplication] delegate];
-//  if (delegate && [delegate respondsToSelector:@selector(window)]) {
-//    UIWindow *window = [delegate window];
-//    return window.rootViewController;
-//  }
-//  return [UIApplication sharedApplication].keyWindow.rootViewController;
-//}
-
-- (UIViewController *)getRootViewController {
-  UIViewController *result = nil;
-
-  UIWindow *window = [[UIApplication sharedApplication] keyWindow];
-  if (window.windowLevel != UIWindowLevelNormal) {
-    NSArray *windows = [[UIApplication sharedApplication] windows];
-    for (UIWindow *temp in windows) {
-      if (temp.windowLevel == UIWindowLevelNormal) {
-        window = temp;
-        break;
-      }
-    }
-  }
-  // 取当前展示的控制器
-  result = window.rootViewController;
-  while (result.presentedViewController) {
-    result = result.presentedViewController;
-  }
-  // 如果为UITabBarController：取选中控制器
-  if ([result isKindOfClass:[UITabBarController class]]) {
-    result = [(UITabBarController *)result selectedViewController];
-  }
-  // 如果为UINavigationController：取可视控制器
-  if ([result isKindOfClass:[UINavigationController class]]) {
-    result = [(UINavigationController *)result visibleViewController];
-  }
-  return result;
-}
 
 - (void)enterCallViewController:(NEEnterStatus)enterType
                      attachment:(NSString *)attachment
                         invitor:(NSString *)invitor {
-  UIViewController *currentViewController = [self findVisibleViewController];
+  UIViewController *currentViewController = [NEOneOnOneUIKitUtils findVisibleViewController];
   NEOneOnOneCallViewController *controller = [[NEOneOnOneCallViewController alloc] init];
-  /// 被叫..不需要设置PSTN
-  controller.needPstnCall = NO;
   [[NERtcCallKit sharedInstance] addDelegate:controller];
   switch (enterType) {
     case audio_invited:

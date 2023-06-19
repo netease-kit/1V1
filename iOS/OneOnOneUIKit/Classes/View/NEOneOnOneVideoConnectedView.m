@@ -43,6 +43,7 @@
 - (instancetype)initWithFrame:(CGRect)frame {
   self = [super initWithFrame:frame];
   if (self) {
+    self.canChangeView = YES;
     [self loadSubviews];
   }
   return self;
@@ -182,6 +183,9 @@
     } break;
     case 1: {
       /// 大小图切换
+      if (!self.canChangeView) {
+        return;
+      }
       if (self.itemExpand) {
         self.videoCloseView.hidden = sender.selected;
         BOOL localBlackViewShow = self.localVideoBlackView.hidden;
@@ -363,6 +367,7 @@
 
 - (UIView *)remoteVideoView {
   if (!_remoteVideoView) {
+    _remoteVideoView.backgroundColor = [UIColor blackColor];
     _remoteVideoView = [[UIView alloc] init];
   }
   return _remoteVideoView;

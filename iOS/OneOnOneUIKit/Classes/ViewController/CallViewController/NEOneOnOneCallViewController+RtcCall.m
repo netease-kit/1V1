@@ -2,7 +2,6 @@
 // Use of this source code is governed by a MIT license that can be
 // found in the LICENSE file.
 
-#import <NECallKitPstn/NECallKitPstn.h>
 #import <NEOneOnOneKit/NEOneOnOneKit-Swift.h>
 #import <NERtcCallKit/NERtcCallKit.h>
 #import <libextobjc/extobjc.h>
@@ -17,11 +16,12 @@
 #import "NERtcCallKit+Party.h"
 
 static NERtcChannelProfileType RTCConfig_channelProfile = kNERtcChannelProfileLiveBroadcasting;
-static NERtcAudioProfileType RTCConfig_audioProfile = kNERtcAudioProfileHighQuality;
+static NERtcAudioProfileType RTCConfig_audioProfile = kNERtcAudioProfileStandard;
 static NERtcAudioScenarioType RTCConfig_scenario = kNERtcAudioScenarioSpeech;
-static NERtcVideoFrameRate RTCConfig_videoFrame = kNERtcVideoFrameRateFps24;
+static NERtcVideoFrameRate RTCConfig_videoFrame_oversea = kNERtcVideoFrameRateFps15;
+static NERtcVideoFrameRate RTCConfig_videoFrame_online = kNERtcVideoFrameRateFps24;
 static int RTCConfig_videoWidth = 640;
-static int RTCConfig_videoHeight = 360;
+static int RTCConfig_videoHeight = 480;
 
 @implementation NEOneOnOneCallViewController (RtcCall)
 
@@ -47,7 +47,11 @@ static int RTCConfig_videoHeight = 360;
   [NERtcEngine.sharedEngine setChannelProfile:RTCConfig_channelProfile];
   [NERtcEngine.sharedEngine setAudioProfile:RTCConfig_audioProfile scenario:RTCConfig_scenario];
   NERtcVideoEncodeConfiguration *videoConfig = [[NERtcVideoEncodeConfiguration alloc] init];
-  videoConfig.frameRate = RTCConfig_videoFrame;
+  if ([NEOneOnOneKit getInstance].isOversea) {
+    videoConfig.frameRate = RTCConfig_videoFrame_oversea;
+  } else {
+    videoConfig.frameRate = RTCConfig_videoFrame_online;
+  }
   videoConfig.width = RTCConfig_videoWidth;
   videoConfig.height = RTCConfig_videoHeight;
   [NERtcEngine.sharedEngine setLocalVideoConfig:videoConfig];
@@ -70,20 +74,6 @@ static int RTCConfig_videoHeight = 360;
   self.busyBlock();
 }
 
-/// PSTN 开始
-- (void)onTimeOut {
-  // NECallKitPstn bug 需要在超时这里重置一下状态机
-  [[NERtcCallKit sharedInstance] changeStatusCalling];
-
-  [NEOneOnOneLog infoLog:tag desc:[NSString stringWithFormat:@"%@:onTimeOut", tag]];
-  NSLog(@"delegate - onTimeOut");
-  if (self.enterStatus == audio_call) {
-    /// 音频发起方会走这个代理，而不是onCallingTimeOut代理
-    // 邀请方
-    self.needShowStringWhenEndRoom = NELocalizedString(@"无法连接对方，请稍后再试");
-  }
-}
-
 /// RTC通话超时
 - (void)onCallingTimeOut {
   [NEOneOnOneLog infoLog:tag desc:[NSString stringWithFormat:@"%@:onCallingTimeOut", tag]];
@@ -97,68 +87,12 @@ static int RTCConfig_videoHeight = 360;
     /// 邀请方
     [NEOneOnOneToast showToast:NELocalizedString(@"无法连接对方，请稍后再试")];
   }
-
   [self endRoom];
-}
-
-- (void)pstnDidStart {
-  [NEOneOnOneLog infoLog:tag desc:[NSString stringWithFormat:@"%@:pstnDidStart", tag]];
-  NSLog(@"PSTN start");
-}
-
-- (void)pstnOnError:(NSError *_Nullable)error {
-  [NEOneOnOneLog infoLog:tag
-                    desc:[NSString stringWithFormat:@"%@:pstnOnError:%@", tag, error.description]];
-  NSLog(@"pstnOnError");
-  self.hasEndRoom = @"pstnOnError";
-  [NEOneOnOneToast showToast:NELocalizedString(@"无法连接对方，请稍后再试")];
-  [self endRoom];
-  NSLog(@"PSTN error");
-}
-
-- (void)pstnWillStart {
-  [NEOneOnOneLog infoLog:tag desc:[NSString stringWithFormat:@"%@:pstnWillStart", tag]];
-  self.isPstnCall = YES;
-  self.needShowStringWhenEndRoom = nil;
-  NSLog(@"PSTN will start");
 }
 
 - (void)onCallEnd {
   [NEOneOnOneLog infoLog:tag desc:[NSString stringWithFormat:@"%@:onCallEnd", tag]];
   NSLog(@"delegate - onCallEnd");
-  if (self.enterStatus == audio_call) {
-    // 发起方计时
-    if (self.startPstnTime.length > 0) {
-      NSString *currentTime = [NEOneOnOneUIKitUtils currentTimeStr];
-      long long duration = [NEOneOnOneUIKitUtils getDurationStartTime:self.startPstnTime
-                                                              endTime:currentTime];
-      if (duration > 0) {
-        /// 获取本地存储值
-        NSMutableDictionary *localDurationDic = [[[NSUserDefaults standardUserDefaults]
-            dictionaryForKey:NELocalConnectingDuration] mutableCopy];
-        if (localDurationDic == nil) {
-          localDurationDic = [NSMutableDictionary dictionary];
-        }
-        NSString *localUid = [NEOneOnOneKit getInstance].localMember.imAccid;
-        NSString *localDuration = @"0";
-        if ([localDurationDic.allKeys containsObject:localUid]) {
-          localDuration = localDurationDic[localUid];
-        }
-
-        long long totalTime = localDuration.longLongValue + duration;
-
-        if (localUid.length > 0 && totalTime > 0) {
-          [localDurationDic setValue:[NSString stringWithFormat:@"%lld", totalTime]
-                              forKey:localUid];
-
-          [[NSUserDefaults standardUserDefaults] setValue:localDurationDic
-                                                   forKey:NELocalConnectingDuration];
-        }
-      }
-    }
-  }
-  self.startPstnTime = nil;
-
   if (self.hasEndRoom.length > 0) {
     /// 已经由于其他原因关闭了房间
     self.hasEndRoom = nil;
@@ -209,56 +143,6 @@ static int RTCConfig_videoHeight = 360;
     [NEOneOnOneToast showToast:NELocalizedString(@"对方结束视频")];
   }
   [[NERtcCallKit sharedInstance] hangup:nil];
-  [self endRoom];
-}
-
-// Pstn接通
-- (void)onDirectCallAccept {
-  self.pstnAccept = YES;
-  [NEOneOnOneLog infoLog:tag desc:[NSString stringWithFormat:@"%@:onDirectCallAccept", tag]];
-  self.startPstnTime = [NEOneOnOneUIKitUtils currentTimeStr];
-  [self userAccept];
-}
-
-/// PSTN 断开连接
-- (void)onDirectCallDisconnectWithError:(NSError *)error {
-  [NEOneOnOneLog infoLog:tag
-                    desc:[NSString stringWithFormat:@"%@:onDirectCallDisconnectWithError:%@", tag,
-                                                    error.description]];
-  self.hasEndRoom = @"onDirectCallDisconnectWithError";
-  NSLog(@"delegate - onDirectCallDisconnectWithError");
-  [NEOneOnOneToast showToast:NELocalizedString(@"网络异常，通话已结束")];
-  [self endRoom];
-  [NEOneOnOneLog
-      infoLog:tag
-         desc:[NSString stringWithFormat:@"onDirectCallDisconnectWithError:code = %ld,detail = %@",
-                                         (long)error.code, error.description]];
-}
-
-/// PSTN 挂断电话
-- (void)onDirectCallHangupWithReason:(int)reason
-                               error:(NSError *)error
-                   isCallEstablished:(BOOL)isCallEstablished {
-  [NEOneOnOneLog
-      infoLog:tag
-         desc:[NSString stringWithFormat:@"%@:onDirectCallHangupWithReason:%d", tag, reason]];
-  self.hasEndRoom = @"onDirectCallHangupWithReason";
-  if (reason == 16) {
-    /// 拒绝
-    if (self.pstnAccept) {
-      [NEOneOnOneToast showToast:NELocalizedString(@"对方结束通话")];
-    } else {
-      [NEOneOnOneToast showToast:NELocalizedString(@"对方已拒绝你的请求")];
-    }
-
-  } else if (reason == 1000) {
-    /// 主动挂断
-  }
-  [NEOneOnOneLog
-      infoLog:tag
-         desc:[NSString stringWithFormat:
-                            @"onDirectCallHangupWithReason:reason:%d, code = %ld,detail = %@",
-                            reason, (long)error.code, error.description]];
   [self endRoom];
 }
 

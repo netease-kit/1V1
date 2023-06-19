@@ -6,6 +6,7 @@ import Foundation
 import NERtcCallKit
 import NIMSDK
 import NECoreIMKit
+import NERtcSDK
 
 let kitTag = "NEOneOnOneKit"
 @objcMembers
@@ -35,7 +36,9 @@ public class NEOneOnOneKit: NSObject {
     NEOneOnOneLog.setUp(config.appKey)
     NEOneOnOneLog.apiLog(kitTag, desc: "Initialize")
     self.config = config
-
+    if let baseUrl = config.extras["baseUrl"] {
+      NE.config.customUrl = baseUrl
+    }
     /// 非私有化 且要出海 使用默认海外环境
     var overseaAndNotPrivte = false
     if let serverUrl = config.extras["serverUrl"] {
@@ -52,13 +55,13 @@ public class NEOneOnOneKit: NSObject {
     option.apnsCerName = config.APNSCerName
     option.voIPCerName = config.VoIPCerName ?? ""
     option.globalInit = false
-//      option.joinRtcWhenCall = true
+    //      option.joinRtcWhenCall = true
 
     if overseaAndNotPrivte {
       NIMSDK.shared().serverSetting.lbsAddress = "https://lbs.netease.im/lbs/conf.jsp"
       NIMSDK.shared().serverSetting.linkAddress = "link-sg.netease.im:7000"
     }
-//    NERtcCallKit.sharedInstance().setupAppKey(config.appKey, withRtcUid: UInt64(account.longLongValue), options: option)
+    //    NERtcCallKit.sharedInstance().setupAppKey(config.appKey, withRtcUid: UInt64(account.longLongValue), options: option)
     /// CallKit 初始化
     let context = NERtcEngineContext()
     context.appKey = config.appKey
@@ -138,7 +141,7 @@ public class NEOneOnOneKit: NSObject {
   var config: NEOneOnOneKitConfig?
   var isDebug: Bool = false
   /// 是否出海
-  var isOversea: Bool = false
+  public var isOversea: Bool = false
 
   /// 自动上报
   var timer: Timer?

@@ -65,6 +65,12 @@ internal class _NEOneOnOneAccountInfo: NSObject, Codable {
   // mobile
   var mobile: String = ""
   var rtcUid: Int?
+
+  var callType: Int?
+  // audio 播放地址
+  var audioUrl: String?
+  // video 播放地址
+  var videoUrl: String?
 }
 
 @objcMembers
@@ -82,4 +88,10 @@ internal class _NEOneOnOneOnlineUser: NSObject, Codable {
   var icon: String?
 
   var mobile: String?
+  // tag
+  var callType: Int?
+  // audio 播放地址
+  var audioUrl: String?
+  // video 播放地址
+  var videoUrl: String?
 }

@@ -104,12 +104,16 @@ extension AppDelegate {
         NEOneOnOneChatRegisterEngine.getInstance().resgiterEngine()
         //地图map初始化,如果需要使用地图，请注册appkey
         NEMapClient.shared().setupMapClient(withAppkey: AppAMapKey)
-        
+        var mutableDic:[String : String]?
         config.appKey = self.getAppkey()
         if isOverSea {
-            config.extras = ["serverUrl": "oversea"]
+            mutableDic = ["serverUrl": "oversea"]
         }
-
+        if mutableDic == nil{
+            mutableDic = [:]
+        }
+        mutableDic?["baseUrl"] = kApiHost
+        config.extras = mutableDic ?? [:]
         NEOneOnOneUIManager.sharedInstance().initialize(with: config) { code, msg, obj in
             guard code == 0 else { return }
 
