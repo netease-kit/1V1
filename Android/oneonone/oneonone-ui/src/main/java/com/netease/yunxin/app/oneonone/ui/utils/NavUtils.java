@@ -43,7 +43,6 @@ public class NavUtils {
     JSONObject extraInfo = new JSONObject();
     try {
       extraInfo.putOpt(AppParams.CALLER_USER_NAME, UserInfoManager.getSelfNickname());
-      extraInfo.putOpt(AppParams.CALLER_USER_MOBILE, UserInfoManager.getSelfPhoneNumber());
       extraInfo.putOpt(AppParams.CALLER_USER_AVATAR, UserInfoManager.getSelfImAvatar());
       if (userModel != null) {
         if (!TextUtils.isEmpty(userModel.nickname)) {

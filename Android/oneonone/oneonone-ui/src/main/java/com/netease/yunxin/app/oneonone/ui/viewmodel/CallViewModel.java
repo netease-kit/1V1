@@ -242,7 +242,6 @@ public class CallViewModel extends AndroidViewModel {
       userInfo.callType = callParam.getChannelType();
       if (callParam.isCalled()) {
         userInfo.nickname = jsonObject.optString(AppParams.CALLER_USER_NAME);
-        userInfo.mobile = jsonObject.optString(AppParams.CALLER_USER_MOBILE);
         userInfo.avatar = jsonObject.optString(AppParams.CALLER_USER_AVATAR);
         if (callParam.getChannelType() == ChannelType.VIDEO.getValue()) {
           userInfo.title = getApplication().getString(R.string.invited_video_title);

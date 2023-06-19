@@ -10,20 +10,20 @@ import android.content.Context;
 import java.util.Locale;
 
 public class AppConfig {
+  // 跑通Server Demo后，替换为实际的host
+  public static final String BASE_URL="";// 必填
   // 请填写您的appKey,如果您的APP是国内环境，请填写APP_KEY_MAINLAND，如果是海外环境，请填写APP_KEY_OVERSEA
   private static final String APP_KEY_MAINLAND = "your mainland appKey"; // 国内用户填写
   private static final String APP_KEY_OVERSEA = "your oversea appKey"; // 海外用户填写
   public static final boolean IS_OVERSEA= false; // 海外用户填ture,国内用户填false
 
   // 生成账号参考1对1服务端工程
-  public static final String IM_ACCID = "your im accid";
-  public static final String IM_TOKEN = "your im token";
-  public static final String IM_AVATAR = "your im avatar";
-  public static final String IM_NICKNAME = "your im nickname";
-  public static final String PHONE_NUMBER = "your phone number";
-  public static final String USER_TOKEN = "your user token";
-  // 跑通Server Demo后，替换为实际的host
-  public static final String BASE_URL="";
+  public static final String IM_ACCID = "your im accid";// 必填
+  public static final String IM_TOKEN = "your im token";// 必填
+  public static final String IM_AVATAR = "your im avatar";   // 非必填
+  public static final String IM_NICKNAME = "your im nickname"; // 非必填
+  public static final String USER_TOKEN = "your user token"; // 必填
+
 
   private static final String ZH = "zh";
 

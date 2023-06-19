@@ -9,14 +9,10 @@ public class UserInfoManager {
   private static String selfImToken = "";
   private static String selfImNickname = "";
   private static String selfImAvatar = "";
-  private static String selfPhoneNumber = "";
+  private static String selfUserToken = "";
 
   public static String getSelfImAvatar() {
     return selfImAvatar;
-  }
-
-  public static String getSelfPhoneNumber() {
-    return selfPhoneNumber;
   }
 
   public static String getSelfImAccid() {
@@ -35,13 +31,20 @@ public class UserInfoManager {
     selfImNickname = nickname;
   }
 
+  public static String getSelfUserToken() {
+    return selfUserToken;
+  }
+
+  public static void setSelfUserToken(String selfUserToken) {
+    UserInfoManager.selfUserToken = selfUserToken;
+  }
+
   // 设置云信IM用户信息
   public static void setIMUserInfo(
-      String imAccid, String imToken, String imNickname, String imAvatar, String phoneNumber) {
+          String imAccid, String imToken, String imNickname, String imAvatar) {
     selfImAccid = imAccid;
     selfImToken = imToken;
     selfImNickname = imNickname;
     selfImAvatar = imAvatar;
-    selfPhoneNumber = phoneNumber;
   }
 }
