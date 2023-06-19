@@ -13,6 +13,9 @@ NS_ASSUME_NONNULL_BEGIN
 // 大窗口
 @property(nonatomic, strong) UIView *remoteVideoView;
 
+/// 是否可以进行大小窗切换
+@property(nonatomic, assign) BOOL canChangeView;
+
 /// 按钮点击回调 增加参数
 @property(nonatomic, copy) ItemEventExpand itemExpand;
 

@@ -31,6 +31,7 @@ public class NEOneOnOneChatP2PViewController: P2PChatViewController, NIMEventSub
 
   let reportArray = [ne_localized("政治造谣"), ne_localized("色情低俗"), ne_localized("广告营销"), ne_localized("欺诈信息")]
 
+  var remoteUserInfo: NEOneOnOneAccountInfo?
   /// 顶部视图
   override public func viewWillAppear(_ animated: Bool) {
     super.viewWillAppear(animated)
@@ -65,11 +66,11 @@ public class NEOneOnOneChatP2PViewController: P2PChatViewController, NIMEventSub
     NEKitChatConfig.shared.ui.leftBubbleBg = ne_chatUI_imageName(imageName: "left_back_icon")
 
     if viewmodel.session.sessionId != "yunxinassistaccid_1" {
-      inputTopExtendHeight = 40
+      inputTopExtendHeight = 95
       inputTopExtendView.addSubview(quickReplayView)
       quickReplayView.snp.makeConstraints { make in
         make.top.left.right.equalTo(inputTopExtendView)
-        make.height.equalTo(30)
+        make.height.equalTo(85)
       }
       view.bringSubviewToFront(quickReplayView)
       quickReplayView.selectQuickReply = { [weak self] index in
@@ -150,13 +151,14 @@ public class NEOneOnOneChatP2PViewController: P2PChatViewController, NIMEventSub
   }
 
   func updateOnlineState() {
-    NEOneOnOneKit.getInstance().getAccountInfo(viewmodel.session.sessionId) { code, msg, accountInfo in
+    NEOneOnOneKit.getInstance().getAccountInfo(viewmodel.session.sessionId) { [weak self] code, msg, accountInfo in
       if code != 0 {
         // 请求失败
       } else {
         guard let mobile = accountInfo?.mobile else {
           return
         }
+        self?.remoteUserInfo = accountInfo
         NEOneOnOneKit.getInstance().getUserState(mobile, callback: { [weak self] code, msg, onlineState in
           if code == 0 {
             // 请求成功
@@ -277,7 +279,7 @@ public class NEOneOnOneChatP2PViewController: P2PChatViewController, NIMEventSub
   var audioInputingView: NEOneOnOneAudioInputingView {
     if _audioInputingView == nil {
       _audioInputingView = NEOneOnOneAudioInputingView(frame: UIScreen.main.bounds)
-      let audioInputingButton = NEOneOnOneSpeakButton(frame: CGRect(x: menuView.textView.frame.origin.x + menuView.frame.origin.x, y: menuView.textView.frame.origin.y + menuView.origin.y, width: menuView.textView.frame.size.width, height: menuView.textView.frame.height))
+      let audioInputingButton = NEOneOnOneSpeakButton(frame: CGRect(x: menuView.textView.frame.origin.x + menuView.frame.origin.x, y: menuView.textView.frame.origin.y + menuView.frame.origin.y, width: menuView.textView.frame.size.width, height: menuView.textView.frame.height))
       _audioInputingView?.addSubview(audioInputingButton)
     }
     _audioInputingView?.completeBlock = { [weak self] in
@@ -354,7 +356,7 @@ public class NEOneOnOneChatP2PViewController: P2PChatViewController, NIMEventSub
   // 语音输入条
   lazy var audioInputButton: NEOneOnOneSpeakButton = {
     let audioInputButton = NEOneOnOneSpeakButton()
-    let longPressGesture = UILongPressGestureRecognizer(target: self, action: #selector(handleLongPressGesture(_:)))
+    let longPressGesture = UILongPressGestureRecognizer(target: self, action: #selector(longPressGestureAction(_:)))
     audioInputButton.addGestureRecognizer(longPressGesture)
     return audioInputButton
   }()
@@ -374,7 +376,7 @@ public class NEOneOnOneChatP2PViewController: P2PChatViewController, NIMEventSub
   // MARK: objc target func
 
   // 长按手势处理函数
-  @objc func handleLongPressGesture(_ gesture: UILongPressGestureRecognizer) {
+  @objc func longPressGestureAction(_ gesture: UILongPressGestureRecognizer) {
     let semaphore = DispatchSemaphore(value: 0)
 
     var hasPermissions = false
@@ -385,14 +387,10 @@ public class NEOneOnOneChatP2PViewController: P2PChatViewController, NIMEventSub
     switch microphoneStatus {
     case .authorized:
       hasPermissions = true
-      print("Microphone access granted")
-    case .denied:
-      print("Microphone access denied")
+    case .denied: break
     case .notDetermined:
       firstRequest = true
-      print("Microphone access not determined")
-    case .restricted:
-      print("Microphone access restricted")
+    case .restricted: break
     @unknown default:
       fatalError("Unknown microphone status")
     }
@@ -404,7 +402,6 @@ public class NEOneOnOneChatP2PViewController: P2PChatViewController, NIMEventSub
           semaphore.signal()
         } else {
           semaphore.signal()
-          print("Microphone access denied")
         }
       }
     } else {
@@ -435,7 +432,6 @@ public class NEOneOnOneChatP2PViewController: P2PChatViewController, NIMEventSub
 
     switch gesture.state {
     case .began:
-
       NEOneOnOneLog.infoLog(
         tag,
         desc: "开始录音"
@@ -445,9 +441,7 @@ public class NEOneOnOneChatP2PViewController: P2PChatViewController, NIMEventSub
       UIApplication.shared.keyWindow?.addSubview(audioInputingView)
       // TODO: 录制开始
       startRecord()
-
     case .changed:
-      print("changed")
       // 手指不离开进行滑动
       // 判断是否滑动到全屏视图的某一个区域
       let inreact = CGRectContainsPoint(audioInputingView.audioInputImageView.frame, gesture.location(in: UIApplication.shared.keyWindow))
@@ -1032,10 +1026,19 @@ public class NEOneOnOneChatP2PViewController: P2PChatViewController, NIMEventSub
             if onlineState != nil, onlineState == "online" {
               // 在线
               /// 直接呼叫，对端收到邀请通知，如果在忙的话，hungUp配上原因，本段可以拿到状态
-              self?.startCall(isAudio: isAudio, remoteUserIsOnline: true)
+              self?.startCallAction(isAudio: isAudio)
             } else {
               // 不在线
-              self?.startCall(isAudio: isAudio, remoteUserIsOnline: false)
+              if let self = self {
+                NEOneOnOneUIKitUtils.presentAlert(self,
+                                                  titile: ne_localized("对方不在线，请稍后再试"),
+                                                  cancelTitle: "",
+                                                  confirmTitle: ne_localized("确定"),
+                                                  confirmComplete: {})
+                // 取消已点击通话数据
+              }
+              self?.isEnterRoom = false
+              return
             }
           } else {
             // 请求失败
@@ -1048,47 +1051,7 @@ public class NEOneOnOneChatP2PViewController: P2PChatViewController, NIMEventSub
     }
   }
 
-  func startCall(isAudio: Bool, remoteUserIsOnline: Bool) {
-    // 获取本地存储值
-
-    var localDuration: String?
-
-    if let localDurationDic = UserDefaults.standard.dictionary(forKey: NELocalConnectingDuration),
-
-       let localUid = NEOneOnOneKit.getInstance().localMember?.imAccid,
-
-       let duration = localDurationDic[localUid] as? String {
-      localDuration = duration
-
-      print("本地时长：(localDuration!)")
-    }
-
-    var needPstn = isAudio ? true : false
-    if remoteUserIsOnline {
-      // 远端用户在线
-      if let duration = localDuration, let localDurationInt = Int64(duration),
-         localDurationInt > NEPSTNMaxDuration {
-        // 超时不设置PSTN
-        needPstn = false
-      }
-    } else {
-      // 远端用户不在线，直接进行pstn
-      if !isAudio || (localDuration != nil && Int64(localDuration!)! > NEPSTNMaxDuration) {
-        // 视频通话
-        NEOneOnOneUIKitUtils.presentAlert(self,
-                                          titile: ne_localized("对方不在线，请稍后再试"),
-                                          cancelTitle: "",
-                                          confirmTitle: ne_localized("确定"),
-                                          confirmComplete: {})
-        // 取消已点击通话数据
-        isEnterRoom = false
-        return
-      }
-    }
-    startCallAction(isAudio: isAudio, remoteUserIsOnline: remoteUserIsOnline, needPstn: needPstn)
-  }
-
-  func startCallAction(isAudio: Bool, remoteUserIsOnline: Bool, needPstn: Bool) {
+  func startCallAction(isAudio: Bool) {
     var hasPermissions = false
 
     let semaphore = DispatchSemaphore(value: 0)
@@ -1135,12 +1098,9 @@ public class NEOneOnOneChatP2PViewController: P2PChatViewController, NIMEventSub
     }
     print("权限判断通过")
 
-    let user = viewmodel.getUserInfo(userId: viewmodel.session.sessionId)
-    NECallKitPstn.sharedInstance().setCallee(user?.userInfo?.mobile ?? "")
-    //            NSLog("pstn mobile : %@", roomInfoModel?.mobile)
-
-    NERtcCallKit.sharedInstance().timeOutSeconds = isAudio ? (remoteUserIsOnline ? 15 : 1) : 30
-    NERtcCallKit.sharedInstance().enableLocalVideo(true)
+    if remoteUserInfo?.callType != 1 {
+      NERtcCallKit.sharedInstance().timeOutSeconds = isAudio ? (remoteUserIsOnline ? 15 : 1) : 30
+    }
 
     let attachment: [String: Any] = [
       CALLER_USER_NAME: NEOneOnOneKit.getInstance().localMember?.nickName as Any,
@@ -1155,18 +1115,18 @@ public class NEOneOnOneChatP2PViewController: P2PChatViewController, NIMEventSub
     DispatchQueue.main.async { [weak self] in
       guard let strongSelf = self else { return }
       let callViewController = NEOneOnOneCallViewController()
-      callViewController.needPstnCall = needPstn
       callViewController.busyBlock = {
         DispatchQueue.main.async {
           UIApplication.shared.keyWindow?.addSubview(strongSelf.busyView)
         }
       }
-      if needPstn {
-        NECallKitPstn.sharedInstance().add(callViewController)
-        NECallKitPstn.sharedInstance().addDelegate(callViewController)
-      } else {
-        NERtcCallKit.sharedInstance().add(callViewController)
+      if strongSelf.remoteUserInfo?.oc_callType == 1 {
+        NERtcCallKit.sharedInstance().changeStatusCalling()
+        strongSelf.startCallKit(isAudio: isAudio, controller: callViewController)
+        return
       }
+
+      NERtcCallKit.sharedInstance().add(callViewController)
 
       NERtcCallKit.sharedInstance().call(self?.viewmodel.session.sessionId ?? "",
                                          type: isAudio ? .audio : .video,
@@ -1199,7 +1159,10 @@ public class NEOneOnOneChatP2PViewController: P2PChatViewController, NIMEventSub
 
     remoteUser.mobile = user?.userInfo?.mobile
 
-    remoteUser.icon = user?.userInfo?.avatarUrl
+    remoteUser.icon = remoteUserInfo?.icon
+    remoteUser.callType = remoteUserInfo?.callType
+    remoteUser.audioUrl = remoteUserInfo?.audioUrl
+    remoteUser.videoUrl = remoteUserInfo?.videoUrl
 
     controller.remoteUser = remoteUser
 

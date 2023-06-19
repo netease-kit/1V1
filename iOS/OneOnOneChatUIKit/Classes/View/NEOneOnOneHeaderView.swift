@@ -20,7 +20,8 @@ class NEOneOnOneHeaderView: UIView {
     addSubview(backButton)
     backButton.snp.makeConstraints { make in
       make.left.equalTo(self).offset(12)
-      make.height.width.equalTo(18)
+      make.width.equalTo(20)
+      make.height.equalTo(40)
       make.centerY.equalTo(self)
     }
     addSubview(settingButton)

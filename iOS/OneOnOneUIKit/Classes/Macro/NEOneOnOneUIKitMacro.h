@@ -11,7 +11,6 @@
 #define CALLED_USER_NAME @"called_userName"
 #define CALLED_USER_MOBILE @"called_userMobile"
 #define CALLED_USER_AVATAR @"called_userAvatar"
-#define NEED_PSTN_CALL @"needPstnCall"
 #define PARAM_KEY_TITLE @"param_key_title"
 #define PARAM_KEY_URL @"param_key_url"
 #define INDEX @"index"
@@ -22,7 +21,19 @@
 #define NELocalConnectingDuration @"ConnectionDuration"
 #define NEOneOnOneCallViewControllerAppear @"NEOneOnOneCallViewControllerAppear"
 
-#define NEPSTNMaxDuration 30 * 60
+typedef enum : NSUInteger {
+  // 主动拨打音频
+  audio_call,
+  // 主动拨打视频
+  video_call,
+  // 收到音频邀请通知
+  audio_invited,
+  // 收到视频邀请通知
+  video_invited,
+  // 默认
+  enter_default,
+} NEEnterStatus;
+
 /// 通话中 底部视图点击点击事件
 typedef enum : NSUInteger {
   /// 麦克风

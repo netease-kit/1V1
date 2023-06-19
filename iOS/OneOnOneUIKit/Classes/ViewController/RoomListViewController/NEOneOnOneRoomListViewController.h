@@ -2,14 +2,14 @@
 // Use of this source code is governed by a MIT license that can be
 // found in the LICENSE file.
 
-#import <NEUIKit/NEUIBaseViewController.h>
+#import <UIKit/UIKit.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
 typedef void (^PrivateLatterBlock)(NSString *sessionId);
 
 /// 1v1列表
-@interface NEOneOnOneRoomListViewController : NEUIBaseViewController
+@interface NEOneOnOneRoomListViewController : UIViewController
 
 @property(nonatomic, copy) PrivateLatterBlock privateLatter;
 @end

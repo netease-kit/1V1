@@ -143,6 +143,22 @@ public class NEOneOnOneAccountInfo: NSObject {
   public var sex: Int = 0
 
   public var rtcUid: Int?
+
+  public var callType: Int?
+  // audio 播放地址
+  public var audioUrl: String?
+  // video 播放地址
+  public var videoUrl: String?
+
+  public var oc_callType: Int {
+    set {
+      callType = newValue
+    }
+    get {
+      callType ?? 0
+    }
+  }
+
   init(_ create: _NEOneOnOneAccountInfo?) {
     if let create = create {
       imToken = create.imToken
@@ -154,6 +170,9 @@ public class NEOneOnOneAccountInfo: NSObject {
       sex = create.sex
       mobile = create.mobile
       rtcUid = create.rtcUid
+      callType = create.callType
+      audioUrl = create.audioUrl
+      videoUrl = create.videoUrl
     }
   }
 }
@@ -181,6 +200,21 @@ public class NEOneOnOneOnlineUser: NSObject {
   // imaccid
   public var mobile: String?
 
+  public var callType: Int?
+  // audio 播放地址
+  public var audioUrl: String?
+  // video 播放地址
+  public var videoUrl: String?
+
+  public var oc_callType: Int {
+    set {
+      callType = newValue
+    }
+    get {
+      callType ?? 0
+    }
+  }
+
   override public init() {
     super.init()
   }
@@ -191,6 +225,9 @@ public class NEOneOnOneOnlineUser: NSObject {
       userName = create.userName
       icon = create.icon
       mobile = create.mobile
+      callType = create.callType
+      audioUrl = create.audioUrl
+      videoUrl = create.videoUrl
     }
   }
 }

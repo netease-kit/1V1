@@ -24,7 +24,7 @@ Pod::Spec.new do |s|
   s.source           = { :git => 'https://github.com/mayajie@corp.netease.com/NEOneOnOneUIKit.git', :tag => s.version.to_s }
   # s.social_media_url = 'https://twitter.com/<TWITTER_USERNAME>'
   
-  s.ios.deployment_target = '9.0'
+  s.ios.deployment_target = '10.0'
   
   s.source_files = 'Classes/**/*'
 #  s.dependency 'NECoreKit'
@@ -37,10 +37,10 @@ Pod::Spec.new do |s|
   s.dependency 'lottie-ios', '~> 2.5.3'
   s.dependency 'Toast'
   s.dependency 'libextobjc'
-  s.dependency 'NECallKitPstn'
   s.dependency 'NERtcCallKit'
   s.dependency 'NECommonUIKit'
   s.dependency 'SnapKit'
+  s.dependency 'NESocialUIKit'
   s.resource = 'Assets/**/*'
   
   s.pod_target_xcconfig = {

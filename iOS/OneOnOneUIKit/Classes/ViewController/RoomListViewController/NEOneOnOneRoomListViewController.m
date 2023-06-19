@@ -6,7 +6,6 @@
 #import <AVFoundation/AVFoundation.h>
 #import <MJRefresh/MJRefresh.h>
 #import <Masonry/Masonry.h>
-#import <NECallKitPstn/NECallKitPstn.h>
 #import <NEOneOnOneKit/NEOneOnOneKit-Swift.h>
 #import <NERtcCallKit/NERtcCallKit.h>
 #import <NEUIKit/NEUIKit.h>
@@ -26,6 +25,7 @@
 #import "NEOneOnOneUIKitUtils.h"
 #import "NEOneOnOneUILiveListCell.h"
 #import "NEOneOnOneUserBusyView.h"
+#import "NERtcCallKit+Party.h"
 
 @interface NEOneOnOneRoomListViewController () <UICollectionViewDelegate,
                                                 UICollectionViewDataSource,
@@ -88,6 +88,7 @@
 
   // Do any additional setup after loading the view.
   self.title = NELocalizedString(@"1V1社交");
+  self.view.backgroundColor = UIColor.whiteColor;
 
   [self getNewData];
   [self bindViewModel];
@@ -387,11 +388,20 @@
                 if (onlineState.length > 0 && [onlineState isEqualToString:@"online"]) {
                   // 在线
                   /// 直接呼叫，对端收到邀请通知，如果在忙的话，hungUp配上原因，本段可以拿到状态
-                  [self startCall:isAudio remoteUserIsOnline:YES];
+                  [self startCallAction:isAudio];
 
                 } else {
                   // 不在线
-                  [self startCall:isAudio remoteUserIsOnline:NO];
+                  [NEOneOnOneUIKitUtils
+                      presentAlertViewController:self
+                                          titile:NELocalizedString(@"对方不在线，请稍后再试")
+                                     cancelTitle:@""
+                                    confirmTitle:NELocalizedString(@"确定")
+                                 confirmComplete:^{
+
+                                 }];
+                  // 取消已点击通话数据
+                  self.isEnterRoom = NO;
                 }
               }
               else {
@@ -404,45 +414,7 @@
   }
 }
 
-- (void)startCall:(BOOL)isAudio remoteUserIsOnline:(BOOL)remoteUserIsOnline {
-  /// 获取本地存储值
-  NSString *localDuration;
-  NSDictionary *localDurationDic =
-      [[NSUserDefaults standardUserDefaults] dictionaryForKey:NELocalConnectingDuration];
-  NSString *localUid = [NEOneOnOneKit getInstance].localMember.imAccid;
-  if ([localDurationDic.allKeys containsObject:localUid]) {
-    localDuration = localDurationDic[localUid];
-    NSLog(@"本地时长：%@", localDuration);
-  }
-  BOOL needPstn = isAudio ? YES : NO;
-  if (remoteUserIsOnline) {
-    // 远端用户在线
-    if (localDuration.longLongValue > NEPSTNMaxDuration) {
-      /// 超时不设置PSTN
-      needPstn = NO;
-    }
-  } else {
-    // 远端用户不在线，直接进行pstn
-    if (!isAudio || localDuration.longLongValue > NEPSTNMaxDuration) {
-      /// 视频通话
-      [NEOneOnOneUIKitUtils presentAlertViewController:self
-                                                titile:NELocalizedString(@"对方不在线，请稍后再试")
-                                           cancelTitle:@""
-                                          confirmTitle:NELocalizedString(@"确定")
-                                       confirmComplete:^{
-
-                                       }];
-      // 取消已点击通话数据
-      self.isEnterRoom = NO;
-      return;
-    }
-  }
-  [self startCallAction:isAudio remoteUserIsOnline:remoteUserIsOnline needPstn:needPstn];
-}
-
-- (void)startCallAction:(BOOL)isAudio
-     remoteUserIsOnline:(BOOL)remoteUserIsOnline
-               needPstn:(BOOL)needPstn {
+- (void)startCallAction:(BOOL)isAudio {
   {
     __block BOOL hasPermissions = NO;
     dispatch_semaphore_t semaphore = dispatch_semaphore_create(0);
@@ -515,11 +487,9 @@
     NSLog(@"权限判断通过");
   }
 
-  [[NECallKitPstn sharedInstance] setCallee:self.roomInfoModel.mobile];
-  NSLog(@"pstn mobile : %@", self.roomInfoModel.mobile);
-
-  [NERtcCallKit sharedInstance].timeOutSeconds = (isAudio) ? (remoteUserIsOnline ? 15 : 1) : 30;
-  [[NERtcCallKit sharedInstance] enableLocalVideo:YES];
+  if (self.roomInfoModel.oc_callType != 1) {
+    [NERtcCallKit sharedInstance].timeOutSeconds = isAudio ? 15 : 30;
+  }
 
   NSDictionary *attachment = @{
     CALLER_USER_NAME : [NEOneOnOneKit getInstance].localMember.nickName,
@@ -531,22 +501,20 @@
                                                    options:NSJSONWritingPrettyPrinted
                                                      error:nil]
           encoding:NSUTF8StringEncoding];
-  /// 再发起前需要设置 是否需要PSTN
   @weakify(self) dispatch_async(dispatch_get_main_queue(), ^{
     @strongify(self) NEOneOnOneCallViewController *callViewController =
         [[NEOneOnOneCallViewController alloc] init];
-    callViewController.needPstnCall = needPstn;
     callViewController.busyBlock = ^{
       dispatch_async(dispatch_get_main_queue(), ^{
         [[UIApplication sharedApplication].keyWindow addSubview:self.busyView];
       });
     };
-    if (needPstn) {
-      [[NECallKitPstn sharedInstance] addDelegate:callViewController];
-      [[NECallKitPstn sharedInstance] addPstnDelegate:callViewController];
-    } else {
-      [[NERtcCallKit sharedInstance] addDelegate:callViewController];
+    if (self.roomInfoModel.oc_callType == 1) {
+      [[NERtcCallKit sharedInstance] changeStatusCalling];
+      [self startCallKit:isAudio controller:callViewController];
+      return;
     }
+    [[NERtcCallKit sharedInstance] addDelegate:callViewController];
     @weakify(
         self)[[NERtcCallKit sharedInstance] call:self.roomInfoModel.userUuid
                                             type:(isAudio) ? NERtcCallTypeAudio : NERtcCallTypeVideo
@@ -578,6 +546,9 @@
   remoteUser.userName = self.roomInfoModel.userName;
   remoteUser.mobile = self.roomInfoModel.mobile;
   remoteUser.icon = self.roomInfoModel.icon;
+  remoteUser.oc_callType = self.roomInfoModel.oc_callType;
+  remoteUser.audioUrl = self.roomInfoModel.audioUrl;
+  remoteUser.videoUrl = self.roomInfoModel.videoUrl;
   callViewController.remoteUser = remoteUser;
   if (isAudio) {
     callViewController.enterStatus = audio_call;

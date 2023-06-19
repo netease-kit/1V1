@@ -53,14 +53,16 @@ skip_pod_bundle_sign
   pod 'NEOneOnOneKit', :path => '../OneOnOneKit/NEOneOnOneKit.podspec'
   pod 'NEOneOnOneChatUIKit', :path => '../OneOnOneChatUIKit/NEOneOnOneChatUIKit.podspec'
   pod 'LottieSwift', :path => '../lottie/LottieSwift.podspec'
+  pod 'NESocialUIKit', :path => '../NESocialUIKit/NESocialUIKit.podspec'
+
   pod 'NECommonUIKit','9.5.5-alpha01'
   pod 'NECommonKit','9.5.5-alpha01'
   pod 'NEConversationUIKit','9.5.5-alpha01'
   pod 'NEChatUIKit','9.5.5-alpha01'
   pod 'NEMapKit','9.5.5-alpha01'
   pod 'NECommonExt'
-  pod 'NECoreIMKit','9.5.5-alpha01'
-  pod 'NECoreKit','9.5.5-alpha01'
+  pod 'NECoreIMKit','9.5.1'
+  pod 'NECoreKit','9.5.1'
   
   
   

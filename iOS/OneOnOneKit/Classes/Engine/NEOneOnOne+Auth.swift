@@ -42,11 +42,12 @@ extension NEOneOnOneKit: NIMLoginManagerDelegate {
     }
 
     /// 设置RTC Uid 和account一致
-    let accountIntValue = Int(account) ?? 0
-    if accountIntValue == 0 {
-      callback?(NEOneOnOneErrorCode.failed, "error Account", nil)
-      return
-    }
+    /// 注释以下代码：RTC通过接口获取，不进行account是否为数字的判断
+//    let accountIntValue = Int(account) ?? 0
+//    if accountIntValue == 0 {
+//      callback?(NEOneOnOneErrorCode.failed, "error Account", nil)
+//      return
+//    }
 
     if resumeLogin {
       _localMember.mobile = NIMSDK.shared().userManager.userInfo(account)?.userInfo?.mobile ?? ""
@@ -160,7 +161,7 @@ extension NEOneOnOneKit: NIMLoginManagerDelegate {
       if pointerListener is NEOneOnOneAuthListener {
         let listener = pointerListener as! NEOneOnOneAuthListener
         if listener.responds(to: #selector(NEOneOnOneAuthListener.onOneOnOneAuthEvent(_:))) {
-          listener.onOneOnOneAuthEvent?(.loggedOut)
+          listener.onOneOnOneAuthEvent?(.kickOut)
         }
       }
     }

@@ -4,13 +4,8 @@
 
 import Foundation
 
-/// 服务器host
-
-let kApiHost: String = "https://yiyong.netease.im"
-
-// Chatroom host address
-
-let kChatRoomHost: String = "http://yiyong-voice-chat.netease.im"
+/// 跑通Server Demo后，替换为实际的host,默认是https://127.0.0.1:9981 需要模拟器运行
+let kApiHost: String = ""
 
 /// 数据收集
 

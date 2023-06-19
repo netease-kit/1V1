@@ -15,6 +15,8 @@
 
 /// 封面
 @property(nonatomic, strong) UIImageView *coverView;
+/// 背景
+@property(nonatomic, strong) UILabel *backLabel;
 /// 在线
 @property(nonatomic, strong) UILabel *onlineLabel;
 /// 在线图标 小绿点
@@ -35,6 +37,7 @@
 
 - (void)setupViews {
   [self.contentView addSubview:self.coverView];
+  [self.contentView addSubview:self.backLabel];
   [self.contentView addSubview:self.onlineLabel];
   [self.contentView addSubview:self.onlineImageView];
   [self.contentView addSubview:self.roomLabel];
@@ -58,6 +61,13 @@
     make.bottom.equalTo(self.contentView).offset(-8);
     make.right.lessThanOrEqualTo(self.contentView).offset(-8);
     make.height.equalTo(@20);
+  }];
+
+  [self.backLabel mas_makeConstraints:^(MASConstraintMaker *make) {
+    make.left.equalTo(self.onlineImageView.mas_left).offset(-5);
+    make.right.equalTo(self.onlineLabel.mas_right).offset(5);
+    make.height.equalTo(@20);
+    make.centerY.equalTo(self.onlineLabel);
   }];
 }
 
@@ -136,6 +146,17 @@
   }
   return _onlineLabel;
 }
+- (UILabel *)backLabel {
+  if (!_backLabel) {
+    _backLabel = [[UILabel alloc] init];
+    _backLabel.text = @"";
+    _backLabel.backgroundColor = [UIColor ne_colorWithHex:0x000000 alpha:0.5];
+    _backLabel.layer.masksToBounds = YES;
+    _backLabel.layer.cornerRadius = 10;
+  }
+  return _backLabel;
+}
+
 - (UIImageView *)onlineImageView {
   if (!_onlineImageView) {
     _onlineImageView = [[UIImageView alloc] init];
