@@ -8,6 +8,7 @@ import android.Manifest;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Color;
+import android.media.AudioManager;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,19 +20,14 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
-import com.blankj.utilcode.util.PermissionUtils;
-import com.blankj.utilcode.util.ToastUtils;
+import com.netease.lava.nertc.sdk.NERtcEx;
 import com.netease.nimlib.sdk.avsignalling.constant.ChannelType;
 import com.netease.nimlib.sdk.avsignalling.model.ChannelFullInfo;
-import com.netease.yunxin.app.oneonone.ui.OneOnOneUI;
 import com.netease.yunxin.app.oneonone.ui.R;
 import com.netease.yunxin.app.oneonone.ui.activity.CallActivity;
 import com.netease.yunxin.app.oneonone.ui.constant.AppParams;
 import com.netease.yunxin.app.oneonone.ui.databinding.FragmentCallBinding;
-import com.netease.yunxin.app.oneonone.ui.http.HttpService;
-import com.netease.yunxin.app.oneonone.ui.model.ModelResponse;
 import com.netease.yunxin.app.oneonone.ui.model.OtherUserInfo;
-import com.netease.yunxin.app.oneonone.ui.utils.AccountAmountHelper;
 import com.netease.yunxin.app.oneonone.ui.utils.AppGlobals;
 import com.netease.yunxin.app.oneonone.ui.utils.DisplayUtils;
 import com.netease.yunxin.app.oneonone.ui.utils.LogUtil;
@@ -40,15 +36,13 @@ import com.netease.yunxin.app.oneonone.ui.utils.NERTCCallStateManager;
 import com.netease.yunxin.app.oneonone.ui.viewmodel.CallViewModel;
 import com.netease.yunxin.kit.alog.ALog;
 import com.netease.yunxin.kit.common.image.ImageLoader;
-import com.netease.yunxin.kit.common.network.Response;
+import com.netease.yunxin.kit.common.ui.utils.ToastX;
 import com.netease.yunxin.kit.common.utils.NetworkUtils;
-import com.netease.yunxin.kit.entertainment.common.utils.UserInfoManager;
+import com.netease.yunxin.kit.common.utils.PermissionUtils;
 import com.netease.yunxin.nertc.ui.base.AVChatSoundPlayer;
 import com.netease.yunxin.nertc.ui.base.CallParam;
 import org.json.JSONException;
 import org.json.JSONObject;
-import retrofit2.Call;
-import retrofit2.Callback;
 
 public class CallFragment extends Fragment {
   private static final String TAG = "CallFragment";
@@ -77,7 +71,7 @@ public class CallFragment extends Fragment {
                       @Override
                       public void onClick(DialogInterface dialogInterface, int i) {
                         if (!callFinished) {
-                          ToastUtils.showShort(R.string.call_out_failed);
+                          ToastX.showShortToast(R.string.call_out_failed);
                           finishActivity();
                           return;
                         }
@@ -116,6 +110,8 @@ public class CallFragment extends Fragment {
       handleCall();
     }
     if (callParams.isCalled()) {
+      // 被叫扬声器响铃
+      setSpeakerphoneOn(true);
       playRing(AVChatSoundPlayer.RingerTypeEnum.RING);
     }
     subscribeUi();
@@ -123,8 +119,19 @@ public class CallFragment extends Fragment {
     return binding.getRoot();
   }
 
-  public void handleCall() {
+  private void setSpeakerphoneOn(boolean speakerphoneOn) {
+    AudioManager audioManager = (AudioManager) activity.getSystemService(Context.AUDIO_SERVICE);
+    if (speakerphoneOn) {
+      audioManager.setMode(AudioManager.MODE_NORMAL);
+      audioManager.setSpeakerphoneOn(true);
+    } else {
+      audioManager.setMode(AudioManager.MODE_IN_CALL);
+      audioManager.setSpeakerphoneOn(false);
+    }
+  }
 
+  public void handleCall() {
+    // 主叫逻辑
     if (callParams.getCallExtraInfo() == null) {
       return;
     }
@@ -137,17 +144,23 @@ public class CallFragment extends Fragment {
         callerUserName = callParamExtraInfo.getString(AppParams.CALLER_USER_NAME);
         if (activity.isVirtualCall()) {
           NERTCCallStateManager.setCallOutState();
+          setSpeakerphoneOn(callParams.getChannelType() != ChannelType.AUDIO.getValue());
+          AVChatSoundPlayer.INSTANCE.play(activity, AVChatSoundPlayer.RingerTypeEnum.RING);
         } else {
           activity.rtcCall(
               new NECallback<ChannelFullInfo>() {
                 @Override
                 public void onSuccess(ChannelFullInfo channelFullInfo) {
                   callFinished = true;
+                  AVChatSoundPlayer.INSTANCE.play(activity, AVChatSoundPlayer.RingerTypeEnum.RING);
+                  NERtcEx.getInstance()
+                      .setSpeakerphoneOn(
+                          callParams.getChannelType() != ChannelType.AUDIO.getValue());
                 }
 
                 @Override
                 public void onError(int code, String errorMsg) {
-                  ToastUtils.showShort(R.string.call_failed);
+                  ToastX.showShortToast(R.string.call_failed);
                 }
               });
         }
@@ -162,57 +175,6 @@ public class CallFragment extends Fragment {
     viewModel.refresh(callParams);
     handleOtherInfoUi();
     handleRingEvent();
-    handleSmsEvent();
-  }
-
-  private void handleSmsEvent() {
-    viewModel
-        .getSendSmsData()
-        .observe(
-            getViewLifecycleOwner(),
-            new Observer<Boolean>() {
-              @Override
-              public void onChanged(Boolean aBoolean) {
-                if (OneOnOneUI.getInstance().isChineseEnv()) {
-                  // 移除短信提醒功能
-                  //                  sendSms();
-                }
-              }
-            });
-  }
-
-  private void sendSms() {
-    if (AccountAmountHelper.allowSendSms(UserInfoManager.getSelfImAccid())) {
-      HttpService.getInstance()
-          .sendSms(
-              calledMobile,
-              callerUserName,
-              new Callback<ModelResponse<Response>>() {
-
-                @Override
-                public void onResponse(
-                    @NonNull Call<ModelResponse<Response>> call,
-                    @NonNull retrofit2.Response<ModelResponse<Response>> response) {
-                  LogUtil.i(
-                      TAG,
-                      "sendSms,calledMobile:"
-                          + calledMobile
-                          + ",callerUserName:"
-                          + callerUserName
-                          + ",data:"
-                          + response.body());
-                  if (response.isSuccessful() && response.body().code == 200) {
-                    AccountAmountHelper.addSmsUsedWithAccount(UserInfoManager.getSelfImAccid(), 1);
-                  }
-                }
-
-                @Override
-                public void onFailure(
-                    @NonNull Call<ModelResponse<Response>> call, @NonNull Throwable t) {
-                  LogUtil.e(TAG, "sendSms failed,e:" + t.getMessage());
-                }
-              });
-    }
   }
 
   private void handleRingEvent() {
@@ -293,57 +255,47 @@ public class CallFragment extends Fragment {
             handleHangupEvent();
           }
         });
+
+    binding.clRoot.setOnClickListener(v -> {});
   }
 
   private void handleHangupEvent() {
-    if (!NetworkUtils.isConnected()) {
-      ToastUtils.showShort(getString(R.string.one_on_one_network_error));
-      return;
-    }
-    activity.rtcHangup(
-        new NECallback<Integer>() {
-          @Override
-          public void onSuccess(Integer integer) {
-            finishActivity();
-          }
-
-          @Override
-          public void onError(int code, String errorMsg) {
-            finishActivity();
-          }
-        });
+    activity.rtcHangup(null);
     if (callParams.isCalled()) {
       binding.ivInvitedAccept.setEnabled(false);
       binding.ivInvitedReject.setEnabled(false);
     } else {
       binding.ivInviteCancel.setEnabled(false);
     }
+    finishActivity();
   }
 
   private void handleInvitedAcceptEvent() {
     if (!NetworkUtils.isConnected()) {
-      ToastUtils.showShort(getString(R.string.one_on_one_network_error));
+      ToastX.showShortToast(getString(R.string.one_on_one_network_error));
       return;
     }
-    boolean microPhoneGranted = PermissionUtils.isGranted(Manifest.permission.RECORD_AUDIO);
-    boolean cameraGranted = PermissionUtils.isGranted(Manifest.permission.CAMERA);
+    boolean microPhoneGranted =
+        PermissionUtils.hasPermissions(getContext(), Manifest.permission.RECORD_AUDIO);
+    boolean cameraGranted =
+        PermissionUtils.hasPermissions(getContext(), Manifest.permission.CAMERA);
     if (callParams.getChannelType() == ChannelType.AUDIO.getValue() && !microPhoneGranted) {
-      ToastUtils.showShort(getString(R.string.permission_microphone_missing_tips));
+      ToastX.showShortToast(getString(R.string.permission_microphone_missing_tips));
       ALog.e(TAG, "Unable to access the microphone. Enable microphone access and try again");
       return;
     } else if (callParams.getChannelType() == ChannelType.VIDEO.getValue()) {
       if (!microPhoneGranted && !cameraGranted) {
-        ToastUtils.showShort(getString(R.string.permission_microphone_and_camera_missing_tips));
+        ToastX.showShortToast(getString(R.string.permission_microphone_and_camera_missing_tips));
         ALog.e(
             TAG,
             "Unable to access the microphone and camera. Enable microphone and camera access and try again");
         return;
       } else if (!microPhoneGranted) {
-        ToastUtils.showShort(getString(R.string.permission_microphone_missing_tips));
+        ToastX.showShortToast(getString(R.string.permission_microphone_missing_tips));
         ALog.e(TAG, "Unable to access the microphone. Enable microphone access and try again");
         return;
       } else if (!cameraGranted) {
-        ToastUtils.showShort(getString(R.string.permission_camera_missing_tips));
+        ToastX.showShortToast(getString(R.string.permission_camera_missing_tips));
         ALog.e(TAG, "Unable to access the camera. Enable camera access and try again");
         return;
       }
@@ -356,9 +308,8 @@ public class CallFragment extends Fragment {
   private void releaseAndFinish(boolean finishCall) {
     LogUtil.i(
         TAG, "releaseAndFinish,finishCall:" + finishCall + ",isCalled:" + callParams.isCalled());
-    AVChatSoundPlayer.Companion.instance().stop(AVChatSoundPlayer.RingerTypeEnum.RING, activity);
-    AVChatSoundPlayer.Companion.instance()
-        .stop(AVChatSoundPlayer.RingerTypeEnum.CONNECTING, activity);
+    AVChatSoundPlayer.INSTANCE.stop(AVChatSoundPlayer.RingerTypeEnum.RING, activity);
+    AVChatSoundPlayer.INSTANCE.stop(AVChatSoundPlayer.RingerTypeEnum.CONNECTING, activity);
     if (finishCall) {
       if (callParams.isCalled()) {
         activity.rtcHangup(
@@ -380,13 +331,14 @@ public class CallFragment extends Fragment {
   }
 
   private void playRing(AVChatSoundPlayer.RingerTypeEnum ringerTypeEnum) {
-    AVChatSoundPlayer.Companion.instance().play(activity, ringerTypeEnum);
+    AVChatSoundPlayer.INSTANCE.play(activity, ringerTypeEnum);
   }
 
   @Override
   public void onDestroyView() {
     super.onDestroyView();
     binding = null;
+    setSpeakerphoneOn(true);
   }
 
   private void pstnHangup() {

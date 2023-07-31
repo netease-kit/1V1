@@ -26,7 +26,7 @@
         android:layout_width="100dp"
         android:layout_height="match_parent"
         android:scaleType="centerInside"
-        android:src="@drawable/icon_audio" />
+        android:src="@drawable/icon_audio_mute" />
 
     <ImageView
         android:id="@+id/iv_hangup"

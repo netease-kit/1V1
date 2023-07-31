@@ -4,7 +4,11 @@
 
 package com.netease.yunxin.app.oneonone.ui.utils;
 
+import android.content.Context;
+import androidx.appcompat.app.AppCompatActivity;
+import com.netease.yunxin.app.oneonone.ui.R;
 import com.netease.yunxin.kit.alog.ALog;
+import com.netease.yunxin.kit.common.ui.dialog.CommonAlertDialog;
 import com.netease.yunxin.kit.corekit.service.XKitServiceManager;
 
 public class OneOnOneUtils {
@@ -19,5 +23,17 @@ public class OneOnOneUtils {
       return (boolean) result;
     }
     return false;
+  }
+
+  public static void showTipsDialog(Context context) {
+    if (context instanceof AppCompatActivity) {
+      AppCompatActivity activity = (AppCompatActivity) context;
+      CommonAlertDialog commonDialog = new CommonAlertDialog();
+      commonDialog
+          .setTitleStr(activity.getString(R.string.one_on_one_other_you_are_in_the_chatroom))
+          .setPositiveStr(activity.getString(R.string.one_on_one_confirm))
+          .setConfirmListener(() -> {})
+          .show(activity.getSupportFragmentManager());
+    }
   }
 }

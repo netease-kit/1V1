@@ -72,6 +72,19 @@
             android:layout_height="1dp"
             android:layout_marginEnd="-20dp"
             android:background="@color/color_f5f8fc" />
+        <com.netease.yunxin.kit.entertainment.common.widget.SettingItemView
+            android:id="@+id/beauty_setting"
+            android:layout_width="match_parent"
+            android:layout_height="46dp"
+            app:setting_item_icon="@drawable/icon_beauty_setting"
+            app:setting_item_title="@string/app_beauty_setting" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="0.5dp"
+            android:layout_marginStart="-20dp"
+            android:layout_marginEnd="-20dp"
+            android:background="@color/color_f5f8fc" />
 
         <com.netease.yunxin.kit.entertainment.common.widget.SettingItemView
             android:id="@+id/network_detect"

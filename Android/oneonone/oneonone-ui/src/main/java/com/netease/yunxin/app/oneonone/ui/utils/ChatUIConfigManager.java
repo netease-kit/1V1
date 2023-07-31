@@ -13,6 +13,7 @@ import android.view.View;
 import android.widget.FrameLayout;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.MutableLiveData;
 import com.netease.nimlib.sdk.avsignalling.constant.ChannelType;
 import com.netease.nimlib.sdk.msg.attachment.NetCallAttachment;
 import com.netease.nimlib.sdk.msg.constant.MsgTypeEnum;
@@ -28,10 +29,11 @@ import com.netease.yunxin.kit.alog.ALog;
 import com.netease.yunxin.kit.chatkit.ui.ChatKitClient;
 import com.netease.yunxin.kit.chatkit.ui.ChatUIConfig;
 import com.netease.yunxin.kit.chatkit.ui.IChatInputMenu;
+import com.netease.yunxin.kit.chatkit.ui.interfaces.IMessageItemClickListener;
 import com.netease.yunxin.kit.chatkit.ui.model.ChatMessageBean;
+import com.netease.yunxin.kit.chatkit.ui.normal.view.ChatView;
 import com.netease.yunxin.kit.chatkit.ui.view.input.ActionConstants;
 import com.netease.yunxin.kit.chatkit.ui.view.input.InputProperties;
-import com.netease.yunxin.kit.chatkit.ui.view.interfaces.IMessageItemClickListener;
 import com.netease.yunxin.kit.chatkit.ui.view.message.MessageProperties;
 import com.netease.yunxin.kit.chatkit.ui.view.popmenu.ChatPopMenuAction;
 import com.netease.yunxin.kit.chatkit.ui.view.popmenu.IChatPopMenu;
@@ -39,7 +41,6 @@ import com.netease.yunxin.kit.common.ui.action.ActionItem;
 import com.netease.yunxin.kit.common.ui.dialog.CommonAlertDialog;
 import com.netease.yunxin.kit.common.ui.utils.ToastX;
 import com.netease.yunxin.kit.corekit.im.model.UserInfo;
-import com.netease.yunxin.kit.corekit.service.XKitServiceManager;
 import com.netease.yunxin.kit.entertainment.common.gift.GiftDialog;
 import com.netease.yunxin.kit.entertainment.common.utils.ClickUtils;
 import com.netease.yunxin.kit.entertainment.common.utils.DialogUtil;
@@ -52,12 +53,12 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class ChatUIConfigManager {
-  private static final String VOICE_ROOM_SERVICE_NAME = "VoiceRoomKit";
   private static final String TAG = "ChatUIConfigUtil";
   private static final String ACTION_TYPE_TOPIC = "TOPIC";
   private static final String ONLINE = "online";
   private UserInfo userInfo;
   private String sessionId;
+  public MutableLiveData<ChatMessageBean> reEditRevokeMessageLiveData = new MutableLiveData<>();
 
   public void initChatUIConfig(Context context, String sessionID) {
     this.sessionId = sessionID;
@@ -83,12 +84,15 @@ public class ChatUIConfigManager {
     chatUIConfig.chatViewCustom =
         layout -> {
           // 从ChatView中获取底部消息类型布局自定义
-          FrameLayout frameLayout = layout.getChatBodyBottomLayout();
-          frameLayout.setBackgroundColor(Color.TRANSPARENT);
-          CustomChatBottomView customChatBottomView = new CustomChatBottomView(context);
-          customChatBottomView.setBackgroundColor(Color.TRANSPARENT);
-          customChatBottomView.setSessionId(sessionId);
-          frameLayout.addView(customChatBottomView);
+          if (layout instanceof ChatView) {
+            ChatView chatView = (ChatView) layout;
+            FrameLayout frameLayout = chatView.getChatBodyBottomLayout();
+            frameLayout.setBackgroundColor(Color.TRANSPARENT);
+            CustomChatBottomView customChatBottomView = new CustomChatBottomView(context);
+            customChatBottomView.setBackgroundColor(Color.TRANSPARENT);
+            customChatBottomView.setSessionId(sessionId);
+            frameLayout.addView(customChatBottomView);
+          }
         };
   }
 
@@ -188,6 +192,14 @@ public class ChatUIConfigManager {
             }
             return IMessageItemClickListener.super.onMessageClick(view, position, messageInfo);
           }
+
+          @Override
+          public boolean onReEditRevokeMessage(
+              View view, int position, ChatMessageBean messageInfo) {
+            reEditRevokeMessageLiveData.setValue(messageInfo);
+            return IMessageItemClickListener.super.onReEditRevokeMessage(
+                view, position, messageInfo);
+          }
         };
   }
 
@@ -257,10 +269,7 @@ public class ChatUIConfigManager {
 
   private void handleVideoCallAction(Context context) {
     if (!ClickUtils.isFastClick()) {
-      Object result =
-          XKitServiceManager.Companion.getInstance()
-              .callService(VOICE_ROOM_SERVICE_NAME, "getCurrentRoomInfo", null);
-      if (result instanceof Boolean && (boolean) result) {
+      if (OneOnOneUtils.isInVoiceRoom()) {
         showTipsDialog(
             (AppCompatActivity) context,
             context.getString(R.string.one_on_one_other_you_are_in_the_chatroom));
@@ -310,10 +319,7 @@ public class ChatUIConfigManager {
                   } else {
                     DialogUtil.showAlertDialog(
                         (AppCompatActivity) context,
-                        context.getString(
-                            R
-                                .string
-                                .one_on_one_other_is_not_online));
+                        context.getString(R.string.one_on_one_other_is_not_online));
                   }
                 }
               }
@@ -327,10 +333,7 @@ public class ChatUIConfigManager {
 
   private void handleAudioCallAction(Context context) {
     if (!ClickUtils.isFastClick()) {
-      Object result =
-          XKitServiceManager.Companion.getInstance()
-              .callService(VOICE_ROOM_SERVICE_NAME, "getCurrentRoomInfo", null);
-      if (result instanceof Boolean && (boolean) result) {
+      if (OneOnOneUtils.isInVoiceRoom()) {
         showTipsDialog(
             (AppCompatActivity) context,
             context.getString(R.string.one_on_one_other_you_are_in_the_chatroom));

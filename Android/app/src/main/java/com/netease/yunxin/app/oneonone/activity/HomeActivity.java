@@ -7,8 +7,6 @@ package com.netease.yunxin.app.oneonone.activity;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.TextView;
-import com.blankj.utilcode.util.ProcessUtils;
-import com.blankj.utilcode.util.ToastUtils;
 import com.google.android.material.tabs.TabLayout;
 import com.netease.lava.nertc.sdk.NERtcConstants;
 import com.netease.lava.nertc.sdk.NERtcEx;
@@ -24,6 +22,7 @@ import com.netease.nimlib.sdk.auth.LoginInfo;
 import com.netease.nimlib.sdk.avsignalling.constant.ChannelType;
 import com.netease.yunxin.app.oneonone.R;
 import com.netease.yunxin.app.oneonone.adapter.MainPagerAdapter;
+import com.netease.yunxin.app.oneonone.callkit.CustomCallOrderHelper;
 import com.netease.yunxin.app.oneonone.callkit.RtcCallExtension;
 import com.netease.yunxin.app.oneonone.callkit.RtcPushConfigProvider;
 import com.netease.yunxin.app.oneonone.config.AppConfig;
@@ -38,11 +37,15 @@ import com.netease.yunxin.app.oneonone.ui.model.User;
 import com.netease.yunxin.app.oneonone.ui.utils.AppGlobals;
 import com.netease.yunxin.app.oneonone.ui.utils.LogUtil;
 import com.netease.yunxin.kit.alog.ALog;
+import com.netease.yunxin.kit.call.p2p.model.NECallInitRtcMode;
 import com.netease.yunxin.kit.common.network.Response;
+import com.netease.yunxin.kit.common.ui.utils.ToastX;
+import com.netease.yunxin.kit.common.utils.ProcessUtils;
 import com.netease.yunxin.kit.entertainment.common.activity.BasePartyActivity;
 import com.netease.yunxin.kit.entertainment.common.utils.UserInfoManager;
 import com.netease.yunxin.kit.locationkit.LocationKitClient;
 import com.netease.yunxin.nertc.nertcvideocall.bean.InvitedInfo;
+import com.netease.yunxin.nertc.nertcvideocall.model.NERTCVideoCall;
 import com.netease.yunxin.nertc.ui.CallKitNotificationConfig;
 import com.netease.yunxin.nertc.ui.CallKitUI;
 import com.netease.yunxin.nertc.ui.CallKitUIOptions;
@@ -66,7 +69,7 @@ public class HomeActivity extends BasePartyActivity {
         public void onEvent(StatusCode status) {
           if (status == StatusCode.LOGINED) {
 
-            if (ProcessUtils.isMainProcess()
+            if (ProcessUtils.isMainProcess(HomeActivity.this)
                 && !TextUtils.equals(
                     CallKitUI.INSTANCE.getCurrentUserAccId(), UserInfoManager.getSelfImAccid())) {
               NERtcParameters parameters = new NERtcParameters();
@@ -111,14 +114,15 @@ public class HomeActivity extends BasePartyActivity {
                                   .pushConfigProvider(new RtcPushConfigProvider())
                                   // 收到被叫时若 app 在后台，在恢复到前台时是否自动唤起被叫页面，默认为 true
                                   .resumeBGInvitation(true)
+                                  .joinRtcWhenCall(true)
                                   .rtcCallExtension(new RtcCallExtension())
                                   .rtcSdkOption(neRtcOption)
-                                  // 呼叫组件初始化 rtc 范围，true-全局初始化，false-每次通话进行初始化以及销毁
-                                  // 全局初始化有助于更快进入首帧页面，当结合其他组件使用时存在rtc初始化冲突可设置false
-                                  .rtcInitScope(false)
+                                  .initRtcMode(NECallInitRtcMode.IN_NEED_DELAY_TO_ACCEPT)
                                   .p2pAudioActivity(CallActivity.class)
                                   .p2pVideoActivity(CallActivity.class)
                                   .build();
+                          NERTCVideoCall.sharedInstance()
+                              .setCallOrderListener(new CustomCallOrderHelper());
                           CallKitUI.init(AppGlobals.getApplication(), options);
                         }
 
@@ -173,7 +177,7 @@ public class HomeActivity extends BasePartyActivity {
   @Override
   protected void init() {
     curTabIndex = -1;
-    LocationKitClient.init();
+    LocationKitClient.init(this);
     login(AppConfig.IM_ACCID, AppConfig.IM_TOKEN);
     initViews();
   }
@@ -292,8 +296,8 @@ public class HomeActivity extends BasePartyActivity {
         AppConfig.IM_ACCID,
         AppConfig.IM_TOKEN,
         AppConfig.IM_NICKNAME,
-        AppConfig.IM_AVATAR
-    );
+        AppConfig.IM_AVATAR,
+        "");
     UserInfoManager.setSelfUserToken(AppConfig.USER_TOKEN);
     //登录云信IM
     LoginInfo info = new LoginInfo(imAccid, imToken);
@@ -302,7 +306,7 @@ public class HomeActivity extends BasePartyActivity {
           @Override
           public void onSuccess(LoginInfo param) {
             LogUtil.i(TAG, "login success");
-            ToastUtils.showShort("云信IM登录成功");
+            ToastX.showShortToast("云信IM登录成功");
             initOneOnOne();
             startHeartBeatReportTask();
             // your code
@@ -310,7 +314,7 @@ public class HomeActivity extends BasePartyActivity {
 
           @Override
           public void onFailed(int code) {
-            ToastUtils.showShort("云信IM登录失败,code:" + code);
+            ToastX.showShortToast("云信IM登录失败,code:" + code);
             if (code == 302) {
               LogUtil.i(TAG, "账号密码错误");
               // your code

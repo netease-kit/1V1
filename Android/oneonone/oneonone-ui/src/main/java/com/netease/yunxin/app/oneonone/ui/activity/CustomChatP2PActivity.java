@@ -6,6 +6,7 @@ package com.netease.yunxin.app.oneonone.ui.activity;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
@@ -14,6 +15,8 @@ import android.text.TextUtils;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.activity.result.ActivityResultLauncher;
@@ -21,9 +24,11 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.RequiresApi;
 import androidx.core.widget.PopupWindowCompat;
 import androidx.fragment.app.FragmentManager;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import com.netease.yunxin.app.oneonone.ui.R;
 import com.netease.yunxin.app.oneonone.ui.constant.Constants;
+import com.netease.yunxin.app.oneonone.ui.custommessage.GiftAttachment;
 import com.netease.yunxin.app.oneonone.ui.databinding.ActivityMyChatP2pBinding;
 import com.netease.yunxin.app.oneonone.ui.dialog.AudioInputDialog;
 import com.netease.yunxin.app.oneonone.ui.http.HttpService;
@@ -35,19 +40,24 @@ import com.netease.yunxin.app.oneonone.ui.utils.OneOnOneUtils;
 import com.netease.yunxin.app.oneonone.ui.view.SettingPopupWindows;
 import com.netease.yunxin.app.oneonone.ui.viewmodel.CustomP2PViewModel;
 import com.netease.yunxin.kit.alog.ALog;
-import com.netease.yunxin.kit.chatkit.ui.builder.P2PChatFragmentBuilder;
-import com.netease.yunxin.kit.chatkit.ui.page.fragment.ChatP2PFragment;
+import com.netease.yunxin.kit.chatkit.ui.normal.builder.P2PChatFragmentBuilder;
+import com.netease.yunxin.kit.chatkit.ui.normal.page.fragment.ChatP2PFragment;
+import com.netease.yunxin.kit.chatkit.ui.normal.view.MessageBottomLayout;
 import com.netease.yunxin.kit.chatkit.ui.view.emoji.EmojiPickerView;
-import com.netease.yunxin.kit.chatkit.ui.view.input.MessageBottomLayout;
 import com.netease.yunxin.kit.common.ui.utils.ToastX;
 import com.netease.yunxin.kit.common.utils.PermissionUtils;
+import com.netease.yunxin.kit.common.utils.ScreenUtils;
 import com.netease.yunxin.kit.common.utils.SizeUtils;
 import com.netease.yunxin.kit.corekit.im.model.UserInfo;
 import com.netease.yunxin.kit.corekit.im.utils.RouterConstant;
 import com.netease.yunxin.kit.entertainment.common.activity.BasePartyActivity;
+import com.netease.yunxin.kit.entertainment.common.gift.GifAnimationView;
+import com.netease.yunxin.kit.entertainment.common.gift.GiftCache;
 import com.netease.yunxin.kit.entertainment.common.gift.GiftDialog;
-import com.netease.yunxin.kit.entertainment.common.statusbar.StatusBarConfig;
+import com.netease.yunxin.kit.entertainment.common.gift.GiftRender;
+import com.netease.yunxin.kit.entertainment.common.utils.DialogUtil;
 import com.netease.yunxin.kit.entertainment.common.utils.ReportUtils;
+import com.netease.yunxin.kit.entertainment.common.utils.UserInfoManager;
 import java.util.Map;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -74,6 +84,7 @@ public class CustomChatP2PActivity extends BasePartyActivity {
   private final Runnable stopTypingRunnable = () -> setTypeState(false);
   private final ChatUIConfigManager chatUIConfigManager = new ChatUIConfigManager();
   private final AudioInputManager audioInputManager = new AudioInputManager();
+  private GiftRender giftRender;
   private final ActivityResultLauncher<String[]> permissionLauncher =
       registerForActivityResult(
           new ActivityResultContracts.RequestMultiplePermissions(),
@@ -97,13 +108,8 @@ public class CustomChatP2PActivity extends BasePartyActivity {
           });
 
   @Override
-  protected boolean needTransparentStatusBar() {
-    return true;
-  }
-
-  @Override
   protected void init() {
-    StatusBarConfig.paddingStatusBarHeight(this, viewBinding.getRoot());
+    paddingStatusBarHeight(viewBinding.getRoot());
     userInfo = (UserInfo) getIntent().getSerializableExtra(RouterConstant.CHAT_KRY);
     sessionId = getIntent().getStringExtra(RouterConstant.CHAT_ID_KRY);
     if (userInfo == null && TextUtils.isEmpty(sessionId)) {
@@ -115,6 +121,7 @@ public class CustomChatP2PActivity extends BasePartyActivity {
     viewModel.initialize(sessionId, userInfo, chatUIConfigManager);
     configP2PChatCustomUI();
     loadP2PFragment();
+    initGiftAnimation();
     handleEvent();
     initObserver();
     ReportUtils.report(CustomChatP2PActivity.this, TAG_REPORT, "xiaoxi_enter");
@@ -125,6 +132,13 @@ public class CustomChatP2PActivity extends BasePartyActivity {
   }
 
   private void initObserver() {
+    chatUIConfigManager.reEditRevokeMessageLiveData.observe(
+        this,
+        chatMessageBean -> {
+          if (mAudioTv.getVisibility() == View.VISIBLE) {
+            mAudioTv.setVisibility(View.GONE);
+          }
+        });
     viewModel
         .getOnlineStatusData()
         .observe(
@@ -158,6 +172,36 @@ public class CustomChatP2PActivity extends BasePartyActivity {
               }
               viewBinding.tvTitle.setText(userInfo.getUserInfoName());
             });
+    viewModel
+        .getGiftMessageLiveData()
+        .observe(
+            this,
+            new Observer<GiftAttachment>() {
+              @Override
+              public void onChanged(GiftAttachment giftAttachment) {
+                if (giftAttachment != null) {
+                  giftRender.addGift(
+                      GiftCache.getGift(giftAttachment.getGiftId()).getDynamicIconResId());
+                  if (TextUtils.equals(
+                      UserInfoManager.getSelfImAccid(), giftAttachment.getTargetUserUuid())) {
+                    ToastX.showShortToast(
+                        R.string.app_receive_gift_tip,
+                        giftAttachment.getGiftCount(),
+                        GiftCache.getGift(giftAttachment.getGiftId()).getName());
+                  }
+                }
+              }
+            });
+    viewModel.getBusyLiveData().observe(this, aBoolean -> showBusyDialog(aBoolean));
+  }
+
+  private void showBusyDialog(Boolean isShow) {
+    if (isShow) {
+      handler.post(
+          () ->
+              DialogUtil.showAlertDialog(
+                  CustomChatP2PActivity.this, getString(R.string.one_on_one_other_is_busy)));
+    }
   }
 
   private void setTypeState(boolean isTyping) {
@@ -227,7 +271,7 @@ public class CustomChatP2PActivity extends BasePartyActivity {
                 mEmojiIv.setImageResource(R.drawable.one_on_one_chat_emoji_icon);
               }
             });
-    messageInputLayout = chatP2PFragment.getMessageBottomLayout();
+    messageInputLayout = view.findViewById(R.id.inputView);
     if (ChatUtil.isSystemAccount(sessionId)) {
       messageInputLayout.setVisibility(View.GONE);
       viewBinding.ivSetting.setVisibility(View.GONE);
@@ -278,6 +322,12 @@ public class CustomChatP2PActivity extends BasePartyActivity {
 
     mAudioIv.setOnClickListener(
         v -> {
+          InputMethodManager imm =
+              (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+          if (imm.isActive()) {
+            // 隐藏软键盘
+            imm.hideSoftInputFromWindow(v.getApplicationWindowToken(), 0);
+          }
           if (mAudioTv.getVisibility() == View.VISIBLE) {
             mAudioTv.setVisibility(View.GONE);
           } else {
@@ -285,10 +335,7 @@ public class CustomChatP2PActivity extends BasePartyActivity {
           }
         });
 
-    mEmojiIv.setOnClickListener(
-        v -> {
-          messageInputLayout.switchEmoji();
-        });
+    mEmojiIv.setOnClickListener(v -> messageInputLayout.switchEmoji());
 
     mGiftIv.setOnClickListener(v -> showGiftDialog());
   }
@@ -353,6 +400,10 @@ public class CustomChatP2PActivity extends BasePartyActivity {
     viewBinding = null;
     audioInputManager.destroy();
     chatUIConfigManager.destroy();
+    if (giftRender != null) {
+      giftRender.release();
+    }
+    handler.removeCallbacksAndMessages(null);
     super.onDestroy();
   }
 
@@ -361,6 +412,7 @@ public class CustomChatP2PActivity extends BasePartyActivity {
     super.onPause();
     audioInputManager.pause();
     dismissAudioInputDialog();
+    viewModel.registerReceiveMessageObserve(false);
   }
 
   @Override
@@ -368,5 +420,23 @@ public class CustomChatP2PActivity extends BasePartyActivity {
     super.onNewIntent(intent);
     ALog.i(TAG, "onNewIntent,intent:" + intent);
     chatP2PFragment.onNewIntent(intent);
+  }
+
+  private void initGiftAnimation() {
+    GifAnimationView gifAnimationView = new GifAnimationView(this);
+    int size = ScreenUtils.getDisplayWidth();
+    FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(size, size);
+    layoutParams.gravity = Gravity.CENTER;
+    FrameLayout contentParent = getWindow().getDecorView().findViewById(android.R.id.content);
+    contentParent.addView(gifAnimationView, layoutParams);
+    gifAnimationView.bringToFront();
+    giftRender = new GiftRender();
+    giftRender.init(gifAnimationView);
+  }
+
+  @Override
+  protected void onResume() {
+    super.onResume();
+    viewModel.registerReceiveMessageObserve(true);
   }
 }

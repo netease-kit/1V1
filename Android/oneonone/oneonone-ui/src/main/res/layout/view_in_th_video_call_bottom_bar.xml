@@ -36,6 +36,13 @@
         android:scaleType="centerInside"
         android:layout_weight="1"
         android:src="@drawable/icon_camera_switch" />
+    <ImageView
+        android:id="@+id/iv_openOrCloseCamera"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:scaleType="centerInside"
+        android:layout_weight="1"
+        android:src="@drawable/icon_camera_open" />
 
     <ImageView
         android:id="@+id/iv_hangup"

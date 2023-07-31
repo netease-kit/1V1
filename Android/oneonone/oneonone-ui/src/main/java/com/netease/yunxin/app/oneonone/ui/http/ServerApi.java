@@ -7,7 +7,6 @@ package com.netease.yunxin.app.oneonone.ui.http;
 import com.netease.yunxin.app.oneonone.ui.model.HomeItemModel;
 import com.netease.yunxin.app.oneonone.ui.model.ModelResponse;
 import com.netease.yunxin.app.oneonone.ui.model.User;
-import com.netease.yunxin.app.oneonone.ui.model.UserModel;
 import com.netease.yunxin.kit.common.network.Response;
 import java.util.List;
 import java.util.Map;
@@ -16,14 +15,6 @@ import retrofit2.http.Body;
 import retrofit2.http.POST;
 
 public interface ServerApi {
-
-  /** 根据手机号查询用户信息 */
-  @POST("/p2pVideoCall/caller/searchSubscriber")
-  Call<ModelResponse<UserModel>> searchUserWithPhoneNumber(@Body Map<String, Object> body);
-
-  /** 发送普通短信通知 */
-  @POST("/sms/sendOneByOneSms")
-  Call<ModelResponse<Response>> sendSms(@Body Map<String, Object> body);
 
   /** 上报用户心跳 */
   @POST("/nemo/socialChat/user/reporter")
@@ -48,4 +39,8 @@ public interface ServerApi {
   /** 根据userUuid获取账号信息 */
   @POST("/nemo/socialChat/user/getUserInfo")
   Call<ModelResponse<User>> getUserInfo(@Body Map<String, Object> body);
+
+  /** 上报Rtc房间创建 */
+  @POST("/nemo/track/rtc-room-created")
+  Call<ModelResponse<Response>> reportRtcRoom(@Body Map<String, Object> body);
 }

@@ -14,7 +14,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.WindowManager
 import androidx.annotation.LayoutRes
-import com.blankj.utilcode.util.SizeUtils
+import com.netease.yunxin.kit.common.utils.SizeUtils
 import com.netease.yunxin.nertc.ui.R
 
 /**

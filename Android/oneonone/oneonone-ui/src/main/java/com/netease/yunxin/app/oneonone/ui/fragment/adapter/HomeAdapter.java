@@ -12,7 +12,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
-import com.blankj.utilcode.util.ToastUtils;
 import com.netease.nimlib.sdk.avsignalling.constant.ChannelType;
 import com.netease.nimlib.sdk.msg.constant.SessionTypeEnum;
 import com.netease.yunxin.app.oneonone.ui.R;
@@ -31,6 +30,7 @@ import com.netease.yunxin.app.oneonone.ui.utils.OneOnOneUtils;
 import com.netease.yunxin.kit.alog.ALog;
 import com.netease.yunxin.kit.common.image.ImageLoader;
 import com.netease.yunxin.kit.common.ui.dialog.CommonAlertDialog;
+import com.netease.yunxin.kit.common.ui.utils.ToastX;
 import com.netease.yunxin.kit.common.utils.NetworkUtils;
 import com.netease.yunxin.kit.corekit.im.model.UserInfo;
 import com.netease.yunxin.kit.corekit.im.provider.FetchCallback;
@@ -111,7 +111,7 @@ public class HomeAdapter extends RecyclerView.Adapter {
                       @Override
                       public void onAccost(ContactUserDialog dialog) {
                         if (!NetworkUtils.isConnected()) {
-                          ToastUtils.showShort(context.getString(R.string.voiceroom_net_error));
+                          ToastX.showShortToast(context.getString(R.string.voiceroom_net_error));
                           return;
                         }
                         ChatUtil.sendTextMessage(
@@ -122,7 +122,7 @@ public class HomeAdapter extends RecyclerView.Adapter {
                             new FetchCallback<Void>() {
                               @Override
                               public void onSuccess(@Nullable Void param) {
-                                ToastUtils.showShort(
+                                ToastX.showShortToast(
                                     context.getString(R.string.one_on_one_accost_success));
                               }
 
@@ -153,7 +153,7 @@ public class HomeAdapter extends RecyclerView.Adapter {
                       @Override
                       public void onVideoCall(ContactUserDialog dialog) {
                         if (!NetworkUtils.isConnected()) {
-                          ToastUtils.showShort(
+                          ToastX.showShortToast(
                               context.getString(R.string.one_on_one_network_error));
                           return;
                         }
@@ -164,7 +164,7 @@ public class HomeAdapter extends RecyclerView.Adapter {
                       @Override
                       public void onAudioCall(ContactUserDialog dialog) {
                         if (!NetworkUtils.isConnected()) {
-                          ToastUtils.showShort(
+                          ToastX.showShortToast(
                               context.getString(R.string.one_on_one_network_error));
                           return;
                         }

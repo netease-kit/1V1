@@ -19,8 +19,6 @@ import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
-import com.blankj.utilcode.util.PermissionUtils;
-import com.blankj.utilcode.util.ToastUtils;
 import com.netease.nimlib.sdk.RequestCallbackWrapper;
 import com.netease.nimlib.sdk.avsignalling.constant.ChannelType;
 import com.netease.nimlib.sdk.avsignalling.model.ChannelFullInfo;
@@ -35,6 +33,8 @@ import com.netease.yunxin.app.oneonone.ui.utils.NECallback;
 import com.netease.yunxin.app.oneonone.ui.viewmodel.CallViewModel;
 import com.netease.yunxin.app.oneonone.ui.viewmodel.VirtualCallViewModel;
 import com.netease.yunxin.kit.alog.ALog;
+import com.netease.yunxin.kit.common.ui.utils.Permission;
+import com.netease.yunxin.kit.common.ui.utils.ToastX;
 import com.netease.yunxin.kit.entertainment.common.utils.BluetoothHeadsetUtil;
 import com.netease.yunxin.kit.login.AuthorManager;
 import com.netease.yunxin.kit.login.model.EventType;
@@ -61,19 +61,19 @@ public class CallActivity extends CommonCallActivity {
   private VirtualCallViewModel virtualCallViewModel;
   private Fragment inTheCallFragment;
   private final Observer<Boolean> callFinishObserver = aBoolean -> finish();
-  private final Observer<String> toastObserver = s -> ToastUtils.showLong(s);
+  private final Observer<String> toastObserver = s -> ToastX.showShortToast(s);
   private final Observer<Boolean> switchToInTheNormalCallObserver =
       b -> switchToInTheCallFragment();
   private final Observer<Boolean> playErrorObserver =
       aBoolean -> {
-        ToastUtils.showShort(getString(R.string.one_on_one_virtual_call_error));
+        ToastX.showShortToast(getString(R.string.one_on_one_virtual_call_error));
         finish();
       };
   private final Observer<Boolean> switchInToTheVirtualCallObserver =
       aBoolean -> switchToInTheCallFragment();
   private final Observer<Boolean> releaseAndFinishObserver =
       aBoolean -> {
-        ToastUtils.showShort(getString(R.string.one_on_one_virtual_call_end));
+        ToastX.showShortToast(getString(R.string.one_on_one_virtual_call_end));
         finish();
       };
   private final BluetoothHeadsetUtil.BluetoothHeadsetStatusObserver
@@ -81,8 +81,8 @@ public class CallActivity extends CommonCallActivity {
           new BluetoothHeadsetUtil.BluetoothHeadsetStatusObserver() {
             @Override
             public void connect() {
-              if (!BluetoothHeadsetUtil.hasBluetoothConnectPermission()) {
-                BluetoothHeadsetUtil.requestBluetoothConnectPermission();
+              if (!BluetoothHeadsetUtil.hasBluetoothConnectPermission(CallActivity.this)) {
+                BluetoothHeadsetUtil.requestBluetoothConnectPermission(CallActivity.this);
               }
             }
 
@@ -166,9 +166,9 @@ public class CallActivity extends CommonCallActivity {
   }
 
   private void handlePermission(Bundle savedInstanceState, String... permissions) {
-    PermissionUtils.permission(permissions)
-        .callback(
-            new PermissionUtils.FullCallback() {
+    Permission.requirePermissions(CallActivity.this, permissions)
+        .request(
+            new Permission.PermissionCallback() {
               @Override
               public void onGranted(@NonNull List<String> granted) {
                 if (isFinishing() || isDestroyed()) {
@@ -188,28 +188,35 @@ public class CallActivity extends CommonCallActivity {
               }
 
               @Override
-              public void onDenied(
-                  @NonNull List<String> deniedForever, @NonNull List<String> denied) {
-                for (String s : denied) {
+              public void onDenial(
+                  List<String> permissionsDenial, List<String> permissionDenialForever) {
+                for (String s : permissionsDenial) {
                   LogUtil.i(TAG, "onDenied:" + s);
                 }
                 if (!callParam.isCalled()) {
-                  if (denied.size() == 2) {
-                    ToastUtils.showLong(R.string.permission_microphone_and_camera_missing_tips);
-                  } else if (denied.size() == 1) {
-                    String permission = denied.get(0);
+                  if (permissionsDenial.size() == 2 || permissionDenialForever.size() == 2) {
+                    ToastX.showShortToast(R.string.permission_microphone_and_camera_missing_tips);
+                  } else if (permissionsDenial.size() == 1 || permissionDenialForever.size() == 1) {
+                    String permission = "";
+                    if (permissionsDenial.size() == 1) {
+                      permission = permissionsDenial.get(0);
+                    } else {
+                      permission = permissionDenialForever.get(0);
+                    }
                     if (Manifest.permission.CAMERA.equals(permission)) {
-                      ToastUtils.showShort(R.string.permission_camera_missing_tips);
+                      ToastX.showShortToast(R.string.permission_camera_missing_tips);
                     } else if (Manifest.permission.RECORD_AUDIO.equals(permission)) {
-                      ToastUtils.showShort(R.string.permission_microphone_missing_tips);
+                      ToastX.showShortToast(R.string.permission_microphone_missing_tips);
                     }
                   }
                   new Handler(Looper.getMainLooper())
                       .postDelayed(() -> releaseAndFinish(true), 500);
                 }
               }
-            })
-        .request();
+
+              @Override
+              public void onException(Exception exception) {}
+            });
   }
 
   private void showCallingUI(Bundle savedInstanceState, boolean autoCall) {
@@ -227,8 +234,8 @@ public class CallActivity extends CommonCallActivity {
       BluetoothHeadsetUtil.registerBluetoothHeadsetStatusObserver(
           bluetoothHeadsetStatusChangeListener);
       if (BluetoothHeadsetUtil.isBluetoothHeadsetConnected()
-          && !BluetoothHeadsetUtil.hasBluetoothConnectPermission()) {
-        BluetoothHeadsetUtil.requestBluetoothConnectPermission();
+          && !BluetoothHeadsetUtil.hasBluetoothConnectPermission(CallActivity.this)) {
+        BluetoothHeadsetUtil.requestBluetoothConnectPermission(CallActivity.this);
       }
     }
   }
@@ -284,7 +291,7 @@ public class CallActivity extends CommonCallActivity {
           @Override
           public void onJoinFail(String msg, int code) {
             LogUtil.e(TAG, "rtcAccept,onJoinFail msg:" + msg + ",code:" + code);
-            ToastUtils.showShort(getString(R.string.one_on_one_network_error));
+            ToastX.showShortToast(getString(R.string.one_on_one_network_error));
           }
         });
   }
@@ -295,7 +302,9 @@ public class CallActivity extends CommonCallActivity {
           @Override
           public void onResult(int code, Void result, Throwable exception) {
             LogUtil.i(TAG, "rtcHangup,code:" + code + ",exception:" + exception);
-            callback.onSuccess(code);
+            if (callback != null) {
+              callback.onSuccess(code);
+            }
           }
         });
   }
@@ -355,7 +364,7 @@ public class CallActivity extends CommonCallActivity {
   }
 
   private void stopRing() {
-    AVChatSoundPlayer.Companion.instance().stop(CallActivity.this);
+    AVChatSoundPlayer.INSTANCE.stop(CallActivity.this);
   }
 
   public boolean isVirtualCall() {

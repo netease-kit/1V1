@@ -17,7 +17,6 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
-import com.blankj.utilcode.util.ToastUtils;
 import com.netease.yunxin.app.oneonone.ui.R;
 import com.netease.yunxin.app.oneonone.ui.activity.CallActivity;
 import com.netease.yunxin.app.oneonone.ui.custommessage.GiftAttachment;
@@ -26,6 +25,7 @@ import com.netease.yunxin.app.oneonone.ui.model.ModelResponse;
 import com.netease.yunxin.app.oneonone.ui.viewmodel.CallViewModel;
 import com.netease.yunxin.app.oneonone.ui.viewmodel.VirtualCallViewModel;
 import com.netease.yunxin.kit.alog.ALog;
+import com.netease.yunxin.kit.common.ui.utils.ToastX;
 import com.netease.yunxin.kit.common.utils.ScreenUtils;
 import com.netease.yunxin.kit.entertainment.common.gift.GifAnimationView;
 import com.netease.yunxin.kit.entertainment.common.gift.GiftCache;
@@ -86,7 +86,7 @@ public abstract class InTheBaseCallFragment extends Fragment {
                       GiftCache.getGift(giftAttachment.getGiftId()).getDynamicIconResId());
                   if (TextUtils.equals(
                       UserInfoManager.getSelfImAccid(), giftAttachment.getTargetUserUuid())) {
-                    ToastUtils.showShort(
+                    ToastX.showShortToast(
                         R.string.app_receive_gift_tip,
                         giftAttachment.getGiftCount(),
                         GiftCache.getGift(giftAttachment.getGiftId()).getName());
@@ -134,7 +134,7 @@ public abstract class InTheBaseCallFragment extends Fragment {
                       @Override
                       public void onFailure(Call<ModelResponse<Boolean>> call, Throwable t) {
                         ALog.e(TAG, "reward failed error = " + t.getMessage());
-                        ToastUtils.showShort(R.string.app_network_error);
+                        ToastX.showShortToast(R.string.app_network_error);
                       }
                     }));
   }

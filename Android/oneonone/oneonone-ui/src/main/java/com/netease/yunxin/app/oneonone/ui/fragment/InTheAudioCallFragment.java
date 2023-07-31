@@ -6,7 +6,6 @@ package com.netease.yunxin.app.oneonone.ui.fragment;
 
 import android.content.Context;
 import android.content.DialogInterface;
-import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,14 +27,12 @@ import com.netease.yunxin.app.oneonone.ui.utils.security.SecurityTipsModel;
 import com.netease.yunxin.app.oneonone.ui.utils.security.SecurityType;
 import com.netease.yunxin.app.oneonone.ui.view.InTheAudioCallBottomBar;
 import com.netease.yunxin.kit.common.image.ImageLoader;
-import com.netease.yunxin.nertc.ui.base.CallParam;
 
 public class InTheAudioCallFragment extends InTheBaseCallFragment {
   private static final String TAG = "InTheAudioCallFragment";
   private FragmentInAudioCallBinding binding;
   private CallActivity activity;
   private boolean muteLocal = false;
-  private boolean muteRemote = false;
   private long otherRtcUid;
 
   @Override
@@ -73,15 +70,6 @@ public class InTheAudioCallFragment extends InTheBaseCallFragment {
         .addCallback(
             this, // LifecycleOwner
             callback);
-  }
-
-  @Nullable
-  @Override
-  public View onCreateView(
-      @NonNull LayoutInflater inflater,
-      @Nullable ViewGroup container,
-      @Nullable Bundle savedInstanceState) {
-    return super.onCreateView(inflater, container, savedInstanceState);
   }
 
   @Override
@@ -189,17 +177,14 @@ public class InTheAudioCallFragment extends InTheBaseCallFragment {
   }
 
   private void handleAudioEvent() {
-    muteRemote = !muteRemote;
-    if (activity.isVirtualCall()) {
-      virtualCallViewModel.muteAudio(muteRemote);
-    } else {
-      subscribeRemoteAudioStream(otherRtcUid, !muteRemote);
-    }
-    if (muteRemote) {
-      binding.bottomBar.getViewBinding().ivAudio.setImageResource(R.drawable.icon_audio_mute);
-    } else {
-      binding.bottomBar.getViewBinding().ivAudio.setImageResource(R.drawable.icon_audio);
-    }
+    boolean lastSpeakerOn = NERtcEx.getInstance().isSpeakerphoneOn();
+    boolean currentSpeakOn = !lastSpeakerOn;
+    NERtcEx.getInstance().setSpeakerphoneOn(currentSpeakOn);
+    binding
+        .bottomBar
+        .getViewBinding()
+        .ivAudio
+        .setImageResource(currentSpeakOn ? R.drawable.icon_audio : R.drawable.icon_audio_mute);
   }
 
   private void handleMicroPhoneEvent() {
@@ -217,26 +202,14 @@ public class InTheAudioCallFragment extends InTheBaseCallFragment {
   }
 
   private void handleHangupEvent() {
-    CallParam callParams = activity.getCallParams();
-    if (callParams.isCalled()) {
-      activity.rtcHangup(
-          new NECallback<Integer>() {
-            @Override
-            public void onSuccess(Integer integer) {}
+    activity.rtcHangup(
+        new NECallback<Integer>() {
+          @Override
+          public void onSuccess(Integer integer) {}
 
-            @Override
-            public void onError(int code, String errorMsg) {}
-          });
-    } else {
-      activity.rtcHangup(
-          new NECallback<Integer>() {
-            @Override
-            public void onSuccess(Integer integer) {}
-
-            @Override
-            public void onError(int code, String errorMsg) {}
-          });
-    }
+          @Override
+          public void onError(int code, String errorMsg) {}
+        });
     finishActivity();
   }
 
@@ -250,9 +223,5 @@ public class InTheAudioCallFragment extends InTheBaseCallFragment {
     if (!activity.isFinishing()) {
       activity.finish();
     }
-  }
-
-  public void subscribeRemoteAudioStream(long rtcUid, boolean subscribe) {
-    NERtcEx.getInstance().adjustUserPlaybackSignalVolume(rtcUid, subscribe ? 100 : 0);
   }
 }

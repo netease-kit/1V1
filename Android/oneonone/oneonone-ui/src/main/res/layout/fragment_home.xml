@@ -38,7 +38,7 @@
         android:layout_width="40dp"
         android:layout_height="40dp" />
 
-    <com.netease.yunxin.app.oneonone.ui.view.TitleBar
+    <com.netease.yunxin.kit.entertainment.common.widget.TitleBar
         android:id="@+id/title_bar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -52,7 +52,7 @@
         android:background="@color/color_e9eff5"
         android:layout_width="match_parent"
         android:layout_height="1px" />
-    <com.scwang.smart.refresh.layout.SmartRefreshLayout
+    <com.netease.yunxin.kit.entertainment.common.smartrefresh.SmartRefreshLayout
         android:layout_below="@+id/view_line"
         android:layout_marginTop="4dp"
         android:id="@+id/refreshLayout"
@@ -92,5 +92,5 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
         </FrameLayout>
-    </com.scwang.smart.refresh.layout.SmartRefreshLayout>
+    </com.netease.yunxin.kit.entertainment.common.smartrefresh.SmartRefreshLayout>
 </RelativeLayout>

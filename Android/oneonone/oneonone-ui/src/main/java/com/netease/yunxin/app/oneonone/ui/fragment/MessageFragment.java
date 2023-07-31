@@ -15,16 +15,16 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import com.netease.yunxin.app.oneonone.ui.R;
+import com.netease.yunxin.kit.chatkit.repo.ConversationRepo;
 import com.netease.yunxin.kit.common.ui.dialog.ListAlertDialog;
-import com.netease.yunxin.kit.conversationkit.repo.ConversationRepo;
 import com.netease.yunxin.kit.conversationkit.ui.ConversationKitClient;
 import com.netease.yunxin.kit.conversationkit.ui.ConversationUIConfig;
 import com.netease.yunxin.kit.conversationkit.ui.ItemClickListener;
 import com.netease.yunxin.kit.conversationkit.ui.common.ConversationConstant;
 import com.netease.yunxin.kit.conversationkit.ui.model.ConversationBean;
-import com.netease.yunxin.kit.conversationkit.ui.page.ConversationFragment;
-import com.netease.yunxin.kit.entertainment.common.statusbar.StatusBarConfig;
+import com.netease.yunxin.kit.conversationkit.ui.normal.page.ConversationFragment;
 import com.netease.yunxin.kit.entertainment.common.utils.DialogUtil;
+import com.netease.yunxin.kit.entertainment.common.utils.ViewUtils;
 
 public class MessageFragment extends ConversationFragment {
 
@@ -36,7 +36,7 @@ public class MessageFragment extends ConversationFragment {
       @Nullable Bundle savedInstanceState) {
     initConfig();
     View roomView = super.onCreateView(inflater, container, savedInstanceState);
-    StatusBarConfig.paddingStatusBarHeight(getActivity(), roomView);
+    ViewUtils.paddingStatusBarHeight(getActivity(), roomView);
     return roomView;
   }
 

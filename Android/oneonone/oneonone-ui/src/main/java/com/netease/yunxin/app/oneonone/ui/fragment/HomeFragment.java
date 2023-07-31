@@ -19,7 +19,6 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import com.gyf.immersionbar.ImmersionBar;
 import com.netease.yunxin.app.oneonone.ui.OneOnOneUI;
 import com.netease.yunxin.app.oneonone.ui.databinding.FragmentHomeBinding;
 import com.netease.yunxin.app.oneonone.ui.fragment.adapter.HomeAdapter;
@@ -27,9 +26,9 @@ import com.netease.yunxin.app.oneonone.ui.view.FooterView;
 import com.netease.yunxin.app.oneonone.ui.view.HeaderView;
 import com.netease.yunxin.app.oneonone.ui.viewmodel.HomeViewModel;
 import com.netease.yunxin.kit.common.utils.SizeUtils;
-import com.scwang.smart.refresh.layout.api.RefreshLayout;
-import com.scwang.smart.refresh.layout.listener.OnLoadMoreListener;
-import com.scwang.smart.refresh.layout.listener.OnRefreshListener;
+import com.netease.yunxin.kit.entertainment.common.smartrefresh.api.RefreshLayout;
+import com.netease.yunxin.kit.entertainment.common.smartrefresh.listener.OnLoadMoreListener;
+import com.netease.yunxin.kit.entertainment.common.smartrefresh.listener.OnRefreshListener;
 
 /** home tab fragment */
 public class HomeFragment extends Fragment implements OnRefreshListener, OnLoadMoreListener {
@@ -86,7 +85,6 @@ public class HomeFragment extends Fragment implements OnRefreshListener, OnLoadM
 
   private void initView() {
     Context context = requireActivity();
-    ImmersionBar.with(this).statusBarView(binding.statusBarHolder).statusBarDarkFont(true).init();
     binding.refreshLayout.setRefreshHeader(new HeaderView(context));
     binding.refreshLayout.setRefreshFooter(new FooterView(context));
     binding.refreshLayout.setOnRefreshListener(this);

@@ -10,11 +10,15 @@ import androidx.annotation.Nullable;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
+import com.netease.lava.nertc.sdk.NERtcEx;
 import com.netease.nimlib.sdk.avsignalling.constant.ChannelType;
 import com.netease.yunxin.app.oneonone.ui.R;
 import com.netease.yunxin.app.oneonone.ui.constant.AppParams;
 import com.netease.yunxin.app.oneonone.ui.custommessage.GiftAttachment;
+import com.netease.yunxin.app.oneonone.ui.http.HttpService;
+import com.netease.yunxin.app.oneonone.ui.model.ModelResponse;
 import com.netease.yunxin.app.oneonone.ui.model.OtherUserInfo;
+import com.netease.yunxin.app.oneonone.ui.utils.ChatUtil;
 import com.netease.yunxin.app.oneonone.ui.utils.LogUtil;
 import com.netease.yunxin.app.oneonone.ui.utils.SecurityAuditManager;
 import com.netease.yunxin.app.oneonone.ui.utils.security.SecurityAuditModel;
@@ -23,6 +27,7 @@ import com.netease.yunxin.app.oneonone.ui.utils.security.SecurityTipsModel;
 import com.netease.yunxin.app.oneonone.ui.utils.security.SecurityType;
 import com.netease.yunxin.kit.chatkit.model.IMMessageInfo;
 import com.netease.yunxin.kit.chatkit.repo.ChatObserverRepo;
+import com.netease.yunxin.kit.common.network.Response;
 import com.netease.yunxin.kit.corekit.im.model.EventObserver;
 import com.netease.yunxin.kit.entertainment.common.utils.UserInfoManager;
 import com.netease.yunxin.nertc.nertcvideocall.model.NERTCVideoCall;
@@ -36,6 +41,8 @@ import kotlin.Unit;
 import kotlin.jvm.functions.Function1;
 import org.json.JSONException;
 import org.json.JSONObject;
+import retrofit2.Call;
+import retrofit2.Callback;
 
 public class CallViewModel extends AndroidViewModel {
   private static final String TAG = "CallViewModel";
@@ -45,6 +52,7 @@ public class CallViewModel extends AndroidViewModel {
   private SecondsTimer inTheCallSecondTimer;
   private final MutableLiveData<Long> inTheCallDuration = new MutableLiveData<>();
   private long selfRtcUid;
+  private final MutableLiveData<Boolean> selfJoinChannelSuccessData = new MutableLiveData<>();
   private OtherUserInfo userInfo;
   private CallParam callParam;
   private final MutableLiveData<Boolean> switchToInTheCall = new MutableLiveData<>();
@@ -53,7 +61,6 @@ public class CallViewModel extends AndroidViewModel {
   private final MutableLiveData<AVChatSoundPlayer.RingerTypeEnum> playRing =
       new MutableLiveData<>();
   private final MutableLiveData<Boolean> remoteVideoMute = new MutableLiveData<>();
-  private final MutableLiveData<Boolean> sendSmsData = new MutableLiveData<>();
   private final MutableLiveData<Long> otherRtcUid = new MutableLiveData<>();
   private final MutableLiveData<GiftAttachment> giftAttachmentData = new MutableLiveData<>();
   private final NERtcCallbackExTemp rtcCallback =
@@ -62,6 +69,7 @@ public class CallViewModel extends AndroidViewModel {
         public void onJoinChannel(int i, long l, long l1, long l2) {
           super.onJoinChannel(i, l, l1, l2);
           selfRtcUid = l2;
+          selfJoinChannelSuccessData.postValue(true);
         }
 
         @Override
@@ -73,6 +81,14 @@ public class CallViewModel extends AndroidViewModel {
 
   private final NERtcCallDelegate neRtcCallDelegate =
       new NERtcCallDelegate() {
+
+        @Override
+        public void onJoinChannel(String accId, long uid, String channelName, long rtcChannelId) {
+          super.onJoinChannel(accId, uid, channelName, rtcChannelId);
+          NERtcEx.getInstance()
+              .setSpeakerphoneOn(callParam.getChannelType() != ChannelType.AUDIO.getValue());
+          reportOneOnOneRtcRoomCreate(rtcChannelId);
+        }
 
         @Override
         public void onFirstVideoFrameDecoded(@Nullable String userId, int width, int height) {
@@ -159,7 +175,6 @@ public class CallViewModel extends AndroidViewModel {
             toastData.postValue(getApplication().getString(R.string.called_timeout_tips));
           } else {
             toastData.postValue(getApplication().getString(R.string.caller_timeout_tips));
-            sendSmsData.postValue(true);
           }
           super.timeOut();
         }
@@ -172,9 +187,10 @@ public class CallViewModel extends AndroidViewModel {
         public void onEvent(@Nullable List<IMMessageInfo> event) {
           if (event != null) {
             for (IMMessageInfo messageInfo : event) {
-              if (messageInfo != null
-                  && messageInfo.getMessage().getAttachment() instanceof GiftAttachment) {
-                handleGiftMessage((GiftAttachment) messageInfo.getMessage().getAttachment());
+              if (ChatUtil.isCurrentConversationMessage(messageInfo, userInfo.accId)) {
+                if (ChatUtil.isGiftMessageType(messageInfo)) {
+                  handleGiftMessage((GiftAttachment) messageInfo.getMessage().getAttachment());
+                }
               }
             }
           }
@@ -224,10 +240,6 @@ public class CallViewModel extends AndroidViewModel {
     return remoteVideoMute;
   }
 
-  public MutableLiveData<Boolean> getSendSmsData() {
-    return sendSmsData;
-  }
-
   public MutableLiveData<Long> getOtherRtcUid() {
     return otherRtcUid;
   }
@@ -275,6 +287,7 @@ public class CallViewModel extends AndroidViewModel {
   private void handleSecurityData(SecurityAuditModel model) {
     SecurityTipsModel securityTipsModel = new SecurityTipsModel();
     if (model.getType() == SecurityAuditManager.NORMAL_TYPE) {
+      LogUtil.i("SecurityAuditManager", "securityTipsModel:" + securityTipsModel);
       CallViewModel.this.securityTipsModel.setValue(securityTipsModel);
       return;
     }
@@ -321,7 +334,7 @@ public class CallViewModel extends AndroidViewModel {
         }
       }
     }
-    LogUtil.i(TAG, "securityTipsModel:" + securityTipsModel);
+    LogUtil.i("SecurityAuditManager", "securityTipsModel:" + securityTipsModel);
     CallViewModel.this.securityTipsModel.setValue(securityTipsModel);
   }
 
@@ -361,5 +374,24 @@ public class CallViewModel extends AndroidViewModel {
       inTheCallSecondTimer.cancel();
       inTheCallSecondTimer = null;
     }
+  }
+
+  private void reportOneOnOneRtcRoomCreate(long rtcChannelId) {
+    HttpService.getInstance()
+        .reportRtcRoom(
+            rtcChannelId,
+            new Callback<ModelResponse<Response>>() {
+              @Override
+              public void onResponse(
+                  Call<ModelResponse<Response>> call,
+                  retrofit2.Response<ModelResponse<Response>> response) {}
+
+              @Override
+              public void onFailure(Call<ModelResponse<Response>> call, Throwable t) {}
+            });
+  }
+
+  public MutableLiveData<Boolean> getSelfJoinChannelSuccessData() {
+    return selfJoinChannelSuccessData;
   }
 }

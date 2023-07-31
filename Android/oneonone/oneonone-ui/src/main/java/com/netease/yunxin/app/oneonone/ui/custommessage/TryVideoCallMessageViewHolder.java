@@ -10,6 +10,7 @@ import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import com.netease.yunxin.app.oneonone.ui.R;
 import com.netease.yunxin.app.oneonone.ui.utils.NavUtils;
+import com.netease.yunxin.app.oneonone.ui.utils.OneOnOneUtils;
 import com.netease.yunxin.kit.chatkit.ui.databinding.ChatBaseMessageViewHolderBinding;
 import com.netease.yunxin.kit.chatkit.ui.model.ChatMessageBean;
 import com.netease.yunxin.kit.chatkit.ui.view.message.viewholder.ChatBaseMessageViewHolder;
@@ -46,6 +47,13 @@ public class TryVideoCallMessageViewHolder extends ChatBaseMessageViewHolder {
     }
     view.findViewById(R.id.call_now)
         .setOnClickListener(
-            v -> NavUtils.toCallVideoPage(getContainer().getContext(), attachment.getUserInfo()));
+            v -> {
+              if (OneOnOneUtils.isInVoiceRoom()) {
+                OneOnOneUtils.showTipsDialog(getMessageContainer().getContext());
+                return;
+              }
+              NavUtils.toCallVideoPage(
+                  getMessageContainer().getContext(), attachment.getUserInfo());
+            });
   }
 }
