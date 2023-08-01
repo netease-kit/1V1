@@ -12,6 +12,7 @@ public class NEOneOnOneQuickReply: UIView, UICollectionViewDataSource, UICollect
 
   public typealias SelectQuickReply = (Int) -> Void
   public var selectQuickReply: SelectQuickReply?
+  public var rebortClicked: (() -> Void)?
 
   // MARK: UICollectionViewDataSource
 
@@ -40,9 +41,16 @@ public class NEOneOnOneQuickReply: UIView, UICollectionViewDataSource, UICollect
   override public init(frame: CGRect) {
     super.init(frame: frame)
     backgroundColor = UIColor.clear
+    addSubview(rebortButton)
+    rebortButton.snp.makeConstraints { make in
+      make.right.equalToSuperview().offset(-16)
+      make.top.equalToSuperview()
+      make.width.height.equalTo(48)
+    }
     addSubview(quickReplayCollectionView)
     quickReplayCollectionView.snp.makeConstraints { make in
-      make.left.right.top.bottom.equalTo(self)
+      make.left.right.bottom.equalTo(self)
+      make.height.equalTo(30)
     }
   }
 
@@ -63,6 +71,18 @@ public class NEOneOnOneQuickReply: UIView, UICollectionViewDataSource, UICollect
     quickReplayCollectionView.showsHorizontalScrollIndicator = false
     return quickReplayCollectionView
   }()
+
+  lazy var rebortButton: UIButton = {
+    let button = UIButton()
+    button.setImage(ne_chatUI_imageName(imageName: "ai_rebort"), for: .normal)
+    button.addTarget(self, action: #selector(clickRebort), for: .touchUpInside)
+    button.isHidden = !NEOneOnOneChatRegisterEngine.getInstance().isSupportAIGC
+    return button
+  }()
+
+  @objc func clickRebort() {
+    rebortClicked?()
+  }
 }
 
 class NEOneOnOneQuickReplyCell: UICollectionViewCell {

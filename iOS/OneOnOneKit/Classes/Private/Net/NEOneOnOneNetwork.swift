@@ -8,15 +8,7 @@ class NetworkConfig {
   /// 自定义url
   var customUrl: String?
   var baseUrl: String {
-    if let url = customUrl {
-      return url
-    } else if isDebug {
-      return "https://yiyong-qa.netease.im"
-    } else if isOverSea {
-      return "https://yiyong-sg.netease.im"
-    } else {
-      return "https://yiyong.netease.im"
-    }
+    customUrl ?? ""
   }
 
   var isDebug: Bool = false
@@ -85,13 +77,13 @@ public class NEOneOnOneNetwork {
   }
 
   /// 请求session
-  var session: URLSession {
+  lazy var session: URLSession = {
     let sessionConfigure = URLSessionConfiguration.default
     sessionConfigure.httpAdditionalHeaders = ["Content-Type": "application/json;charset=utf-8"]
-    sessionConfigure.timeoutIntervalForRequest = 10
+    sessionConfigure.timeoutIntervalForRequest = 20
     sessionConfigure.requestCachePolicy = .reloadIgnoringLocalCacheData
     return URLSession(configuration: sessionConfigure)
-  }
+  }()
 
   // MARK: - ------------------------- Request --------------------------
 
@@ -124,7 +116,7 @@ public class NEOneOnOneNetwork {
     var request = URLRequest(
       url: URL,
       cachePolicy: .useProtocolCachePolicy,
-      timeoutInterval: 10
+      timeoutInterval: 20
     )
     // headers
     for (key, value) in headers {
@@ -179,7 +171,7 @@ public class NEOneOnOneNetwork {
       }
       // 打印requestId
       if let requestId = response["requestId"] as? String, !url.contains("socialChat/user/reporter") {
-        NEOneOnOneLog.infoLog(self.tag, desc: "RequestId:\n\(requestId)")
+        NEOneOnOneLog.infoLog(self.tag, desc: "Url:\(url) RequestId:\(requestId)")
       }
       guard let code = response["code"] as? Int else {
         failed(makeError(NEOneOnOneErrorCode.failed, "Empty code in response body!"))

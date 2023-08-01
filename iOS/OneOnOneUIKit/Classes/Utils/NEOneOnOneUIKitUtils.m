@@ -132,4 +132,57 @@ static UIWindow *subWindow;
   }
 }
 
+/// 获取当前视图控制器
++ (UIViewController *)findVisibleViewController {
+  UIViewController *currentViewController = [NEOneOnOneUIKitUtils getRootViewController];
+
+  BOOL runLoopFind = YES;
+  while (runLoopFind) {
+    if (currentViewController.presentedViewController) {
+      currentViewController = currentViewController.presentedViewController;
+    } else {
+      if ([currentViewController isKindOfClass:[UINavigationController class]]) {
+        currentViewController =
+            ((UINavigationController *)currentViewController).visibleViewController;
+      } else if ([currentViewController isKindOfClass:[UITabBarController class]]) {
+        currentViewController =
+            ((UITabBarController *)currentViewController).selectedViewController;
+      } else {
+        break;
+      }
+    }
+  }
+
+  return currentViewController;
+}
+
++ (UIViewController *)getRootViewController {
+  UIViewController *result = nil;
+
+  UIWindow *window = [[UIApplication sharedApplication] keyWindow];
+  if (window.windowLevel != UIWindowLevelNormal) {
+    NSArray *windows = [[UIApplication sharedApplication] windows];
+    for (UIWindow *temp in windows) {
+      if (temp.windowLevel == UIWindowLevelNormal) {
+        window = temp;
+        break;
+      }
+    }
+  }
+  // 取当前展示的控制器
+  result = window.rootViewController;
+  while (result.presentedViewController) {
+    result = result.presentedViewController;
+  }
+  // 如果为UITabBarController：取选中控制器
+  if ([result isKindOfClass:[UITabBarController class]]) {
+    result = [(UITabBarController *)result selectedViewController];
+  }
+  // 如果为UINavigationController：取可视控制器
+  if ([result isKindOfClass:[UINavigationController class]]) {
+    result = [(UINavigationController *)result visibleViewController];
+  }
+  return result;
+}
+
 @end

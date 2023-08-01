@@ -74,42 +74,19 @@ table th:nth-of-type(2) {
     `accountId`、`accessToken` 和 `imToken` 的值请填写 1 对 1 娱乐社交服务端返回的内容。
     :::
 
-5. （可选）修改 `/OneOnOneKit/Classes/Private/Net/NEOneOnOneNetwork.swift` 文件 ，在 `baseUrl` 中设置当前的环境对应的域名。
+5. （可选）修改 `OneOnOne/iOS/OneOnOneSample/OneOnOneSample/AppKey.h`中设置当前的环境对应的域名。
 
 
     ::: note note
     如果您在本地运行了1 对 1 娱乐社交服务端工程，域名请设置为 `http://127.0.0.1:9981`。
     :::
     ```
-    class NetworkConfig {
-    /// 自定义url
-    var customUrl: String?
-    var baseUrl: String {
-        if let url = customUrl {
-        return url
-        } else if isDebug {
-        return "http://127.0.0.1:9981"
-        } else {
-        return "http://127.0.0.1:9981"
-        }
-    }
+    /// 服务器
+    let kApiHost: String = "http://127.0.0.1:9981"
+    
     ```
   
-6.  （可选）注释掉 `NEOneOnOne+Auth.swift` 的如下代码。
-
-    ::: note note
-    如果应用服务端生成的 accountId 不是 int 类型，包含了字母，请注释掉以下校验，否则会编译失败。
-    :::
-
-  
-    ```
-    let accountIntValue = Int(account) ?? 0
-    if accountIntValue == 0 {
-        callback?(NEOneOnOneErrorCode.failed, "error Account", nil)
-        return
-    }
-    ```
-7. 运行工程。
+6. 运行工程。
 
 ::: note note
 如果 1 对 1 娱乐社交服务端部署在本地，客户端需要和服务器连接到一个网络环境内，此时无法使用真机运行，需要用模拟器运行。

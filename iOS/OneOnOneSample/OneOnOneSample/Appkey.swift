@@ -4,13 +4,8 @@
 
 import Foundation
 
-/// 服务器host
-
-let kApiHost: String = "https://yiyong.netease.im"
-
-// Chatroom host address
-
-let kChatRoomHost: String = "http://yiyong-voice-chat.netease.im"
+/// 服务器地址
+let kApiHost: String = ""
 
 /// 数据收集
 
