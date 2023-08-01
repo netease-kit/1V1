@@ -24,11 +24,11 @@ import com.netease.yunxin.app.oneonone.ui.databinding.OneOnOneChatAssistantLeftH
 import com.netease.yunxin.kit.alog.ALog;
 import com.netease.yunxin.kit.chatkit.ui.databinding.ChatBaseMessageViewHolderBinding;
 import com.netease.yunxin.kit.chatkit.ui.model.ChatMessageBean;
-import com.netease.yunxin.kit.chatkit.ui.view.message.viewholder.ChatBaseMessageViewHolder;
+import com.netease.yunxin.kit.chatkit.ui.normal.view.message.viewholder.NormalChatBaseMessageViewHolder;
 import com.netease.yunxin.kit.corekit.im.utils.RouterConstant;
 import com.netease.yunxin.kit.corekit.route.XKitRouter;
 
-public class AssistantMessageViewHolder extends ChatBaseMessageViewHolder {
+public class AssistantMessageViewHolder extends NormalChatBaseMessageViewHolder {
   private static final String TAG = "AssistantMessageViewHolder";
   private View rootView;
 
@@ -38,10 +38,10 @@ public class AssistantMessageViewHolder extends ChatBaseMessageViewHolder {
   }
 
   @Override
-  public void addContainer() {
+  public void addViewToMessageContainer() {
     OneOnOneChatAssistantLeftHolderBinding leftBinding =
         OneOnOneChatAssistantLeftHolderBinding.inflate(
-            LayoutInflater.from(parent.getContext()), getContainer(), true);
+            LayoutInflater.from(parent.getContext()), getMessageContainer(), true);
     rootView = leftBinding.getRoot();
   }
 

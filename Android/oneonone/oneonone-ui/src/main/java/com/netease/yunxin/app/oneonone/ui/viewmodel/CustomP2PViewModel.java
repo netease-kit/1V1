@@ -14,8 +14,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.MutableLiveData;
-import com.blankj.utilcode.util.GsonUtils;
-import com.blankj.utilcode.util.SPUtils;
 import com.netease.nimlib.sdk.NIMClient;
 import com.netease.nimlib.sdk.Observer;
 import com.netease.nimlib.sdk.RequestCallbackWrapper;
@@ -31,6 +29,7 @@ import com.netease.nimlib.sdk.msg.constant.SessionTypeEnum;
 import com.netease.nimlib.sdk.msg.model.CustomNotification;
 import com.netease.nimlib.sdk.uinfo.UserServiceObserve;
 import com.netease.nimlib.sdk.uinfo.model.NimUserInfo;
+import com.netease.yunxin.app.oneonone.ui.custommessage.GiftAttachment;
 import com.netease.yunxin.app.oneonone.ui.http.HttpService;
 import com.netease.yunxin.app.oneonone.ui.model.ModelResponse;
 import com.netease.yunxin.app.oneonone.ui.model.User;
@@ -42,10 +41,15 @@ import com.netease.yunxin.kit.alog.ALog;
 import com.netease.yunxin.kit.chatkit.model.IMMessageInfo;
 import com.netease.yunxin.kit.chatkit.repo.ChatObserverRepo;
 import com.netease.yunxin.kit.chatkit.repo.ChatRepo;
+import com.netease.yunxin.kit.common.utils.SPUtils;
 import com.netease.yunxin.kit.corekit.im.model.EventObserver;
 import com.netease.yunxin.kit.corekit.im.model.UserInfo;
 import com.netease.yunxin.kit.corekit.im.provider.FetchCallback;
+import com.netease.yunxin.kit.corekit.im.repo.SettingRepo;
 import com.netease.yunxin.kit.entertainment.common.utils.UserInfoManager;
+import com.netease.yunxin.nertc.nertcvideocall.model.AbsNERtcCallingDelegate;
+import com.netease.yunxin.nertc.nertcvideocall.model.NERTCVideoCall;
+import com.netease.yunxin.nertc.nertcvideocall.utils.GsonUtils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -63,11 +67,30 @@ public class CustomP2PViewModel extends AndroidViewModel {
   private final MutableLiveData<Boolean> onlineStatusData = new MutableLiveData<>();
   private final MutableLiveData<Boolean> typeStateLiveData = new MutableLiveData<>();
   private final MutableLiveData<UserInfo> userInfoLiveData = new MutableLiveData<>();
+  private final MutableLiveData<GiftAttachment> giftMessageLiveData = new MutableLiveData<>();
+  private final MutableLiveData<Boolean> busyLiveData = new MutableLiveData<>();
   private UserInfo userInfo;
   private final Handler mainHandler = new Handler(Looper.getMainLooper());
   private static final String TYPE_STATE = "typing";
   private static final int DELAY_TIME = 300;
   private ChatUIConfigManager chatUIConfigManager;
+  private final EventObserver<List<IMMessageInfo>> incomingMessageObserver =
+      new EventObserver<List<IMMessageInfo>>() {
+        @Override
+        public void onEvent(@Nullable List<IMMessageInfo> event) {
+          if (event != null && !event.isEmpty()) {
+            for (IMMessageInfo messageInfo : event) {
+              // 消息发送者是当前会话对象
+              if (ChatUtil.isCurrentConversationMessage(messageInfo, sessionId)) {
+                if (ChatUtil.isGiftMessageType(messageInfo)) {
+                  giftMessageLiveData.setValue(
+                      (GiftAttachment) messageInfo.getMessage().getAttachment());
+                }
+              }
+            }
+          }
+        }
+      };
   private final Observer<List<NimUserInfo>> userInfoUpdateObserver =
       new Observer<List<NimUserInfo>>() {
         @Override
@@ -117,6 +140,15 @@ public class CustomP2PViewModel extends AndroidViewModel {
         }
       };
 
+  private final AbsNERtcCallingDelegate neRtcCallingDelegate =
+      new AbsNERtcCallingDelegate() {
+        @Override
+        public void onUserBusy(String userId) {
+          super.onUserBusy(userId);
+          busyLiveData.setValue(true);
+        }
+      };
+
   public CustomP2PViewModel(@NonNull Application application) {
     super(application);
   }
@@ -131,8 +163,11 @@ public class CustomP2PViewModel extends AndroidViewModel {
     NIMClient.getService(UserServiceObserve.class)
         .observeUserInfoUpdate(userInfoUpdateObserver, true);
     ChatObserverRepo.registerCustomNotificationObserve(customNotificationObserver);
+    NERTCVideoCall.sharedInstance().addDelegate(neRtcCallingDelegate);
     fetchTargetUserName();
     getTargetUserInfo(sessionId);
+    // 语音消息改为扬声器播放
+    SettingRepo.setHandsetMode(false);
   }
 
   private void fetchTargetUserName() {
@@ -245,6 +280,14 @@ public class CustomP2PViewModel extends AndroidViewModel {
     return userInfoLiveData;
   }
 
+  public MutableLiveData<GiftAttachment> getGiftMessageLiveData() {
+    return giftMessageLiveData;
+  }
+
+  public MutableLiveData<Boolean> getBusyLiveData() {
+    return busyLiveData;
+  }
+
   @Override
   protected void onCleared() {
     super.onCleared();
@@ -253,6 +296,8 @@ public class CustomP2PViewModel extends AndroidViewModel {
     NIMClient.getService(UserServiceObserve.class)
         .observeUserInfoUpdate(userInfoUpdateObserver, false);
     ChatObserverRepo.unregisterCustomNotificationObserve(customNotificationObserver);
+    registerReceiveMessageObserve(false);
+    NERTCVideoCall.sharedInstance().removeDelegate(neRtcCallingDelegate);
   }
 
   private void listenOnlineEvent(boolean listen) {
@@ -380,6 +425,14 @@ public class CustomP2PViewModel extends AndroidViewModel {
       } else {
         mainHandler.postDelayed(() -> ChatUtil.insertCommonRiskMessage(sessionId), DELAY_TIME);
       }
+    }
+  }
+
+  public void registerReceiveMessageObserve(boolean register) {
+    if (register) {
+      ChatObserverRepo.registerReceiveMessageObserve(incomingMessageObserver);
+    } else {
+      ChatObserverRepo.unregisterReceiveMessageObserve(incomingMessageObserver);
     }
   }
 }

@@ -4,6 +4,7 @@
 
 package com.netease.yunxin.app.oneonone.ui.utils;
 
+import android.text.TextUtils;
 import com.netease.nimlib.sdk.NIMClient;
 import com.netease.nimlib.sdk.RequestCallback;
 import com.netease.nimlib.sdk.msg.MessageBuilder;
@@ -15,6 +16,7 @@ import com.netease.nimlib.sdk.msg.model.IMMessage;
 import com.netease.yunxin.app.oneonone.ui.constant.Constants;
 import com.netease.yunxin.app.oneonone.ui.custommessage.AccostMessageAttachment;
 import com.netease.yunxin.app.oneonone.ui.custommessage.CommonRiskAttachment;
+import com.netease.yunxin.app.oneonone.ui.custommessage.GiftAttachment;
 import com.netease.yunxin.app.oneonone.ui.custommessage.OneOnOneChatCustomMessageType;
 import com.netease.yunxin.app.oneonone.ui.custommessage.PrivacyRiskAttachment;
 import com.netease.yunxin.app.oneonone.ui.custommessage.TryAudioCallMessageAttachment;
@@ -155,8 +157,14 @@ public class ChatUtil {
     return -1;
   }
 
+  public static boolean isCurrentConversationMessage(IMMessageInfo messageInfo, String sessionId) {
+    return messageInfo != null
+        && TextUtils.equals(messageInfo.getMessage().getSessionId(), sessionId);
+  }
+
   public static boolean isGiftMessageType(IMMessageInfo messageInfo) {
-    return ChatUtil.getCustomMsgType(messageInfo) == OneOnOneChatCustomMessageType.SEND_GIFT_TYPE;
+    return ChatUtil.getCustomMsgType(messageInfo) == OneOnOneChatCustomMessageType.SEND_GIFT_TYPE
+        && messageInfo.getMessage().getAttachment() instanceof GiftAttachment;
   }
 
   public static boolean isSystemAccount(String account) {

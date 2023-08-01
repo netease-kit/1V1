@@ -17,8 +17,8 @@ android {
         applicationId = "com.netease.yunxin.app.oneonone"
         minSdk = 21
         targetSdk = 30
-        versionCode = 4
-        versionName = "1.4.0"
+        versionCode = 150
+        versionName = "1.5.0"
         multiDexEnabled = true
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -80,12 +80,10 @@ dependencies {
     implementation("androidx.recyclerview:recyclerview:1.2.1")
     implementation("com.netease.yunxin.kit:alog:1.0.9")
 
-    implementation("com.netease.yunxin.kit.call:call-pstn:1.8.2"){
+    implementation("com.netease.yunxin.kit.call:call-ui:2.0.1"){
         exclude("com.netease.yunxin","nertc-base")
     }
-    implementation("com.gyf.immersionbar:immersionbar:3.0.0")
     implementation("com.netease.yunxin.kit.auth:auth-yunxin-login:1.0.4")
-    implementation("com.blankj:utilcodex:1.30.6")
     implementation("com.squareup.okhttp3:logging-interceptor:4.7.2")
     implementation("com.squareup.okhttp3:okhttp:4.9.3")
     implementation("com.google.code.gson:gson:2.9.0")
@@ -94,15 +92,15 @@ dependencies {
     implementation("io.reactivex.rxjava2:rxandroid:2.1.1")
     implementation("androidx.navigation:navigation-fragment-ktx:2.4.2")
     implementation("androidx.navigation:navigation-ui-ktx:2.4.2")
-    implementation("com.netease.yunxin.kit.common:common-ui:1.1.20")
-    implementation("com.netease.nimlib:chatroom:9.10.0")
-    implementation("com.netease.nimlib:avsignalling:9.10.0")
+    implementation("com.netease.yunxin.kit.common:common-ui:1.3.0")
+    implementation("com.netease.nimlib:chatroom:9.12.0")
+    implementation("com.netease.nimlib:avsignalling:9.12.0")
 //    implementation("com.android.support:support-v4:28.0.0")
     implementation(project(":oneonone:oneonone-ui"))
     implementation(project(":entertainment:entertainment-common"))
-    implementation(project(":beauty:beauty-ui"))
+    implementation(project(":beauty:beauty-faceunity"))
     //会话列表组件
-    api("com.netease.yunxin.kit.conversation:conversationkit-ui:9.5.5-alpha01")
+    api("com.netease.yunxin.kit.conversation:conversationkit-ui:9.6.3-alpha01")
     implementation("com.github.bumptech.glide:glide:4.13.1")
     annotationProcessor("com.github.bumptech.glide:compiler:4.13.1")
 

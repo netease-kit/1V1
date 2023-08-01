@@ -70,20 +70,6 @@ public class AudioInputDialog extends Dialog {
           WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.MATCH_PARENT);
     }
     setCanceledOnTouchOutside(false);
-    FrameLayout fl = rootView.findViewById(R.id.fl);
-    fl.post(
-        () -> {
-          int[] location = new int[2];
-          fl.getLocationOnScreen(location);
-          int viewLeft = location[0];
-          int viewTop = location[1];
-          int viewRight = viewLeft + fl.getWidth();
-          int viewBottom = viewTop + fl.getHeight();
-          flViewRect.left = viewLeft;
-          flViewRect.top = viewTop;
-          flViewRect.right = viewRight;
-          flViewRect.bottom = viewBottom;
-        });
   }
 
   @Override
@@ -148,6 +134,21 @@ public class AudioInputDialog extends Dialog {
                 dismiss();
               }
             }
+          });
+      FrameLayout fl = rootView.findViewById(R.id.fl);
+      fl.post(
+          () -> {
+            int[] location = new int[2];
+            fl.getLocationOnScreen(location);
+            int viewLeft = location[0];
+            int viewTop = location[1];
+            int viewRight = viewLeft + fl.getWidth();
+            int viewBottom = viewTop + fl.getHeight();
+            flViewRect.left = viewLeft;
+            flViewRect.top = viewTop;
+            flViewRect.right = viewRight;
+            flViewRect.bottom = viewBottom;
+            ALog.i(TAG, "flViewRect:" + flViewRect);
           });
       super.show();
     } catch (WindowManager.BadTokenException e) {

@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2022 NetEase, Inc. All rights reserved.
+  ~ Use of this source code is governed by a MIT license that can be
+  ~ found in the LICENSE file.
+  -->
+
+<resources>
+    <string name="origin">original image</string>
+    <string name="bailiang_1">White bright 1</string>
+    <string name="bailiang_2">White bright 2</string>
+    <string name="bailiang_3">White bright 3</string>
+    <string name="bailiang_4">White bright 4</string>
+    <string name="bailiang_5">White bright 5</string>
+    <string name="bailiang_6">White bright 6</string>
+    <string name="bailiang_7">White bright 7</string>
+    <string name="fennen_1">pink 1</string>
+    <string name="fennen_2">Pink 2</string>
+    <string name="fennen_3">pink 3</string>
+    <string name="fennen_5">pink 5</string>
+    <string name="fennen_6">Pink 6</string>
+    <string name="fennen_7">Pink 7</string>
+    <string name="fennen_8">Pink 8</string>
+    <string name="xiaoqingxin_1">fresh 1</string>
+    <string name="xiaoqingxin_3">fresh 3</string>
+    <string name="xiaoqingxin_4">fresh 4</string>
+    <string name="xiaoqingxin_6">fresh 6</string>
+    <string name="lengsediao_1">Cool Tone 1</string>
+    <string name="lengsediao_2">Cool Tone 2</string>
+    <string name="lengsediao_3">Cool Tone 3</string>
+    <string name="lengsediao_4">Cool Tone 4</string>
+    <string name="lengsediao_7">Cool tone 7</string>
+    <string name="lengsediao_8">Cool tone 8</string>
+    <string name="lengsediao_11">Cool tone 11</string>
+    <string name="nuansediao_1">Warm color 1</string>
+    <string name="nuansediao_2">Warm color 2</string>
+    <string name="gexing_1">Personality 1</string>
+    <string name="gexing_2">Personality 2</string>
+    <string name="gexing_3">Personality 3</string>
+    <string name="gexing_4">personality 4</string>
+    <string name="gexing_5">personality 5</string>
+    <string name="gexing_7">Personality 7</string>
+    <string name="gexing_10">Personality 10</string>
+    <string name="gexing_11">Personality 11</string>
+    <string name="heibai_1">Black and white 1</string>
+    <string name="heibai_2">Black and White 2</string>
+    <string name="heibai_3">Black and white 3</string>
+    <string name="heibai_4">Black and White 4</string>
+    <string name="ziran_1">Nature 1</string>
+    <string name="ziran_2">Nature 2</string>
+    <string name="ziran_3">Nature 3</string>
+    <string name="ziran_4">Natura 4</string>
+    <string name="ziran_5">Nature 5</string>
+    <string name="ziran_6">Nature 6</string>
+    <string name="ziran_7">Nature 7</string>
+    <string name="ziran_8">Natura 8</string>
+    <string name="zhiganhui_1">texture gray 1</string>
+    <string name="zhiganhui_2">texture gray 2</string>
+    <string name="zhiganhui_3">texture gray 3</string>
+    <string name="zhiganhui_4">texture gray 4</string>
+    <string name="zhiganhui_5">texture gray 5</string>
+    <string name="zhiganhui_6">texture gray 6</string>
+    <string name="zhiganhui_7">texture gray 7</string>
+    <string name="zhiganhui_8">texture gray 8</string>
+    <string name="mitao_1">peach 1</string>
+    <string name="mitao_2">peach 2</string>
+    <string name="mitao_3">peach 3</string>
+    <string name="mitao_4">peach 4</string>
+    <string name="mitao_5">peach 5</string>
+    <string name="mitao_6">peach 6</string>
+    <string name="mitao_7">peach 7</string>
+    <string name="mitao_8">peach 8</string>
+</resources>

@@ -15,11 +15,11 @@ import com.netease.yunxin.app.oneonone.ui.databinding.OneOnOneChatGiftLeftHolder
 import com.netease.yunxin.app.oneonone.ui.databinding.OneOnOneChatGiftRightHolderBinding;
 import com.netease.yunxin.kit.chatkit.ui.databinding.ChatBaseMessageViewHolderBinding;
 import com.netease.yunxin.kit.chatkit.ui.model.ChatMessageBean;
-import com.netease.yunxin.kit.chatkit.ui.view.message.viewholder.ChatBaseMessageViewHolder;
+import com.netease.yunxin.kit.chatkit.ui.normal.view.message.viewholder.NormalChatBaseMessageViewHolder;
 import com.netease.yunxin.kit.entertainment.common.gift.GiftCache;
 import com.netease.yunxin.kit.entertainment.common.utils.UserInfoManager;
 
-public class GiftMessageViewHolder extends ChatBaseMessageViewHolder {
+public class GiftMessageViewHolder extends NormalChatBaseMessageViewHolder {
   private static final String TAG = "GiftMessageViewHolder";
   private View rootView;
   private boolean isRight = false;
@@ -29,16 +29,16 @@ public class GiftMessageViewHolder extends ChatBaseMessageViewHolder {
   }
 
   @Override
-  public void addContainer() {
+  public void addViewToMessageContainer() {
     if (isRight) {
       OneOnOneChatGiftRightHolderBinding rightBinding =
           OneOnOneChatGiftRightHolderBinding.inflate(
-              LayoutInflater.from(parent.getContext()), getContainer(), true);
+              LayoutInflater.from(parent.getContext()), getMessageContainer(), true);
       rootView = rightBinding.getRoot();
     } else {
       OneOnOneChatGiftLeftHolderBinding leftBinding =
           OneOnOneChatGiftLeftHolderBinding.inflate(
-              LayoutInflater.from(parent.getContext()), getContainer(), true);
+              LayoutInflater.from(parent.getContext()), getMessageContainer(), true);
       rootView = leftBinding.getRoot();
     }
   }

@@ -7,6 +7,11 @@ package com.netease.yunxin.app.oneonone.ui.fragment;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.SurfaceTexture;
+import android.hardware.Camera;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -20,9 +25,17 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.lifecycle.Observer;
-import com.blankj.utilcode.util.ToastUtils;
+import com.faceunity.core.enumeration.CameraFacingEnum;
+import com.faceunity.core.enumeration.FUAIProcessorEnum;
+import com.faceunity.core.enumeration.FUInputTextureEnum;
+import com.faceunity.core.enumeration.FUTransformMatrixEnum;
+import com.faceunity.core.utils.CameraUtils;
+import com.faceunity.nama.FURenderer;
+import com.faceunity.nama.data.FaceUnityDataFactory;
+import com.faceunity.nama.listener.FURendererListener;
 import com.netease.lava.nertc.sdk.NERtcConstants;
 import com.netease.lava.nertc.sdk.NERtcEx;
+import com.netease.lava.nertc.sdk.video.NERtcVideoFrame;
 import com.netease.lava.nertc.sdk.video.NERtcVideoView;
 import com.netease.neliveplayer.sdk.NELivePlayer;
 import com.netease.yunxin.app.oneonone.ui.OneOnOneUI;
@@ -38,13 +51,12 @@ import com.netease.yunxin.app.oneonone.ui.utils.security.SecurityTipsModel;
 import com.netease.yunxin.app.oneonone.ui.utils.security.SecurityType;
 import com.netease.yunxin.app.oneonone.ui.view.InTheVideoCallBottomBar;
 import com.netease.yunxin.kit.alog.ALog;
-import com.netease.yunxin.kit.beauty.BeautyManager;
 import com.netease.yunxin.kit.common.image.ImageLoader;
+import com.netease.yunxin.kit.common.ui.utils.ToastX;
 import com.netease.yunxin.nertc.nertcvideocall.model.NERTCVideoCall;
 import com.netease.yunxin.nertc.nertcvideocall.model.impl.NERtcCallbackExTemp;
-import com.netease.yunxin.nertc.ui.base.CallParam;
 
-public class InTheVideoCallFragment extends InTheBaseCallFragment {
+public class InTheVideoCallFragment extends InTheBaseCallFragment implements SensorEventListener {
   private static final String TAG = "InTheVideoCallFragment";
   private FragmentInVideoCallBinding binding;
   private CallActivity activity;
@@ -60,6 +72,30 @@ public class InTheVideoCallFragment extends InTheBaseCallFragment {
   private NERTCVideoCall rtcCall;
   private String otherUid;
   private SecurityTipsModel securityTipsModel;
+  private int mCameraFacing = Camera.CameraInfo.CAMERA_FACING_FRONT;
+  private boolean isFirstInit = true;
+  private boolean isFUOn = false;
+  private int mSkipFrame = 5;
+  private FURenderer mFURendererManager;
+  private FaceUnityDataFactory mFaceUnityDataFactory;
+  private SensorManager mSensorManager;
+
+  private final FURendererListener mFURendererListener =
+      new FURendererListener() {
+        @Override
+        public void onPrepare() {
+          mFaceUnityDataFactory.bindCurrentRenderer();
+        }
+
+        @Override
+        public void onTrackStatusChanged(FUAIProcessorEnum type, int status) {}
+
+        @Override
+        public void onFpsChanged(double fps, double callTime) {}
+
+        @Override
+        public void onRelease() {}
+      };
 
   private void handleVideoSizeChanged(int videoWidth, int videoHeight) {
     if (videoWidth > 0 && videoHeight > 0) {
@@ -129,7 +165,8 @@ public class InTheVideoCallFragment extends InTheBaseCallFragment {
       @Nullable ViewGroup container,
       @Nullable Bundle savedInstanceState) {
     rtcCall = activity.getRtcCall();
-    BeautyManager.getInstance().startBeauty();
+    //    BeautyManager.getInstance().startBeauty();
+    setupFaceUnity();
     return super.onCreateView(inflater, container, savedInstanceState);
   }
 
@@ -181,7 +218,54 @@ public class InTheVideoCallFragment extends InTheBaseCallFragment {
     } else {
       binding.textureViewContainer.setVisibility(View.GONE);
       binding.bigVideo.setVisibility(View.VISIBLE);
+      NERtcEx.getInstance()
+          .setVideoCallback(
+              neRtcVideoFrame -> {
+                if (isFirstInit) {
+                  isFirstInit = false;
+                  mFURendererManager.prepareRenderer(mFURendererListener);
+                  return false;
+                }
+                int texId =
+                    mFURendererManager.onDrawFrameSingleInput(
+                        neRtcVideoFrame.textureId, neRtcVideoFrame.width, neRtcVideoFrame.height);
+                if (mSkipFrame-- > 0) {
+                  return false;
+                }
+                if (neRtcVideoFrame.format == NERtcVideoFrame.Format.TEXTURE_OES) {
+                  neRtcVideoFrame.format = NERtcVideoFrame.Format.TEXTURE_RGB;
+                }
+                neRtcVideoFrame.textureId = texId;
+                return true;
+              },
+              true);
     }
+  }
+
+  private void setupFaceUnity() {
+    mFURendererManager = FURenderer.getInstance();
+    mFURendererManager.setMarkFPSEnable(true);
+    mFURendererManager.setInputTextureType(FUInputTextureEnum.FU_ADM_FLAG_EXTERNAL_OES_TEXTURE);
+    mFURendererManager.setCameraFacing(CameraFacingEnum.CAMERA_FRONT);
+    mFURendererManager.setInputOrientation(
+        CameraUtils.INSTANCE.getCameraOrientation(Camera.CameraInfo.CAMERA_FACING_FRONT));
+    mFURendererManager.setInputTextureMatrix(
+        mCameraFacing == Camera.CameraInfo.CAMERA_FACING_FRONT
+            ? FUTransformMatrixEnum.CCROT0_FLIPVERTICAL
+            : FUTransformMatrixEnum.CCROT0);
+    mFURendererManager.setInputBufferMatrix(
+        mCameraFacing == Camera.CameraInfo.CAMERA_FACING_FRONT
+            ? FUTransformMatrixEnum.CCROT0_FLIPVERTICAL
+            : FUTransformMatrixEnum.CCROT0);
+    mFURendererManager.setOutputMatrix(
+        mCameraFacing == Camera.CameraInfo.CAMERA_FACING_FRONT
+            ? FUTransformMatrixEnum.CCROT0
+            : FUTransformMatrixEnum.CCROT0_FLIPVERTICAL);
+    mFURendererManager.setCreateEGLContext(false);
+    mFaceUnityDataFactory = new FaceUnityDataFactory(0);
+    mSensorManager = (SensorManager) getContext().getSystemService(Context.SENSOR_SERVICE);
+    Sensor sensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+    mSensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_NORMAL);
   }
 
   @Override
@@ -202,7 +286,11 @@ public class InTheVideoCallFragment extends InTheBaseCallFragment {
     super.subscribeUi();
     binding.smallVideo.setZOrderMediaOverlay(true);
     binding.bigVideo.setZOrderMediaOverlay(false);
+    binding.bigVideo.setScalingType(NERtcConstants.VideoScalingType.SCALE_ASPECT_BALANCED);
     viewModel.refresh(activity.getCallParams());
+    viewModel
+        .getSelfJoinChannelSuccessData()
+        .observe(viewLifecycleOwner, aBoolean -> setupLocalView(binding.smallVideo));
     viewModel
         .getOtherInfo()
         .observe(
@@ -211,7 +299,6 @@ public class InTheVideoCallFragment extends InTheBaseCallFragment {
               @Override
               public void onChanged(OtherUserInfo otherUserInfo) {
                 otherUid = otherUserInfo.accId;
-                setupLocalView(binding.smallVideo);
                 binding.tvNickname.setText(otherUserInfo.nickname);
                 ImageLoader.with(AppGlobals.getApplication())
                     .circleLoad(otherUserInfo.avatar, binding.ivAvatar);
@@ -328,15 +415,12 @@ public class InTheVideoCallFragment extends InTheBaseCallFragment {
         // 摄像头打开
         binding.smallVideo.setVisibility(View.VISIBLE);
         binding.tvSmallVideoDesc.setVisibility(View.GONE);
-        binding.ivCameraState.setImageResource(R.drawable.icon_camera_open);
       } else {
         // 摄像头关闭
         binding.smallVideo.setVisibility(View.GONE);
         binding.tvSmallVideoDesc.setVisibility(View.VISIBLE);
         binding.tvSmallVideoDesc.setText(R.string.already_close_camera);
-        binding.ivCameraState.setImageResource(R.drawable.icon_camera_close);
       }
-      binding.flLocalCamera.setVisibility(View.VISIBLE);
     } else {
       //小屏是对方
       if (remoteCameraIsOpen) {
@@ -349,7 +433,6 @@ public class InTheVideoCallFragment extends InTheBaseCallFragment {
         binding.tvSmallVideoDesc.setVisibility(View.VISIBLE);
         binding.tvSmallVideoDesc.setText(R.string.other_already_close_camera);
       }
-      binding.flLocalCamera.setVisibility(View.GONE);
     }
   }
 
@@ -418,19 +501,6 @@ public class InTheVideoCallFragment extends InTheBaseCallFragment {
           }
         });
 
-    binding.flLocalCamera.setOnClickListener(
-        new View.OnClickListener() {
-          @Override
-          public void onClick(View view) {
-            if (TextUtils.isEmpty(otherUid)) {
-              return;
-            }
-            localCameraIsOpen = !localCameraIsOpen;
-            rtcCall.muteLocalVideo(!localCameraIsOpen);
-            handleUi();
-          }
-        });
-
     binding.bottomBar.setOnItemClickListener(
         new InTheVideoCallBottomBar.OnItemClickListener() {
           @Override
@@ -449,6 +519,11 @@ public class InTheVideoCallFragment extends InTheBaseCallFragment {
           }
 
           @Override
+          public void onOpenOrCloseCameraButtonClick() {
+            handleOpenOrCloseCamera();
+          }
+
+          @Override
           public void onHangupButtonClick() {
             handleHangupEvent();
           }
@@ -461,9 +536,24 @@ public class InTheVideoCallFragment extends InTheBaseCallFragment {
         new View.OnClickListener() {
           @Override
           public void onClick(View view) {
-            ToastUtils.showShort(R.string.earphone_tips);
+            ToastX.showShortToast(R.string.earphone_tips);
           }
         });
+  }
+
+  private void handleOpenOrCloseCamera() {
+    if (TextUtils.isEmpty(otherUid)) {
+      return;
+    }
+    localCameraIsOpen = !localCameraIsOpen;
+    rtcCall.muteLocalVideo(!localCameraIsOpen);
+    binding
+        .bottomBar
+        .getViewBinding()
+        .ivOpenOrCloseCamera
+        .setImageResource(
+            localCameraIsOpen ? R.drawable.icon_camera_open : R.drawable.icon_camera_close);
+    handleUi();
   }
 
   private void handleSwitchCamera() {
@@ -471,7 +561,7 @@ public class InTheVideoCallFragment extends InTheBaseCallFragment {
   }
 
   private void handleHangupEvent() {
-    ToastUtils.showShort(R.string.end_video);
+    ToastX.showShortToast(R.string.end_video);
     activity.rtcHangup(
         new NECallback<Integer>() {
           @Override
@@ -486,22 +576,14 @@ public class InTheVideoCallFragment extends InTheBaseCallFragment {
   }
 
   private void handleMuteAudioEvent() {
-    muteRemote = !muteRemote;
-    if (activity.isVirtualCall()) {
-      virtualCallViewModel.muteAudio(muteRemote);
-    } else {
-      CallParam callParam = activity.getCallParams();
-      if (callParam.isCalled()) {
-        activity.getRtcCall().setAudioMute(muteRemote, callParam.getCallerAccId());
-      } else {
-        activity.getRtcCall().setAudioMute(muteRemote, callParam.getCalledAccIdList().get(0));
-      }
-    }
-    if (muteRemote) {
-      binding.bottomBar.getViewBinding().ivAudio.setImageResource(R.drawable.icon_audio_mute);
-    } else {
-      binding.bottomBar.getViewBinding().ivAudio.setImageResource(R.drawable.icon_audio);
-    }
+    boolean lastSpeakerOn = NERtcEx.getInstance().isSpeakerphoneOn();
+    boolean currentSpeakOn = !lastSpeakerOn;
+    NERtcEx.getInstance().setSpeakerphoneOn(currentSpeakOn);
+    binding
+        .bottomBar
+        .getViewBinding()
+        .ivAudio
+        .setImageResource(currentSpeakOn ? R.drawable.icon_audio : R.drawable.icon_audio_mute);
   }
 
   private void handleMircoPhoneEvent() {
@@ -529,10 +611,32 @@ public class InTheVideoCallFragment extends InTheBaseCallFragment {
   }
 
   @Override
+  public void onSensorChanged(SensorEvent event) {
+    float x = event.values[0];
+    float y = event.values[1];
+    if (Math.abs(x) > 3 || Math.abs(y) > 3) {
+      if (Math.abs(x) > Math.abs(y)) {
+        mFURendererManager.setDeviceOrientation(x > 0 ? 0 : 180);
+      } else {
+        mFURendererManager.setDeviceOrientation(y > 0 ? 90 : 270);
+      }
+    }
+  }
+
+  @Override
+  public void onAccuracyChanged(Sensor sensor, int accuracy) {}
+
+  @Override
   public void onDestroyView() {
     super.onDestroyView();
-    BeautyManager.getInstance().stopBeauty();
+    //    BeautyManager.getInstance().stopBeauty();
+    destroyFU();
     binding = null;
     giftRender.release();
+  }
+
+  private void destroyFU() {
+    mFURendererManager.release();
+    isFirstInit = true;
   }
 }

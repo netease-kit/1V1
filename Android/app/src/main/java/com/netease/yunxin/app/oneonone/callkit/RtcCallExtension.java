@@ -25,7 +25,6 @@ public class RtcCallExtension extends NERtcCallExtension {
     try {
       NERtcEx.getInstance().release();
     } catch (Exception e) {
-      e.printStackTrace();
       ALog.e(TAG, "e:" + e);
     }
     super.initRtc();

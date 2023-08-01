@@ -60,6 +60,16 @@ public class InTheVideoCallBottomBar extends RelativeLayout {
           }
         });
 
+    binding.ivOpenOrCloseCamera.setOnClickListener(
+        new OnClickListener() {
+          @Override
+          public void onClick(View view) {
+            if (onItemClickListener != null) {
+              onItemClickListener.onOpenOrCloseCameraButtonClick();
+            }
+          }
+        });
+
     binding.ivHangup.setOnClickListener(
         new OnClickListener() {
           @Override
@@ -87,6 +97,8 @@ public class InTheVideoCallBottomBar extends RelativeLayout {
     void onAudioButtonClick();
 
     void onSwitchCameraButtonClick();
+
+    void onOpenOrCloseCameraButtonClick();
 
     void onHangupButtonClick();
   }

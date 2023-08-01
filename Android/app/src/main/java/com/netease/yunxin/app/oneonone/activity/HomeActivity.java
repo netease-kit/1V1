@@ -7,8 +7,6 @@ package com.netease.yunxin.app.oneonone.activity;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.TextView;
-import com.blankj.utilcode.util.ProcessUtils;
-import com.blankj.utilcode.util.ToastUtils;
 import com.google.android.material.tabs.TabLayout;
 import com.netease.lava.nertc.sdk.NERtcConstants;
 import com.netease.lava.nertc.sdk.NERtcEx;
@@ -22,8 +20,10 @@ import com.netease.nimlib.sdk.auth.AuthService;
 import com.netease.nimlib.sdk.auth.AuthServiceObserver;
 import com.netease.nimlib.sdk.auth.LoginInfo;
 import com.netease.nimlib.sdk.avsignalling.constant.ChannelType;
+import com.netease.yunxin.app.oneonone.BuildConfig;
 import com.netease.yunxin.app.oneonone.R;
 import com.netease.yunxin.app.oneonone.adapter.MainPagerAdapter;
+import com.netease.yunxin.app.oneonone.callkit.CustomCallOrderHelper;
 import com.netease.yunxin.app.oneonone.callkit.RtcCallExtension;
 import com.netease.yunxin.app.oneonone.callkit.RtcPushConfigProvider;
 import com.netease.yunxin.app.oneonone.config.AppConfig;
@@ -38,11 +38,18 @@ import com.netease.yunxin.app.oneonone.ui.model.User;
 import com.netease.yunxin.app.oneonone.ui.utils.AppGlobals;
 import com.netease.yunxin.app.oneonone.ui.utils.LogUtil;
 import com.netease.yunxin.kit.alog.ALog;
+import com.netease.yunxin.kit.call.p2p.model.NECallInitRtcMode;
 import com.netease.yunxin.kit.common.network.Response;
+import com.netease.yunxin.kit.common.ui.utils.ToastX;
+import com.netease.yunxin.kit.common.utils.ProcessUtils;
 import com.netease.yunxin.kit.entertainment.common.activity.BasePartyActivity;
+import com.netease.yunxin.kit.entertainment.common.http.ECHttpService;
+import com.netease.yunxin.kit.entertainment.common.model.ECModelResponse;
+import com.netease.yunxin.kit.entertainment.common.model.NemoAccount;
 import com.netease.yunxin.kit.entertainment.common.utils.UserInfoManager;
 import com.netease.yunxin.kit.locationkit.LocationKitClient;
 import com.netease.yunxin.nertc.nertcvideocall.bean.InvitedInfo;
+import com.netease.yunxin.nertc.nertcvideocall.model.NERTCVideoCall;
 import com.netease.yunxin.nertc.ui.CallKitNotificationConfig;
 import com.netease.yunxin.nertc.ui.CallKitUI;
 import com.netease.yunxin.nertc.ui.CallKitUIOptions;
@@ -66,7 +73,7 @@ public class HomeActivity extends BasePartyActivity {
         public void onEvent(StatusCode status) {
           if (status == StatusCode.LOGINED) {
 
-            if (ProcessUtils.isMainProcess()
+            if (ProcessUtils.isMainProcess(HomeActivity.this)
                 && !TextUtils.equals(
                     CallKitUI.INSTANCE.getCurrentUserAccId(), UserInfoManager.getSelfImAccid())) {
               NERtcParameters parameters = new NERtcParameters();
@@ -111,14 +118,15 @@ public class HomeActivity extends BasePartyActivity {
                                   .pushConfigProvider(new RtcPushConfigProvider())
                                   // 收到被叫时若 app 在后台，在恢复到前台时是否自动唤起被叫页面，默认为 true
                                   .resumeBGInvitation(true)
+                                  .joinRtcWhenCall(true)
                                   .rtcCallExtension(new RtcCallExtension())
                                   .rtcSdkOption(neRtcOption)
-                                  // 呼叫组件初始化 rtc 范围，true-全局初始化，false-每次通话进行初始化以及销毁
-                                  // 全局初始化有助于更快进入首帧页面，当结合其他组件使用时存在rtc初始化冲突可设置false
-                                  .rtcInitScope(false)
+                                  .initRtcMode(NECallInitRtcMode.IN_NEED_DELAY_TO_ACCEPT)
                                   .p2pAudioActivity(CallActivity.class)
                                   .p2pVideoActivity(CallActivity.class)
                                   .build();
+                          NERTCVideoCall.sharedInstance()
+                              .setCallOrderListener(new CustomCallOrderHelper());
                           CallKitUI.init(AppGlobals.getApplication(), options);
                         }
 
@@ -173,9 +181,49 @@ public class HomeActivity extends BasePartyActivity {
   @Override
   protected void init() {
     curTabIndex = -1;
-    LocationKitClient.init();
-    login(AppConfig.IM_ACCID, AppConfig.IM_TOKEN);
+    LocationKitClient.init(this);
+    // 先创建账号再登录
+    createAccountThenLogin(
+        AppConfig.getAppKey(),
+        AppConfig.APP_SECRET,
+        1,
+        BuildConfig.VERSION_NAME,
+        new Callback<ECModelResponse<NemoAccount>>() {
+          @Override
+          public void onResponse(
+              Call<ECModelResponse<NemoAccount>> call,
+              retrofit2.Response<ECModelResponse<NemoAccount>> response) {
+            if (response.body() != null) {
+              NemoAccount account = response.body().data;
+              if (account != null) {
+                login(account);
+              } else {
+                ToastX.showShortToast("createAccountThenLogin failed,account is null");
+                ALog.e(TAG, "createAccountThenLogin failed,account is null");
+              }
+            }
+          }
+
+          @Override
+          public void onFailure(Call<ECModelResponse<NemoAccount>> call, Throwable t) {
+            ToastX.showShortToast("createAccountThenLogin failed,t:" + t);
+            ALog.e(TAG, "createAccountThenLogin failed,exception:" + t);
+          }
+        });
     initViews();
+  }
+
+  private void createAccountThenLogin(
+      String appKey,
+      String appSecret,
+      int sceneType,
+      String versionCode,
+      Callback<ECModelResponse<NemoAccount>> callback) {
+    ECHttpService.getInstance().initialize(this, AppConfig.getOneOnOneBaseUrl());
+    ECHttpService.getInstance().addHeader("appkey", appKey);
+    ECHttpService.getInstance().addHeader("AppSecret", appSecret);
+    ECHttpService.getInstance().addHeader("versionCode", versionCode);
+    ECHttpService.getInstance().createAccount(sceneType, callback);
   }
 
   private void initOneOnOne() {
@@ -279,30 +327,26 @@ public class HomeActivity extends BasePartyActivity {
     }
   }
 
-  private void login(String imAccid, String imToken) {
-    if (TextUtils.isEmpty(imAccid)) {
+  private void login(NemoAccount nemoAccount) {
+    if (TextUtils.isEmpty(nemoAccount.userUuid)) {
       ALog.d(TAG, "login but imAccid is empty");
       return;
     }
-    if (TextUtils.isEmpty(imToken)) {
+    if (TextUtils.isEmpty(nemoAccount.imToken)) {
       ALog.d(TAG, "login but token is empty");
       return;
     }
     UserInfoManager.setIMUserInfo(
-        AppConfig.IM_ACCID,
-        AppConfig.IM_TOKEN,
-        AppConfig.IM_NICKNAME,
-        AppConfig.IM_AVATAR
-    );
-    UserInfoManager.setSelfUserToken(AppConfig.USER_TOKEN);
+        nemoAccount.userUuid, nemoAccount.imToken, nemoAccount.userName, nemoAccount.icon, "");
+    UserInfoManager.setSelfUserToken(nemoAccount.userToken);
     //登录云信IM
-    LoginInfo info = new LoginInfo(imAccid, imToken);
+    LoginInfo info = new LoginInfo(nemoAccount.userUuid, nemoAccount.imToken);
     RequestCallback<LoginInfo> callback =
         new RequestCallback<LoginInfo>() {
           @Override
           public void onSuccess(LoginInfo param) {
             LogUtil.i(TAG, "login success");
-            ToastUtils.showShort("云信IM登录成功");
+            ToastX.showShortToast("云信IM登录成功");
             initOneOnOne();
             startHeartBeatReportTask();
             // your code
@@ -310,7 +354,7 @@ public class HomeActivity extends BasePartyActivity {
 
           @Override
           public void onFailed(int code) {
-            ToastUtils.showShort("云信IM登录失败,code:" + code);
+            ToastX.showShortToast("云信IM登录失败,code:" + code);
             if (code == 302) {
               LogUtil.i(TAG, "账号密码错误");
               // your code

@@ -27,6 +27,9 @@ dependencyResolutionManagement {
         maven {
             setUrl("https://oss.sonatype.org/content/repositories/snapshots/")
         }
+        maven {
+            setUrl("https://maven.faceunity.com/repository/maven-public/")
+        }
         jcenter()
     }
 }
@@ -34,5 +37,5 @@ dependencyResolutionManagement {
 include(":app")
 include(":oneonone:oneonone-ui")
 include(":entertainment:entertainment-common")
-include(":beauty:beauty-ui")
+include(":beauty:beauty-faceunity")
 

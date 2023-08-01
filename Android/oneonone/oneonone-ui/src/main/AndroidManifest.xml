@@ -53,6 +53,11 @@
             android:screenOrientation="portrait">
         </activity>
 
+        <activity
+            android:name=".activity.PSTNSettingActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.AppCompat.NoActionBar" />
+
     </application>
 
 </manifest>

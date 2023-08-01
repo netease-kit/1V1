@@ -9,7 +9,6 @@ import com.netease.yunxin.app.oneonone.ui.BuildConfig;
 import com.netease.yunxin.app.oneonone.ui.model.HomeItemModel;
 import com.netease.yunxin.app.oneonone.ui.model.ModelResponse;
 import com.netease.yunxin.app.oneonone.ui.model.User;
-import com.netease.yunxin.app.oneonone.ui.model.UserModel;
 import com.netease.yunxin.kit.common.network.Response;
 import com.netease.yunxin.kit.common.network.ServiceCreator;
 import java.util.HashMap;
@@ -47,25 +46,6 @@ public class HttpService {
 
   public void addHeader(String key, String value) {
     serviceCreator.addHeader(key, value);
-  }
-
-  public void searchUserInfoWithPhoneNumber(
-      String phoneNumber, Callback<ModelResponse<UserModel>> callback) {
-    Map<String, Object> map = new HashMap<>();
-    map.put("mobile", phoneNumber);
-    if (serverApi != null) {
-      serverApi.searchUserWithPhoneNumber(map).enqueue(callback);
-    }
-  }
-
-  public void sendSms(
-      String phoneNumber, String noticeUser, Callback<ModelResponse<Response>> callback) {
-    Map<String, Object> map = new HashMap<>();
-    map.put("mobile", phoneNumber);
-    map.put("noticeUser", noticeUser);
-    if (serverApi != null) {
-      serverApi.sendSms(map).enqueue(callback);
-    }
   }
 
   public void reportHeartBeat(Callback<ModelResponse<Response>> callback) {
@@ -115,6 +95,14 @@ public class HttpService {
     map.put("userUuid", userUuid);
     if (serverApi != null) {
       serverApi.getUserInfo(map).enqueue(callback);
+    }
+  }
+
+  public void reportRtcRoom(long cid, Callback<ModelResponse<Response>> callback) {
+    Map<String, Object> map = new HashMap<>();
+    map.put("cid", cid + "");
+    if (serverApi != null) {
+      serverApi.reportRtcRoom(map).enqueue(callback);
     }
   }
 }

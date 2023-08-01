@@ -26,19 +26,15 @@ dependencies {
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.okhttp3:logging-interceptor:4.7.2")
     implementation("com.squareup.okhttp3:okhttp:4.9.3")
-
+    api("com.netease.yunxin.kit.common:common-network:1.1.8")
 
     implementation("com.airbnb.android:lottie:5.0.3")
-    implementation("com.netease.yunxin:nertc-base:4.6.50")
-    implementation("com.gyf.immersionbar:immersionbar:3.0.0")
-    implementation("com.blankj:utilcodex:1.30.6")
-    implementation("com.scwang.smart:refresh-layout-kernel:2.0.3")
-    implementation ("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
+    implementation("com.netease.yunxin:nertc-base:5.4.0")
 
 
-    implementation("com.netease.yunxin.kit.common:common-ui:1.1.20")
+    implementation("com.netease.yunxin.kit.common:common-ui:1.3.0")
     implementation("com.netease.yunxin.kit.common:common-image:1.1.7")
-    implementation("com.netease.yunxin.kit.voiceroom:voiceroomkit:1.3.1")
-    implementation("com.netease.yunxin.kit.auth:auth-yunxin-login:1.0.4")
+    implementation("com.netease.yunxin.kit.voiceroom:voiceroomkit:1.5.0")
+//    implementation("com.netease.yunxin.kit.auth:auth-yunxin-login:1.0.4")
 
 }

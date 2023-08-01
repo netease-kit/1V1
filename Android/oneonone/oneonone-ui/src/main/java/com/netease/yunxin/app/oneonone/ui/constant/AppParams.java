@@ -6,7 +6,6 @@ package com.netease.yunxin.app.oneonone.ui.constant;
 
 public class AppParams {
   public static final String CALLER_USER_NAME = "caller_userName";
-  public static final String CALLER_USER_MOBILE = "caller_userMobile";
   public static final String CALLER_USER_AVATAR = "caller_userAvatar";
   public static final String CALLED_USER_NAME = "called_userName";
   public static final String CALLED_USER_MOBILE = "called_userMobile";

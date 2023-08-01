@@ -4,17 +4,17 @@
 
 package com.netease.yunxin.app.oneonone.ui.utils;
 
-import com.netease.yunxin.nertc.nertcvideocall.model.NERTCVideoCall;
-import com.netease.yunxin.nertc.nertcvideocall.model.impl.NERTCVideoCallImpl;
+import com.netease.yunxin.kit.call.p2p.NECallEngine;
+import com.netease.yunxin.kit.call.p2p.internal.NECallEngineImpl;
 
 public class NERTCCallStateManager {
   public static void setCallOutState() {
-    NERTCVideoCallImpl videoCallImpl = (NERTCVideoCallImpl) NERTCVideoCall.sharedInstance();
-    videoCallImpl.getRecorder().setCurrentState(videoCallImpl.getRecorder().getCallOutState());
+    NECallEngineImpl callEngine = (NECallEngineImpl) NECallEngine.sharedInstance();
+    callEngine.getRecorder().setCurrentState(callEngine.getRecorder().getCallOutState());
   }
 
   public static void setIdleState() {
-    NERTCVideoCallImpl videoCallImpl = (NERTCVideoCallImpl) NERTCVideoCall.sharedInstance();
-    videoCallImpl.getRecorder().setCurrentState(videoCallImpl.getRecorder().getIdleState());
+    NECallEngineImpl callEngine = (NECallEngineImpl) NECallEngine.sharedInstance();
+    callEngine.getRecorder().setCurrentState(callEngine.getRecorder().getIdleState());
   }
 }

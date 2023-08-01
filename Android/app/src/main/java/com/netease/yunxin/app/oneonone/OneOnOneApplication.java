@@ -5,6 +5,7 @@
 package com.netease.yunxin.app.oneonone;
 
 import android.app.Application;
+import com.faceunity.nama.FURenderer;
 import com.netease.nimlib.sdk.SDKOptions;
 import com.netease.nimlib.sdk.ServerAddresses;
 import com.netease.yunxin.app.oneonone.config.AppConfig;
@@ -12,7 +13,6 @@ import com.netease.yunxin.app.oneonone.config.NimSDKOptionConfig;
 import com.netease.yunxin.app.oneonone.config.OverSeaConfig;
 import com.netease.yunxin.app.oneonone.ui.utils.IMUIKitUtil;
 import com.netease.yunxin.kit.alog.ALog;
-import com.netease.yunxin.kit.beauty.BeautyManager;
 import com.netease.yunxin.kit.entertainment.common.AppStatusManager;
 import com.netease.yunxin.kit.entertainment.common.utils.IconFontUtil;
 
@@ -27,7 +27,7 @@ public class OneOnOneApplication extends Application {
     AppConfig.init(this);
     AppStatusManager.init(this);
     IconFontUtil.getInstance().init(this);
-    BeautyManager.getInstance().init(OneOnOneApplication.this);
+    FURenderer.getInstance().init(this);
     IMUIKitUtil.initIMUIKit(this, NimSDKOptionConfig.getSDKOptions(this, AppConfig.getAppKey()));
   }
   // 如果返回值为 null，则全部使用默认参数。

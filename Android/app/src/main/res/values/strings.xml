@@ -160,4 +160,7 @@
     <string name="terms_of_service">Terms of Service</string>
     <string name="general_settings">General settings</string>
     <string name="one_on_one_message">Message</string>
+    <string name="app_tip">tips</string>
+    <string name="app_permission_content">CommsEase Party requires microphone and camera permissions to enable the use of audio, video, and live streaming.</string>
+    <string name="app_ok">OK</string>
 </resources>

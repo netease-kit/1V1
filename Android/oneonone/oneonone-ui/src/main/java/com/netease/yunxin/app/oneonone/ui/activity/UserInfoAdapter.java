@@ -10,12 +10,12 @@ import android.view.LayoutInflater;
 import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-import com.blankj.utilcode.util.ScreenUtils;
 import com.netease.yunxin.app.oneonone.ui.databinding.RvItemUserInfoBinding;
 import com.netease.yunxin.app.oneonone.ui.model.UserInfoDetailModel;
 import com.netease.yunxin.app.oneonone.ui.utils.AppGlobals;
 import com.netease.yunxin.app.oneonone.ui.utils.LogUtil;
 import com.netease.yunxin.kit.common.image.ImageLoader;
+import com.netease.yunxin.kit.common.utils.ScreenUtils;
 
 public class UserInfoAdapter extends RecyclerView.Adapter {
   private static final String TAG = "UserInfoAdapter";
@@ -63,7 +63,7 @@ public class UserInfoAdapter extends RecyclerView.Adapter {
       LogUtil.i(TAG, "bindData,userInfoDetailModel:" + userInfoDetailModel);
       Context context = AppGlobals.getApplication();
       ViewGroup.LayoutParams layoutParams = binding.ivBg.getLayoutParams();
-      layoutParams.height = ScreenUtils.getScreenWidth();
+      layoutParams.height = ScreenUtils.getDisplayWidth();
       binding.ivBg.setLayoutParams(layoutParams);
       ImageLoader.with(context).commonLoad(userInfoDetailModel.bgUrl, binding.ivBg);
       binding.tvNickname.setText(userInfoDetailModel.nickname);
