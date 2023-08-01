@@ -11,7 +11,6 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 import android.provider.Settings;
-
 import com.faceunity.nama.BeautySettingActivity;
 import com.netease.yunxin.app.oneonone.activity.CommonSettingActivity;
 import com.netease.yunxin.app.oneonone.config.AppConfig;
@@ -57,6 +56,7 @@ public class NavUtils {
     intent.putExtra(Constants.INTENT_KEY_URL, url);
     context.startActivity(intent);
   }
+
   public static void toBeautySettingPage(Context context) {
     Intent intent = new Intent(context, BeautySettingActivity.class);
     intent.putExtra(BeautySettingActivity.INTENT_KEY_APP_KEY, AppConfig.getAppKey());
@@ -116,8 +116,8 @@ public class NavUtils {
       intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
       intent.putExtra("packageName", activity.getApplicationInfo().packageName);
       ComponentName comp =
-              new ComponentName(
-                      "com.huawei.systemmanager", "com.huawei.permissionmanager.ui.MainActivity");
+          new ComponentName(
+              "com.huawei.systemmanager", "com.huawei.permissionmanager.ui.MainActivity");
       intent.setComponent(comp);
       activity.startActivity(intent);
     } catch (Exception e) {
@@ -143,9 +143,9 @@ public class NavUtils {
       Intent intent = new Intent("miui.intent.action.APP_PERM_EDITOR");
       intent.putExtra("extra_pkgname", activity.getPackageName());
       ComponentName componentName =
-              new ComponentName(
-                      "com.miui.securitycenter",
-                      "com.miui.permcenter.permissions.PermissionsEditorActivity");
+          new ComponentName(
+              "com.miui.securitycenter",
+              "com.miui.permcenter.permissions.PermissionsEditorActivity");
       intent.setComponent(componentName);
       activity.startActivity(intent);
     } catch (Exception e) {
@@ -160,7 +160,7 @@ public class NavUtils {
       intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
       intent.putExtra("packageName", activity.getPackageName());
       ComponentName comp =
-              new ComponentName("com.sonymobile.cta", "com.sonymobile.cta.SomcCTAMainActivity");
+          new ComponentName("com.sonymobile.cta", "com.sonymobile.cta.SomcCTAMainActivity");
       intent.setComponent(comp);
       activity.startActivity(intent);
     } catch (Exception e) {
@@ -176,9 +176,9 @@ public class NavUtils {
       intent.putExtra("packageName", activity.getPackageName());
       //        ComponentName comp = new ComponentName("com.color.safecenter", "com.color.safecenter.permission.PermissionManagerActivity");
       ComponentName comp =
-              new ComponentName(
-                      "com.coloros.securitypermission",
-                      "com.coloros.securitypermission.permission.PermissionAppAllPermissionActivity"); //R11t 7.1.1 os-v3.2
+          new ComponentName(
+              "com.coloros.securitypermission",
+              "com.coloros.securitypermission.permission.PermissionAppAllPermissionActivity"); //R11t 7.1.1 os-v3.2
       intent.setComponent(comp);
       activity.startActivity(intent);
     } catch (Exception e) {
@@ -190,18 +190,18 @@ public class NavUtils {
   public static void VIVO(Activity activity) {
     Intent localIntent;
     if (((Build.MODEL.contains("Y85")) && (!Build.MODEL.contains("Y85A")))
-            || (Build.MODEL.contains("vivo Y53L"))) {
+        || (Build.MODEL.contains("vivo Y53L"))) {
       localIntent = new Intent();
       localIntent.setClassName(
-              "com.vivo.permissionmanager", "com.vivo.permissionmanager.activity.PurviewTabActivity");
+          "com.vivo.permissionmanager", "com.vivo.permissionmanager.activity.PurviewTabActivity");
       localIntent.putExtra("packagename", activity.getPackageName());
       localIntent.putExtra("tabId", "1");
       activity.startActivity(localIntent);
     } else {
       localIntent = new Intent();
       localIntent.setClassName(
-              "com.vivo.permissionmanager",
-              "com.vivo.permissionmanager.activity.SoftPermissionDetailActivity");
+          "com.vivo.permissionmanager",
+          "com.vivo.permissionmanager.activity.SoftPermissionDetailActivity");
       localIntent.setAction("secure.intent.action.softPermissionDetail");
       localIntent.putExtra("packagename", activity.getPackageName());
       activity.startActivity(localIntent);
@@ -214,8 +214,8 @@ public class NavUtils {
       intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
       intent.putExtra("packageName", activity.getPackageName());
       ComponentName comp =
-              new ComponentName(
-                      "com.android.settings", "com.android.settings.Settings$AccessLockSummaryActivity");
+          new ComponentName(
+              "com.android.settings", "com.android.settings.Settings$AccessLockSummaryActivity");
       intent.setComponent(comp);
       activity.startActivity(intent);
     } catch (Exception e) {
@@ -234,8 +234,8 @@ public class NavUtils {
     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
     intent.putExtra("packageName", activity.getPackageName());
     ComponentName comp =
-            new ComponentName(
-                    "com.qihoo360.mobilesafe", "com.qihoo360.mobilesafe.ui.index.AppEnterActivity");
+        new ComponentName(
+            "com.qihoo360.mobilesafe", "com.qihoo360.mobilesafe.ui.index.AppEnterActivity");
     intent.setComponent(comp);
     activity.startActivity(intent);
   }

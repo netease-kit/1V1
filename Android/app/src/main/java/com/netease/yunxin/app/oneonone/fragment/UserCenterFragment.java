@@ -17,7 +17,6 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-
 import com.faceunity.nama.BeautyLog;
 import com.netease.lava.nertc.sdk.LastmileProbeConfig;
 import com.netease.lava.nertc.sdk.LastmileProbeResult;
@@ -39,7 +38,6 @@ import com.netease.yunxin.kit.entertainment.common.dialog.PhoneConsultBottomDial
 import com.netease.yunxin.kit.entertainment.common.fragment.BaseFragment;
 import com.netease.yunxin.kit.entertainment.common.utils.DialogUtil;
 import com.netease.yunxin.nertc.nertcvideocall.model.impl.NERtcCallbackExTemp;
-
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -91,8 +89,13 @@ public class UserCenterFragment extends BaseFragment {
     return rootView;
   }
 
-  private void initViews() {
+  @Override
+  public void onResume() {
+    super.onResume();
     initUser();
+  }
+
+  private void initViews() {
     binding.logUpload.setOnClickListener(
         v -> {
           initRTC();
@@ -101,56 +104,56 @@ public class UserCenterFragment extends BaseFragment {
           NERtcEx.getInstance().release();
         });
     binding.beautySetting.setOnClickListener(
-            v -> {
-              ArrayList<String> list = new ArrayList<>();
-              list.add(Manifest.permission.CAMERA);
-              list.add(Manifest.permission.RECORD_AUDIO);
-              Permission.requirePermissions(getActivity(), list.toArray(new String[0]))
-                      .request(
-                              new Permission.PermissionCallback() {
+        v -> {
+          ArrayList<String> list = new ArrayList<>();
+          list.add(Manifest.permission.CAMERA);
+          list.add(Manifest.permission.RECORD_AUDIO);
+          Permission.requirePermissions(getActivity(), list.toArray(new String[0]))
+              .request(
+                  new Permission.PermissionCallback() {
 
-                                @Override
-                                public void onGranted(@NonNull List<String> granted) {
-                                  if (new HashSet<>(granted).containsAll(list)) {
-                                    NavUtils.toBeautySettingPage(requireActivity());
-                                  }
+                    @Override
+                    public void onGranted(@NonNull List<String> granted) {
+                      if (new HashSet<>(granted).containsAll(list)) {
+                        NavUtils.toBeautySettingPage(requireActivity());
+                      }
+                    }
+
+                    @Override
+                    public void onDenial(
+                        List<String> permissionsDenial, List<String> permissionDenialForever) {
+                      for (String s : permissionsDenial) {
+                        BeautyLog.e(TAG, "permissionsDenial:" + s);
+                      }
+                      for (String s : permissionDenialForever) {
+                        BeautyLog.e(TAG, "permissionDenialForever:" + s);
+                      }
+                      if (permissionsDenial.size() > 0) {
+                        ToastX.showShortToast(R.string.permission_request_failed_tips);
+                      }
+                      if (permissionDenialForever.size() > 0) {
+                        DialogUtil.showConfirmDialog(
+                            requireActivity(),
+                            getString(R.string.app_tip),
+                            getString(R.string.app_permission_content),
+                            getString(R.string.app_cancel),
+                            getString(R.string.app_ok),
+                            new CommonConfirmDialog.Callback() {
+
+                              @Override
+                              public void result(@Nullable Boolean aBoolean) {
+                                if (aBoolean != null && aBoolean) {
+                                  NavUtils.goToSetting(requireActivity());
                                 }
+                              }
+                            });
+                      }
+                    }
 
-                                @Override
-                                public void onDenial(
-                                        List<String> permissionsDenial, List<String> permissionDenialForever) {
-                                  for (String s : permissionsDenial) {
-                                    BeautyLog.e(TAG, "permissionsDenial:" + s);
-                                  }
-                                  for (String s : permissionDenialForever) {
-                                    BeautyLog.e(TAG, "permissionDenialForever:" + s);
-                                  }
-                                  if (permissionsDenial.size() > 0) {
-                                    ToastX.showShortToast(R.string.permission_request_failed_tips);
-                                  }
-                                  if (permissionDenialForever.size() > 0) {
-                                    DialogUtil.showConfirmDialog(
-                                            requireActivity(),
-                                            getString(R.string.app_tip),
-                                            getString(R.string.app_permission_content),
-                                            getString(R.string.app_cancel),
-                                            getString(R.string.app_ok),
-                                            new CommonConfirmDialog.Callback() {
-
-                                              @Override
-                                              public void result(@Nullable Boolean aBoolean) {
-                                                if (aBoolean != null && aBoolean) {
-                                                  NavUtils.goToSetting(requireActivity());
-                                                }
-                                              }
-                                            });
-                                  }
-                                }
-
-                                @Override
-                                public void onException(Exception exception) {}
-                              });
-            });
+                    @Override
+                    public void onException(Exception exception) {}
+                  });
+        });
     binding.networkDetect.setOnClickListener(
         v -> {
           initRTC();

@@ -4,7 +4,7 @@
 
 package com.netease.yunxin.app.oneonone.utils;
 
-import com.netease.yunxin.app.oneonone.config.AppConfig;
+import com.netease.yunxin.kit.entertainment.common.utils.UserInfoManager;
 import java.util.Locale;
 
 public class AppUtils {
@@ -15,10 +15,10 @@ public class AppUtils {
   }
 
   public static String getUserName() {
-    return AppConfig.IM_NICKNAME;
+    return UserInfoManager.getSelfNickname();
   }
 
   public static String getAvatar() {
-    return AppConfig.IM_AVATAR;
+    return UserInfoManager.getSelfImAvatar();
   }
 }
