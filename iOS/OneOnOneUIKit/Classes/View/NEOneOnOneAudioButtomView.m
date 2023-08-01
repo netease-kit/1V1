@@ -82,7 +82,7 @@
 - (UIButton *)loudspeakerButton {
   if (!_loudspeakerButton) {
     _loudspeakerButton = [[UIButton alloc] init];
-    _loudspeakerButton.selected = NO;
+    _loudspeakerButton.selected = YES;
     [_loudspeakerButton setBackgroundImage:[NEOneOnOneUI ne_imageName:@"speaker_open_icon"]
                                   forState:UIControlStateNormal];
     [_loudspeakerButton setBackgroundImage:[NEOneOnOneUI ne_imageName:@"speaker_close_icon"]

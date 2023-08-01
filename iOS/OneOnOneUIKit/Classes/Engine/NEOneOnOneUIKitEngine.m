@@ -29,26 +29,26 @@ static NSString *engineTag = @"NEOneOnOneUIKitEngine";
   static dispatch_once_t onceToken;
   dispatch_once(&onceToken, ^{
     instance = [[NEOneOnOneUIKitEngine alloc] init];
-    [NEOneOnOneKit getInstance].interceptor = ^BOOL {
-      if (instance.interceptor) {
-        BOOL isBusy = instance.interceptor();
-        if (isBusy) {
-          // #pragma mark TODO
-          //         /// 需要确认是否要迁移到 all In One 中
-          //         /// 1v1的业务逻辑
-          //         /// all in one 才会存在
-          //
-          //         [NEOneOnOneUIKitUtils
-          //             presentAlertViewController:[self getRootViewController]
-          //                                 titile:NELocalizedString(@"对方正在忙碌中\n请稍后再试")
-          //                            cancelTitle:@""
-          //                           confirmTitle:NELocalizedString(@"确定")
-          //                        confirmComplete:nil];
-        }
-        return isBusy;
-      }
-      return false;
-    };
+    //    [NEOneOnOneKit getInstance].interceptor = ^BOOL {
+    //      if (instance.interceptor) {
+    //        BOOL isBusy = instance.interceptor();
+    //        if (isBusy) {
+    //          // #pragma mark TODO
+    //          //         /// 需要确认是否要迁移到 all In One 中
+    //          //         /// 1v1的业务逻辑
+    //          //         /// all in one 才会存在
+    //          //
+    //          //         [NEOneOnOneUIKitUtils
+    //          //             presentAlertViewController:[self getRootViewController]
+    //          // titile:NELocalizedString(@"对方正在忙碌中\n请稍后再试")
+    //          //                            cancelTitle:@""
+    //          //                           confirmTitle:NELocalizedString(@"确定")
+    //          //                        confirmComplete:nil];
+    //        }
+    //        return isBusy;
+    //      }
+    //      return false;
+    //    };
     [[NEOneOnOneKit getInstance] addOneOnOneListener:instance];
   });
   return instance;
@@ -93,7 +93,7 @@ static NSString *engineTag = @"NEOneOnOneUIKitEngine";
         onlineUser.icon = avatar;
         onlineUser.mobile = mobile;
         onlineUser.userUuid = invitor;
-        controller.remoteUser = onlineUser;
+        //        controller.remoteUser = onlineUser;
 
         controller.enterStatus = enterType;
         dispatch_async(dispatch_get_main_queue(), ^{
@@ -122,30 +122,31 @@ static NSString *engineTag = @"NEOneOnOneUIKitEngine";
 //        }
 //}
 
-- (void)onOneOnOneInvited:(NSString *)invitor
-                  userIDs:(NSArray<NSString *> *)userIDs
-              isFromGroup:(BOOL)isFromGroup
-                  groupID:(NSString *)groupID
-                     type:(enum NEOneOnOneRtcCallType)type
-               attachment:(NSString *)attachment {
-  [NEOneOnOneLog infoLog:engineTag
-                    desc:[NSString stringWithFormat:@"收到Invite信息 %@,%@,%ld,%@,", invitor,
-                                                    userIDs, (long)type, attachment]];
-  NSLog(@"收到Invite信息 %@,%@,%ld,%@,", invitor, userIDs, (long)type, attachment);
-  // 如果是黑名单成员，直接拒接
-  if ([NIMSDK.sharedSDK.userManager isUserInBlackList:invitor]) {
-    [[NERtcCallKit sharedInstance] reject:nil];
-    return;
-  }
-  // 处理异常case，如果上一个target还处于销毁中，那么循环等待吧
-  if (type == NEOneOnOneRtcCallTypeAudio) {
-    [[NERtcCallKit sharedInstance] setTimeOutSeconds:15];
-    [self enterCallViewController:audio_invited attachment:attachment invitor:invitor];
-  } else {
-    [[NERtcCallKit sharedInstance] setTimeOutSeconds:30];
-    [self enterCallViewController:video_invited attachment:attachment invitor:invitor];
-  }
-}
+//- (void)onOneOnOneInvited:(NSString *)invitor
+//                  userIDs:(NSArray<NSString *> *)userIDs
+//              isFromGroup:(BOOL)isFromGroup
+//                  groupID:(NSString *)groupID
+//                     type:(enum NEOneOnOneRtcCallType)type
+//               attachment:(NSString *)attachment {
+//  [NEOneOnOneLog infoLog:engineTag
+//                    desc:[NSString stringWithFormat:@"收到Invite信息 %@,%@,%ld,%@,", invitor,
+//                                                    userIDs, (long)type, attachment]];
+//  NSLog(@"收到Invite信息 %@,%@,%ld,%@,", invitor, userIDs, (long)type, attachment);
+//
+//  // 如果是黑名单成员，直接拒接
+//  if ([NIMSDK.sharedSDK.userManager isUserInBlackList:invitor]) {
+//    [[NERtcCallKit sharedInstance] reject:nil];
+//    return;
+//  }
+//  // 处理异常case，如果上一个target还处于销毁中，那么循环等待吧
+//  if (type == NEOneOnOneRtcCallTypeAudio) {
+//    [[NERtcCallKit sharedInstance] setTimeOutSeconds:15];
+//    [self enterCallViewController:audio_invited attachment:attachment invitor:invitor];
+//  } else {
+//    [[NERtcCallKit sharedInstance] setTimeOutSeconds:30];
+//    [self enterCallViewController:video_invited attachment:attachment invitor:invitor];
+//  }
+//}
 
 #pragma mark Util
 

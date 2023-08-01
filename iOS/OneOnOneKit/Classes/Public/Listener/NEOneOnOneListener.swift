@@ -14,7 +14,7 @@ public protocol NEOneOnOneListener: NSObjectProtocol {
   @objc optional func onReceiveNotificationCustomMessage(message: NEOneOnOneCustomMessage)
 
   /// 接收到邀请回调
-  @objc optional func onOneOnOneInvited(_ invitor: String, userIDs: [String], isFromGroup: Bool, groupID: String?, type: NEOneOnOneRtcCallType, attachment: String?)
+//  @objc optional func onOneOnOneInvited(_ invitor: String, userIDs: [String], isFromGroup: Bool, groupID: String?, type: NEOneOnOneRtcCallType, attachment: String?)
 
   /// 接收到礼物
   @objc optional func onReceiveGift(gift: NEOneOnOneOneGift)

@@ -4,7 +4,6 @@
 
 import UIKit
 import NIMSDK
-import NEConversationKit
 import NECommonKit
 import NEConversationUIKit
 

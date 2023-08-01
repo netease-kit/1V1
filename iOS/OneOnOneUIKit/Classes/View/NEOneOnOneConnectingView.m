@@ -6,7 +6,6 @@
 #import <Masonry/Masonry.h>
 #import <NEUIKit/NEUIKit.h>
 #import <SDWebImage/SDWebImage.h>
-#import <libextobjc/extobjc.h>
 #import "NEOneOnOneAudioButtomView.h"
 #import "NEOneOnOneCustomButtonView.h"
 #import "NEOneOnOneLocalized.h"
@@ -87,9 +86,10 @@
     make.height.equalTo(@103);
   }];
 
-  @weakify(self) self.cancelView.buttonClicked = ^{
-    @strongify(self) if (self.itemEvent) {
-      self.itemEvent(item_cancel);
+  __weak typeof(self) weakSelf = self;
+  self.cancelView.buttonClicked = ^{
+    if (weakSelf.itemEvent) {
+      weakSelf.itemEvent(item_cancel);
     }
   };
 
@@ -103,8 +103,8 @@
   }];
 
   self.rejectView.buttonClicked = ^{
-    @strongify(self) if (self.itemEvent) {
-      self.itemEvent(item_reject);
+    if (weakSelf.itemEvent) {
+      weakSelf.itemEvent(item_reject);
     }
   };
   /// 受邀方 统一按钮
@@ -117,8 +117,8 @@
   }];
 
   self.acceptView.buttonClicked = ^{
-    @strongify(self) if (self.itemEvent) {
-      self.itemEvent(item_accept);
+    if (weakSelf.itemEvent) {
+      weakSelf.itemEvent(item_accept);
     }
   };
   /// 通话中
@@ -131,9 +131,7 @@
   }];
 
   self.audioButtomView.clickItem = ^(ButtonItemType item, BOOL close) {
-    @strongify(self)
-
-        [self audioBottomItemClick:item close:close];
+    [weakSelf audioBottomItemClick:item close:close];
   };
 }
 
@@ -267,8 +265,10 @@
 - (void)updateUI:(NSString *)remoteIcon
       remoteName:(NSString *)name
           status:(NECallViewStatus)status {
-  @weakify(self) dispatch_async(dispatch_get_main_queue(), ^{
-    @strongify(self)[self.remoteImageView sd_setImageWithURL:[NSURL URLWithString:remoteIcon]];
+  __weak typeof(self) weakSelf = self;
+  dispatch_async(dispatch_get_main_queue(), ^{
+    __strong typeof(weakSelf) self = weakSelf;
+    [self.remoteImageView sd_setImageWithURL:[NSURL URLWithString:remoteIcon]];
     self.remoteNameLabel.text = name;
     switch (status) {
         // 开始视频呼叫

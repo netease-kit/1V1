@@ -1,4 +1,4 @@
-// Copyright (c) 2022 NetEase, Inc. All rights reserved.
+//// Copyright (c) 2022 NetEase, Inc. All rights reserved.
 // Use of this source code is governed by a MIT license that can be
 // found in the LICENSE file.
 
@@ -22,7 +22,6 @@ final class OneOnOneSampleUITests: XCTestCase {
     // UI tests must launch the application that they test.
     let app = XCUIApplication()
     app.launch()
-
     // Use XCTAssert and related functions to verify your tests produce the correct results.
   }
 
