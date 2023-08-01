@@ -136,4 +136,16 @@ class NEOneOnOneRoomService {
       reportTimer = nil
     }
   }
+
+  func reportRtcRoom(cid: Int64, success: (() -> Void)? = nil,
+                     failure: ((NSError) -> Void)? = nil) {
+    let params: [String: Any] = [
+      "cid": cid,
+    ]
+    NEAPI.OneOnOne.reportRtc.request(params) { _ in
+      success?()
+    } failed: { error in
+      failure?(error)
+    }
+  }
 }

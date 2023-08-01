@@ -57,9 +57,23 @@
     make.left.right.top.bottom.equalTo(self);
   }];
 
+  BOOL isNotchScreen = NO;
+  if (@available(iOS 11.0, *)) {
+    UIEdgeInsets safeAreaInsets = UIApplication.sharedApplication.keyWindow.safeAreaInsets;
+    isNotchScreen = safeAreaInsets.bottom > 0;
+  }
+
+  [self.bottomBackView mas_makeConstraints:^(MASConstraintMaker *make) {
+    make.left.right.bottom.equalTo(self);
+    NSNumber *height = isNotchScreen ? @94 : @80;
+    make.height.equalTo(height);
+  }];
+
   [self addSubview:self.chatUpButton];
   [self.chatUpButton mas_makeConstraints:^(MASConstraintMaker *make) {
-    make.bottom.equalTo(self.mas_bottom).offset(-34);
+    int offset = isNotchScreen ? -7 : 0;
+    //    make.bottom.equalTo(self.mas_bottom).offset(-34);
+    make.centerY.equalTo(self.bottomBackView.mas_centerY).offset(offset);
     make.left.equalTo(self).offset(20);
     make.height.equalTo(@44);
     float width = self.frame.size.width / 2 - 10 * 2 - 15;
@@ -69,7 +83,8 @@
   [self addSubview:self.privateLatterButton];
   [self.privateLatterButton mas_makeConstraints:^(MASConstraintMaker *make) {
     make.height.width.equalTo(@32);
-    make.bottom.equalTo(self.mas_bottom).offset(-50);
+    //    make.bottom.equalTo(self.mas_bottom).offset(-50);
+    make.centerY.equalTo(self.chatUpButton.mas_centerY).offset(-7);
     make.left.equalTo(self.mas_centerX).offset(13);
   }];
 
@@ -103,11 +118,6 @@
   [self.videoLabel mas_makeConstraints:^(MASConstraintMaker *make) {
     make.top.equalTo(self.videoButton.mas_bottom);
     make.centerX.equalTo(self.videoButton.mas_centerX);
-  }];
-
-  [self.bottomBackView mas_makeConstraints:^(MASConstraintMaker *make) {
-    make.left.right.bottom.equalTo(self);
-    make.height.equalTo(@94);
   }];
 }
 

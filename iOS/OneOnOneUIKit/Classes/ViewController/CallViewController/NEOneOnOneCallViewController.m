@@ -10,7 +10,6 @@
 #import <NEOneOnOneUIKit/NEOneOnOneUIKit-Swift.h>
 #import <NERtcCallKit/NERtcCallKit.h>
 #import <NEUIKit/NEUIKit.h>
-#import <libextobjc/extobjc.h>
 #import "NEOneOnOneCallViewController+RtcCall.h"
 #import "NEOneOnOneCustomTimer.h"
 #import "NEOneOnOneGiftView.h"
@@ -22,7 +21,8 @@
 #import "NERtcCallKit+Party.h"
 @interface NEOneOnOneCallViewController () <NEOneOnOneGiftViewDelegate,
                                             AVCaptureVideoDataOutputSampleBufferDelegate,
-                                            NEOneOnOneAuthListener>
+                                            NEOneOnOneAuthListener,
+                                            NEOneOnOnePlayerProtocol>
 
 @property(nonatomic, strong) dispatch_queue_t timeQueue;
 @property(nonatomic, strong) NEOneOnOneCustomTimer *timer;
@@ -34,11 +34,22 @@
 @property(nonatomic, strong) NEOneOnOneGiftView *giftAnimation;  // 礼物动画
 @property(nonatomic, strong) AVCaptureSession *captureSession;
 /// 虚拟房间播放视频相关的
-@property(nonatomic, strong) AVPlayerLayer *playerLayer;
-@property(nonatomic, strong) AVPlayer *player;
+//@property(nonatomic, strong) AVPlayer *player;
 @property(nonatomic, strong) AVCaptureDeviceInput *input;
 @property(nonatomic, strong) AVAudioSessionCategory originalCategory;
+// 防重点
+@property(nonatomic, assign) BOOL isEntering;
 
+@property(nonatomic, strong) NEOneOnOneConnectingView *connectingView;
+@property(nonatomic, strong) NEOneOnOneVideoConnectedView *videoConnectedView;
+@property(nonatomic, strong) UIButton *giftButton;
+
+/////音频播放地址
+//@property(nonatomic,strong) NSString *audioPlayUrl;
+/////视频播放地址
+//@property(nonatomic,strong) NSString *videoPlayUrl;
+/////是否为虚拟房间，callType为1 是虚拟房间
+//@property(nonatomic,assign) int callType;
 @end
 
 @implementation NEOneOnOneCallViewController
@@ -73,25 +84,27 @@
 
 - (void)appWillEnterForeground {
   // 应用即将进入前台时的处理逻辑
-  if (self.player) {
-    [self.player play];
-  }
+  [NEOneOnOnePlayerUtil.getInstance playerPlay];
 }
 
 - (void)viewDidLoad {
   [super viewDidLoad];
+  // 数据解析
+  [self extraParamsDataAnalysis];
   self.view.backgroundColor = [UIColor blackColor];
   [[UIApplication sharedApplication] setIdleTimerDisabled:YES];
   NSError *active_err;
   NSError *setCategory_err;
   //    try AVAudioSession.sharedInstance().setCategory(AVAudioSessionCategoryPlayAndRecord, with:
   //    .duckOthers)
-  if (self.remoteUser.oc_callType == 1) {
+  if ([self isVirtualRoom]) {
+    [NEOneOnOnePlayerUtil.getInstance addPlayerListener:self];
     // 虚拟房间
-    // 处理后台播放音乐不会自动暂停以及设置category导致在后台对端接听后无声音的问题；虚拟房间进行设置，销毁进行恢复
-    self.originalCategory = AVAudioSession.sharedInstance.category;
-    [AVAudioSession.sharedInstance setCategory:AVAudioSessionCategoryPlayback
-                                         error:&setCategory_err];
+    // 设置category 是因为静音模式下，需要播放出声音
+    // 另外虚拟房间才会设置，因为设置category导致在后台对端接听后无声音的问题；虚拟房间进行设置，销毁进行恢复
+    [NEOneOnOnePlayerUtil.getInstance setOriginalCategray:AVAudioSession.sharedInstance.category];
+  } else {
+    [[NERtcCallKit sharedInstance] addDelegate:self];
   }
   [AVAudioSession.sharedInstance setActive:YES error:&active_err];
   if (active_err || setCategory_err) {
@@ -114,15 +127,18 @@
   [[NEOneOnOneKit getInstance] addOneOnOneListener:self];
   [[NEOneOnOneKit getInstance] addAuthListener:self];
   [NERtcCallKit sharedInstance].engineDelegate = self;
-  @weakify(self) self.connectingView.itemEvent = ^(Item item) {
-    @strongify(self) switch (item) {
+  __weak typeof(self) weakSelf = self;
+  self.connectingView.itemEvent = ^(Item item) {
+    __strong typeof(weakSelf) self = weakSelf;
+    switch (item) {
       case item_cancel: {
-        if (self.remoteUser.oc_callType == 1) {
+        if ([self isVirtualRoom]) {
           [self endRoom];
           return;
         }
-        @weakify(self)[[NERtcCallKit sharedInstance] cancel:^(NSError *_Nullable error) {
-          @strongify(self) if (error) {
+        [[NERtcCallKit sharedInstance] cancel:^(NSError *_Nullable error) {
+          __strong typeof(weakSelf) self = weakSelf;
+          if (error) {
             [NEOneOnOneLog errorLog:tag desc:error.localizedDescription];
             NSLog(@"cancel - error -- %@", error.description);
             if (error.code == 20016) {
@@ -130,8 +146,7 @@
             } else {
               [self endRoom];
             }
-          }
-          else {
+          } else {
             [self endRoom];
           }
         }];
@@ -144,10 +159,12 @@
 
       break;
       case item_reject: {
+        self.hasEndRoom = @"end";
         [[NERtcCallKit sharedInstance] reject:^(NSError *_Nullable error) {
-          @strongify(self) if (error) {
+          if (error) {
             NSLog(@"reject - error -- %@", error.description);
           }
+          __strong typeof(weakSelf) self = weakSelf;
           [self endRoom];
         }];
         NetworkStatus status = [self.reachability currentReachabilityStatus];
@@ -233,18 +250,26 @@
           return;
         }
         NSLog(@"权限判断通过");
+        if (self.isEntering) {
+          return;
+        }
+        self.isEntering = YES;
 
         if (self.enterStatus == audio_invited) {
-          [self.connectingView updateUI:self.remoteUser.icon
-                             remoteName:self.remoteUser.userName
+          [self.connectingView updateUI:self.callParam.remoteAvatar
+                             remoteName:self.callParam.remoteShowName
                                  status:audio_call_connecting];
         }
 
         [[NERtcCallKit sharedInstance] accept:^(NSError *_Nullable error) {
-          @strongify(self) if (error) {
+          __strong typeof(weakSelf) self = weakSelf;
+          if (error) {
             if (error.code == 10404) {
               /// NERTCCallKit 内部问题，后期会优化
               [self endRoom];
+            } else {
+              // 避免其他error未及时返回，导致页面接听按钮无效果
+              self.isEntering = NO;
             }
             NSLog(@"error -- %@", error.description);
           }
@@ -255,7 +280,7 @@
 
       break;
       case item_close: {
-        if (self.remoteUser.oc_callType == 1) {
+        if ([self isVirtualRoom]) {
           BOOL isAudio = (self.enterStatus == audio_call);
           if (isAudio) {
             [NEOneOnOneToast showToast:NELocalizedString(@"结束通话")];
@@ -266,6 +291,7 @@
           return;
         }
 
+        self.hasEndRoom = @"end";
         [[NERtcCallKit sharedInstance] hangup:^(NSError *_Nullable error) {
           if (error) {
             NSLog(@"audio hangup - error -- %@", error.description);
@@ -289,9 +315,10 @@
   };
 
   self.connectingView.itemExpand = ^(Item item, BOOL close) {
-    @strongify(self) switch (item) {
+    __strong typeof(weakSelf) self = weakSelf;
+    switch (item) {
       case item_mic: {
-        if (self.remoteUser.oc_callType == 1) {
+        if ([self isVirtualRoom]) {
           return;
         }
         [[NERtcCallKit sharedInstance] muteLocalAudio:close];
@@ -299,12 +326,17 @@
 
       break;
       case item_speaker: {
-        if (self.player) {
-          self.player.volume = close ? 0 : [[AVAudioSession sharedInstance] outputVolume];
+        if ([self isVirtualRoom]) {
+          [NEOneOnOnePlayerUtil.getInstance changePlayerModelSpeaker:!close];
           return;
         }
-        [NERtcEngine.sharedEngine adjustUserPlaybackSignalVolume:close ? 0 : 100
-                                                       forUserID:self.remoteUserId];
+        NSError *error;
+        [[NERtcCallKit sharedInstance] setLoudSpeakerMode:!close error:&error];
+        if (error) {
+          [NEOneOnOneLog
+              infoLog:tag
+                 desc:[NSString stringWithFormat:@"%@:setLoudSpeakerMode", error.description]];
+        }
       }
 
       break;
@@ -319,12 +351,9 @@
   }];
 
   [self.view addSubview:self.videoConnectedView];
-  if (self.remoteUser.oc_callType == 1) {
+  if ([self isVirtualRoom]) {
     self.videoConnectedView.canChangeView = NO;
   }
-  [self.videoConnectedView mas_makeConstraints:^(MASConstraintMaker *make) {
-    make.left.top.right.bottom.equalTo(self.view);
-  }];
 
   [self.view addSubview:self.giftButton];
   [self.giftButton mas_makeConstraints:^(MASConstraintMaker *make) {
@@ -335,13 +364,14 @@
   self.videoConnectedView.hidden = YES;
 
   self.videoConnectedView.itemExpand = ^(Item item, BOOL close) {
-    @strongify(self) switch (item) {
+    __strong typeof(weakSelf) self = weakSelf;
+    switch (item) {
       case item_close: {
         if (self.timer) {
           [self.timer invalidate];
         }
 
-        if (self.remoteUser.oc_callType == 1) {
+        if ([self isVirtualRoom]) {
           BOOL isAudio = (self.enterStatus == audio_call);
           if (isAudio) {
             [NEOneOnOneToast showToast:NELocalizedString(@"结束通话")];
@@ -351,7 +381,7 @@
           [self endRoom];
           return;
         }
-
+        self.hasEndRoom = @"end";
         [[NERtcCallKit sharedInstance] hangup:^(NSError *_Nullable error) {
           if (error) {
             NSLog(@"video hangup - error -- %@", error.description);
@@ -364,7 +394,7 @@
       } break;
 
       case item_mic: {
-        if (self.remoteUser.oc_callType == 1) {
+        if ([self isVirtualRoom]) {
           return;
         }
         [[NERtcCallKit sharedInstance] muteLocalAudio:close];
@@ -372,14 +402,20 @@
 
       break;
       case item_speaker: {
-        [NERtcEngine.sharedEngine adjustUserPlaybackSignalVolume:close ? 0 : 100
-                                                       forUserID:self.remoteUserId];
-        if (self.player) {
-          self.player.volume = close ? 0 : [[AVAudioSession sharedInstance] outputVolume];
+        if ([self isVirtualRoom]) {
+          [NEOneOnOnePlayerUtil.getInstance changePlayerModelSpeaker:!close];
+          return;
+        }
+        NSError *error;
+        [[NERtcCallKit sharedInstance] setLoudSpeakerMode:!close error:&error];
+        if (error) {
+          [NEOneOnOneLog
+              infoLog:tag
+                 desc:[NSString stringWithFormat:@"%@:setLoudSpeakerMode", error.description]];
         }
       } break;
       case item_switch_camera: {
-        if (self.remoteUser.oc_callType == 1) {
+        if ([self isVirtualRoom]) {
           [self switchCamera];
           return;
         }
@@ -390,13 +426,16 @@
 
       case item_video_close: {
         //                [[NERtcCallKit sharedInstance] enableLocalVideo:!close];
+        if ([self isVirtualRoom]) {
+          return;
+        }
         [[NERtcCallKit sharedInstance] muteLocalVideo:close];
       }
 
       break;
       case item_video_change: {
         /// 如果是虚拟房间，不做大小屏切换
-        if (self.remoteUser.oc_callType == 1) {
+        if ([self isVirtualRoom]) {
           return;
         }
         [self refreshVideoView:close];
@@ -412,13 +451,13 @@
   UIPanGestureRecognizer *pan = [[UIPanGestureRecognizer alloc] initWithTarget:traget action:nil];
   [self.view addGestureRecognizer:pan];
 
-  if (self.remoteUser.oc_callType == 1) {
+  if ([self isVirtualRoom]) {
     dispatch_time_t delayTime =
         dispatch_time(DISPATCH_TIME_NOW, (int64_t)(3.0 * NSEC_PER_SEC));  // 延迟 3 秒执行
-    @weakify(self) dispatch_after(delayTime, dispatch_get_main_queue(), ^{
-      @strongify(self)
-          // 在指定时间后执行的任务
-          [self userAccept];
+    dispatch_after(delayTime, dispatch_get_main_queue(), ^{
+      __strong typeof(weakSelf) self = weakSelf;
+      // 在指定时间后执行的任务
+      [self userAccept];
       [self playMedia];
     });
   }
@@ -428,24 +467,46 @@
   // 根据参数处理内容
   switch (self.enterStatus) {
     case audio_call: {
-      [self.connectingView updateUI:self.remoteUser.icon
-                         remoteName:self.remoteUser.userName
+      [self.connectingView updateUI:self.callParam.remoteAvatar
+                         remoteName:self.callParam.remoteShowName
                              status:audio_call_start];
+      if ([self isVirtualRoom]) {
+        return;
+      }
+
+      /// 呼叫中的音乐也需要为听筒模式，所以在此处设置，不在接通后设置
+      NSError *error;
+      [[NERtcCallKit sharedInstance] setLoudSpeakerMode:NO error:&error];
+      if (error) {
+        [NEOneOnOneLog
+            infoLog:tag
+               desc:[NSString stringWithFormat:@"%@:setLoudSpeakerMode", error.description]];
+      }
     } break;
     case video_call: {
-      [self.connectingView updateUI:self.remoteUser.icon
-                         remoteName:self.remoteUser.userName
+      [self.connectingView updateUI:self.callParam.remoteAvatar
+                         remoteName:self.callParam.remoteShowName
                              status:video_call_start];
+      [[NERtcEngine sharedEngine] setParameters:@{kNERtcKeyVideoStartWithBackCamera : @NO}];
     } break;
     case audio_invited: {
-      [self.connectingView updateUI:self.remoteUser.icon
-                         remoteName:self.remoteUser.userName
+      [self.connectingView updateUI:self.callParam.remoteAvatar
+                         remoteName:self.callParam.remoteShowName
                              status:audio_invide_start];
+      /// 呼叫中的音乐也需要为听筒模式，所以在此处设置，不在接通后设置
+      NSError *error;
+      [[NERtcCallKit sharedInstance] setLoudSpeakerMode:NO error:&error];
+      if (error) {
+        [NEOneOnOneLog
+            infoLog:tag
+               desc:[NSString stringWithFormat:@"%@:setLoudSpeakerMode", error.description]];
+      }
     } break;
 
     case video_invited: {
-      [self.connectingView updateUI:self.remoteUser.icon
-                         remoteName:self.remoteUser.userName
+      [[NERtcEngine sharedEngine] setParameters:@{kNERtcKeyVideoStartWithBackCamera : @NO}];
+      [self.connectingView updateUI:self.callParam.remoteAvatar
+                         remoteName:self.callParam.remoteShowName
                              status:video_invite_start];
     } break;
     default:
@@ -462,7 +523,7 @@
 
 - (NEOneOnOneVideoConnectedView *)videoConnectedView {
   if (!_videoConnectedView) {
-    _videoConnectedView = [[NEOneOnOneVideoConnectedView alloc] init];
+    _videoConnectedView = [[NEOneOnOneVideoConnectedView alloc] initWithFrame:self.view.bounds];
   }
   return _videoConnectedView;
 }
@@ -492,20 +553,21 @@
     [NEOneOnOneToast showToast:NELocalizedString(@"网络异常，请稍后重试")];
     return;
   }
-  @weakify(self)[[NEOneOnOneKit getInstance]
+  __weak typeof(self) weakSelf = self;
+  [[NEOneOnOneKit getInstance]
       rewardWithGiftId:gift.giftId
              giftCount:count
-                target:self.remoteUser.userUuid
+                target:self.callParam.remoteUserAccid
               callback:^(NSInteger code, NSString *_Nullable msg, id _Nullable obj) {
                 if (code == 0) {
-                  @strongify(self)[self
+                  [weakSelf
                       playGiftWithName:[NSString stringWithFormat:@"anim_gift_0%zd", gift.giftId]];
                 }
               }];
 }
 
 - (void)onReceiveGiftWithGift:(NEOneOnOneOneGift *)gift {
-  if (![gift.senderUserUuid isEqualToString:self.remoteUser.userUuid]) {
+  if (![gift.senderUserUuid isEqualToString:self.callParam.remoteUserAccid]) {
     return;
   }
   [self playGiftWithName:[NSString stringWithFormat:@"anim_gift_0%zd", gift.giftId]];
@@ -535,11 +597,12 @@
 
 /// 播放礼物动画
 - (void)playGiftWithName:(NSString *)name {
-  if (UIApplication.sharedApplication.applicationState == UIApplicationStateBackground) {
-    // 在后台就不添加礼物动画了
-    return;
-  }
   dispatch_async(dispatch_get_main_queue(), ^{
+    // 必须放在主线程
+    if (UIApplication.sharedApplication.applicationState == UIApplicationStateBackground) {
+      // 在后台就不添加礼物动画了
+      return;
+    }
     [self.view addSubview:self.giftAnimation];
     [self.view bringSubviewToFront:self.giftAnimation];
     [self.giftAnimation addGift:name];
@@ -554,14 +617,16 @@
 }
 
 - (void)userAccept {
-  @weakify(self) NSLog(@"用户同意");
+  __weak typeof(self) weakSelf = self;
+  NSLog(@"用户同意");
   if (self.enterStatus == audio_call || self.enterStatus == audio_invited) {
     dispatch_async(dispatch_get_main_queue(), ^{
-      @strongify(self) self.connectingView.hidden = NO;
+      __strong typeof(weakSelf) self = weakSelf;
+      self.connectingView.hidden = NO;
       self.videoConnectedView.hidden = YES;
       self.giftButton.hidden = NO;
-      [self.connectingView updateUI:self.remoteUser.icon
-                         remoteName:self.remoteUser.userName
+      [self.connectingView updateUI:self.callParam.remoteAvatar
+                         remoteName:self.callParam.remoteShowName
                              status:audio_call_connecting];
     });
     //    dispatch_async(self.timeQueue, ^() {
@@ -577,7 +642,8 @@
     //    });
     self.timerIdentifier = [self
             schedleTask:^{
-              @strongify(self)[self timeUp];
+              __strong typeof(weakSelf) self = weakSelf;
+              [self timeUp];
             }
                interval:1
                  repeat:YES
@@ -586,7 +652,7 @@
 
   } else if (self.enterStatus == video_call || self.enterStatus == video_invited) {
     [self refreshVideoUI];
-    if (self.remoteUser.oc_callType == 1) {
+    if ([self isVirtualRoom]) {
       [self localPreview];
     }
   }
@@ -687,11 +753,14 @@
 }
 
 - (void)refreshVideoUI {
-  @weakify(self) dispatch_async(dispatch_get_main_queue(), ^{
-    @strongify(self) self.connectingView.hidden = YES;
+  __weak typeof(self) weakSelf = self;
+  dispatch_async(dispatch_get_main_queue(), ^{
+    __strong typeof(weakSelf) self = weakSelf;
+    self.connectingView.hidden = YES;
     self.videoConnectedView.hidden = NO;
     self.giftButton.hidden = NO;
-    [self.videoConnectedView updateUI:self.remoteUser.icon remoteName:self.remoteUser.userName];
+    [self.videoConnectedView updateUI:self.callParam.remoteAvatar
+                           remoteName:self.callParam.remoteShowName];
   });
   //   dispatch_async(self.timeQueue, ^() {
   //    @strongify(self) if (self && !self.timer) {
@@ -706,7 +775,8 @@
   //  });
   self.timerIdentifier = [self
           schedleTask:^{
-            @strongify(self)[self timeUp];
+            __strong typeof(weakSelf) self = weakSelf;
+            [self timeUp];
           }
              interval:1
                repeat:YES
@@ -716,7 +786,7 @@
 
 - (void)refreshVideoView:(BOOL)convert {
   dispatch_async(dispatch_get_main_queue(), ^{
-    if (self.remoteUser.oc_callType == 1) {
+    if ([self isVirtualRoom]) {
       [[NERtcCallKit sharedInstance] setupLocalView:convert
                                                         ? self.videoConnectedView.remoteVideoView
                                                         : self.videoConnectedView.localVideoView];
@@ -728,7 +798,7 @@
       [[NERtcCallKit sharedInstance]
           setupRemoteView:convert ? self.videoConnectedView.localVideoView
                                   : self.videoConnectedView.remoteVideoView
-                  forUser:self.remoteUser.userUuid];
+                  forUser:self.callParam.remoteUserAccid];
     }
   });
 }
@@ -781,19 +851,23 @@
   [self cancelTimer:self.timerIdentifier];
   [NEOneOnOneLog infoLog:tag desc:[NSString stringWithFormat:@"%@:endRoom", tag]];
   NSLog(@"定时器----%@", self.timer);
-  dispatch_async(dispatch_get_main_queue(), ^{
-    if (self.presentedViewController) {
-      [self.presentedViewController dismissViewControllerAnimated:NO
-                                                       completion:^{
-                                                         [self dismissViewControllerAnimated:YES
-                                                                                  completion:nil];
-                                                       }];
-    } else {
-      [self dismissViewControllerAnimated:YES
-                               completion:^{
-                               }];
-    }
-  });
+  if ([self isVirtualRoom]) {
+    dispatch_async(dispatch_get_main_queue(), ^{
+      if (self.presentedViewController) {
+        [self.presentedViewController dismissViewControllerAnimated:NO
+                                                         completion:^{
+                                                           [self dismissViewControllerAnimated:YES
+                                                                                    completion:nil];
+                                                         }];
+      } else {
+        [self dismissViewControllerAnimated:YES
+                                 completion:^{
+                                 }];
+      }
+    });
+  } else {
+    [[NSNotificationCenter defaultCenter] postNotificationName:kCallKitDismissNoti object:nil];
+  }
 }
 
 - (void)playMedia {
@@ -817,58 +891,19 @@
 }
 
 - (void)playAudio:(NSString *)urlString {
-  NSURL *videoURL = [NSURL URLWithString:urlString];
-  self.player = [AVPlayer playerWithURL:videoURL];
-  self.playerLayer = [AVPlayerLayer playerLayerWithPlayer:self.player];
-  [self.player play];
-  [[NSNotificationCenter defaultCenter] addObserver:self
-                                           selector:@selector(playerDidFinishPlaying)
-                                               name:AVPlayerItemDidPlayToEndTimeNotification
-                                             object:self.player.currentItem];
+  [NEOneOnOnePlayerUtil.getInstance playAudio:urlString];
 }
 
 - (void)playVideo:(NSString *)urlString {
-  NSURL *videoURL = [NSURL URLWithString:urlString];
-  self.player = [AVPlayer playerWithURL:videoURL];
-  self.playerLayer = [AVPlayerLayer playerLayerWithPlayer:self.player];
-  self.playerLayer.frame = self.videoConnectedView.remoteVideoView.bounds;
-  self.playerLayer.videoGravity = AVLayerVideoGravityResizeAspectFill;
-  [self.videoConnectedView.remoteVideoView.layer addSublayer:self.playerLayer];
-  [self.player play];
-  [[NSNotificationCenter defaultCenter] addObserver:self
-                                           selector:@selector(playerDidFinishPlaying)
-                                               name:AVPlayerItemDidPlayToEndTimeNotification
-                                             object:self.player.currentItem];
-  [[NSNotificationCenter defaultCenter] addObserver:self
-                                           selector:@selector(playerDidFinishPlaying)
-                                               name:AVPlayerItemDidPlayToEndTimeNotification
-                                             object:self.player.currentItem];
-
-  [[NSNotificationCenter defaultCenter] addObserver:self
-                                           selector:@selector(playerErrorPlaying)
-                                               name:AVPlayerItemFailedToPlayToEndTimeNotification
-                                             object:self.player.currentItem];
-  [[NSNotificationCenter defaultCenter] addObserver:self
-                                           selector:@selector(playerErrorPlaying)
-                                               name:AVPlayerItemPlaybackStalledNotification
-                                             object:self.player.currentItem];
-
-  [[NSNotificationCenter defaultCenter] addObserver:self
-                                           selector:@selector(playerErrorPlaying)
-                                               name:AVPlayerItemNewErrorLogEntryNotification
-                                             object:self.player.currentItem];
-
-  // 监听 AVAudioSessionInterruptionNotification 通知
-  [[NSNotificationCenter defaultCenter] addObserver:self
-                                           selector:@selector(playerInterruption:)
-                                               name:AVAudioSessionInterruptionNotification
-                                             object:nil];
+  [[NEOneOnOnePlayerUtil getInstance] playVideo:urlString
+                                          frame:self.videoConnectedView.remoteVideoView.bounds
+                                     superLayer:self.videoConnectedView.remoteVideoView.layer];
 }
 - (void)dealloc {
-  if (self.remoteUser.oc_callType == 1 && self.originalCategory) {
+  if ([self isVirtualRoom] && self.originalCategory) {
     [AVAudioSession.sharedInstance setCategory:self.originalCategory error:nil];
   }
-  if (self.enterStatus == video_call && self.remoteUser.oc_callType == 1) {
+  if (self.enterStatus == video_call && [self isVirtualRoom]) {
     if (self.captureSession) {
       [self.captureSession stopRunning];
       // 将会话中的输入和输出设置为 nil
@@ -892,31 +927,27 @@
 
   [[NEOneOnOneKit getInstance] removeOneOnOneListener:self];
   [[NEOneOnOneKit getInstance] removeAuthListener:self];
+  [NEOneOnOnePlayerUtil.getInstance removePlayerListener:self];
   [self destroyNetworkObserver];
-  [[NSNotificationCenter defaultCenter] postNotificationName:@"kCallKitDismissNoti" object:nil];
+  //  [[NSNotificationCenter defaultCenter] postNotificationName:@"kCallKitDismissNoti" object:nil];
   /// 状态机置为空闲
   [[NERtcCallKit sharedInstance] changeStatusIdle];
 }
-- (void)playerDidFinishPlaying {
-  self.player = nil;
+
+#pragma mark NEOneOnOnePlayerProtocol
+
+- (void)OneOnOnePlayerDidFinishPlaying {
+  [NEOneOnOnePlayerUtil.getInstance resetPlayer];
   [NEOneOnOneToast showToast:NELocalizedString(@"通话已结束哦~")];
   [self endRoom];
 }
 
-- (void)playerErrorPlaying {
-  self.player = nil;
+- (void)OneOnOnePlayerErrorPlaying {
+  [NEOneOnOnePlayerUtil.getInstance resetPlayer];
   [NEOneOnOneToast showToast:NELocalizedString(@"网络异常，请重新拨打")];
   [self endRoom];
 }
-
-- (BOOL)isLocalUser:(long)uid {
-  if ([NEOneOnOneKit getInstance].localMember.rtcUid == uid) {
-    return YES;
-  }
-  return NO;
-}
-
-- (void)playerInterruption:(NSNotification *)notification {
+- (void)OneOnOnePlayerInterruption:(NSNotification *)notification {
   NSDictionary *userInfo = notification.userInfo;
   AVAudioSessionInterruptionType type =
       [userInfo[AVAudioSessionInterruptionTypeKey] unsignedIntegerValue];
@@ -925,7 +956,7 @@
     case AVAudioSessionInterruptionTypeBegan: {
       // 暂停视频播放
       dispatch_async(dispatch_get_main_queue(), ^{
-        [self.player pause];
+        [[NEOneOnOnePlayerUtil getInstance] playerPause];
       });
 
       break;
@@ -936,7 +967,7 @@
       if (options & AVAudioSessionInterruptionOptionShouldResume) {
         // 恢复视频播放
         dispatch_async(dispatch_get_main_queue(), ^{
-          [self.player play];
+          [[NEOneOnOnePlayerUtil getInstance] playerPlay];
         });
       }
       break;
@@ -944,6 +975,13 @@
     default:
       break;
   }
+}
+
+- (BOOL)isLocalUser:(long)uid {
+  if ([NEOneOnOneKit getInstance].localMember.rtcUid == uid) {
+    return YES;
+  }
+  return NO;
 }
 
 #pragma mark OneOnOneListener
@@ -981,6 +1019,7 @@
                    repeat:(BOOL)repeat
                     async:(BOOL)async
           reuseIdentifier:(NSString *)identifier {
+  __weak typeof(self) weakSelf = self;
   dispatch_queue_t queue = async ? self.timeQueue : dispatch_get_main_queue();
   // 穿件定时器
   dispatch_source_t timer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, queue);
@@ -990,6 +1029,7 @@
   dispatch_source_set_timer(timer, start, interval * NSEC_PER_SEC, 0);
   // 设置回调
   dispatch_source_set_event_handler(timer, ^{
+    __strong typeof(weakSelf) self = weakSelf;
     task();
     if (!repeat) {
       [self cancelTimer:identifier];
@@ -1039,10 +1079,58 @@
 }
 - (void)onOneOnOneAuthEvent:(enum NEOneOnOneAuthEvent)event {
   if (event == NEOneOnOneAuthEventKickOut) {
-    if (self.remoteUser.oc_callType == 1 && self.player) {
-      self.player = nil;
+    if ([self isVirtualRoom]) {
+      [[NEOneOnOnePlayerUtil getInstance] resetPlayer];
       [self endRoom];
     }
   }
+}
+- (BOOL)isVirtualRoom {
+  return (self.remoteUser.oc_callType == 1);
+}
+
+// 自定义数据解析
+- (void)extraParamsDataAnalysis {
+  if (self.remoteUser.oc_callType == 1) {
+    // 虚拟房间。手动加入和退出
+    return;
+  }
+
+  if (self.callParam.isCaller) {
+    // 呼叫方
+    if (self.callParam.callType == NERtcCallTypeAudio) {
+      self.enterStatus = audio_call;
+    } else {
+      self.enterStatus = video_call;
+    }
+  } else {
+    // 被呼叫方
+    if (self.callParam.callType == NERtcCallTypeAudio) {
+      self.enterStatus = audio_invited;
+    } else {
+      self.enterStatus = video_invited;
+    }
+  }
+
+  //    NSError *error = nil;
+  //    NSData *jsonData = [self.callParam.extra dataUsingEncoding:NSUTF8StringEncoding];
+  //    NSDictionary *dictionary = [NSJSONSerialization JSONObjectWithData:jsonData
+  //    options:NSJSONReadingMutableContainers error:&error]; if (error == nil) {
+  ////        self.remoteUser = [[NEOneOnOneOnlineUser alloc] init];
+  ////        //音频播放地址
+  ////        self.remoteUser.audioUrl = dictionary[@"audioPlayUrl"];
+  ////        //视频播放地址
+  ////        self.remoteUser.videoUrl = dictionary[@"videoPlayUrl"];
+  ////        //是否是虚拟房间
+  ////        self.remoteUser.oc_callType = [dictionary[@"callType"] intValue];
+  //        ///呼叫类型
+  //
+  //    } else {
+  //        // 解析错误处理
+  //        [NEOneOnOneLog
+  //            infoLog:tag
+  //               desc:[NSString stringWithFormat:@"%@:extraParams:%@", tag,self.callParam.extra]];
+  //        [self endRoom];
+  //    }
 }
 @end

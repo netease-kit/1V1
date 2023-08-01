@@ -86,4 +86,16 @@ public extension NEOneOnOneKit {
   func isInOneInOne() -> Bool {
     !(NERtcCallKit.sharedInstance().callStatus == .idle)
   }
+
+  // 创建房间后上报
+  func reportRtcRoom(_ cid: Int64, callback: NEOneOnOneCallback<AnyObject>? = nil) {
+    NEOneOnOneLog.apiLog(kitTag, desc: "reportRtcRoom,cid:\(cid)")
+    Judge.initCondition({
+      self.roomService.reportRtcRoom(cid: cid) {
+        callback?(NEOneOnOneErrorCode.success, nil, nil)
+      } failure: { error in
+        callback?(error.code, error.localizedDescription, nil)
+      }
+    }, failure: callback)
+  }
 }
