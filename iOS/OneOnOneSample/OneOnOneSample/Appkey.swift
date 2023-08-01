@@ -30,26 +30,19 @@ let kAppAMapKey: String = "A Map key"
 
 // 获取userUuid和对应的userToken，请参考https://doc.yunxin.163.com/neroom/docs/TY1NzM5MjQ?platform=server
 
-//// AccountId
-// let accountId: String = "416838791307392"
-//// accessToken
-// let accessToken: String = "4BWL7M2J7TI23WZNUR8QEZ4E"
-//
-//// imToken
-// let imToken: String = "0BY1JX6UOK4E7Q9OYPVYHC1T"
 
 // AccountId
-var accountId: String = "26616318743809879"
+var accountId: String = ""
 // accessToken
-var accessToken: String = "60OIVYI5RVS3TMLER5PF7CEF"
+var accessToken: String = ""
 
 // imToken
-var imToken: String = "4LNNKL5K4VWNUNY9HCVAO873"
+var imToken: String = ""
 
 // MARK: 以下内容选填
-
+//
 // 以下内容选填
 
-var nickName: String = "nickName"
+var nickName: String = ""
 
 var avatar: String = ""
