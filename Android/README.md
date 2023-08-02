@@ -21,7 +21,7 @@
 
 - [已创建应用并获取 App Key](https://doc.yunxin.163.com/docs/jcyOTA0ODM/jE3OTc5NTY?platformId=50002)
 - [已开通相关能力](https://doc.yunxin.163.com/docs/DgyMDc0NTA/DA3NzUzNzY)
-- 已开通统一登录功能，具体请联系网易云信商务经理。
+
 
 ## 注意事项
 
@@ -49,18 +49,15 @@
 3. 在 `/app/java/com.netease.yunxin.app.oneonone/config/AppConfig.java` 文件中配置应用的 App Key，并填写云信 IM 账号相关信息。
 
     ```
-    // 请填写您的appKey,如果您的APP是国内环境，请填写APP_KEY_MAINLAND，如果是海外环境，请填写APP_KEY_OVERSEA
-    public static final String ONLINE_APP_KEY = "your mainland appKey";// 国内用户填写
-    public static final String OVERSEA_APP_KEY = "your oversea appKey";// 海外用户填写
-    // 请填写1对1服务端工程返回的账号信息
-    public static final String IM_ACCID = "your im accid";
-    public static final String IM_TOKEN = "your im token";
-    public static final String IM_AVATAR = "your im avatar";
-    public static final String IM_NICKNAME = "your im nickname";
-    public static final String PHONE_NUMBER = "your phone number";
-    public static final String USER_TOKEN = "your user token";
-    // 跑通Server Demo后，替换为实际的host,默认是http://127.0.0.1:9981 需要连网络代理运行
-    public static final String BASE_URL="http://127.0.0.1:9981";
+    // 请填写您的AppKey和AppSecret
+    private static final String APP_KEY = "your AppKey"; // 填入您的AppKey,可在云信控制台AppKey管理处获取
+    public static final String APP_SECRET = "your AppSecret"; // 填入您的AppSecret,可在云信控制台AppKey管理处获取
+    public static final boolean IS_OVERSEA = false; // 海外用户填ture,国内用户填false
+    /**
+     * BASE_URL为服务端地址,请在跑通Server Demo(https://github.com/netease-kit/nemo)后，替换为您自己实际的服务端地址
+     * "http://yiyong.netease.im/"仅用于跑通体验Demo,请勿用于正式产品上线
+     */
+    public static final String BASE_URL = "http://yiyong.netease.im/";
  
     ```
    ![配置AppKey.png](https://yx-web-nosdn.netease.im/common/4fa23d7115b8cde79cc6204d24f7a7e1/配置AppKey.png)
