@@ -67,54 +67,44 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
     setupReachability("163.com")
     startNotifier()
     
-    
-      let config = NELoginSampleConfig()
-      config.appKey = Configs.AppKey
-      config.appSecret = Configs.AppSecret
-      var loginSampleExtras = Configs.extras
-      loginSampleExtras["baseUrl"] = Configs.loginSampleBaseUrl
-      config.extras = loginSampleExtras
-      
-      NELoginSample.getInstance().initialize(config) { code, msg, obj in
-          if code == 0 {
-              NELoginSample.getInstance().createAccount(nil, sceneType: .oneOnOne, userUuid: nil, imToken: nil) { code, msg, account in
-                  if code == 0{
-                      print("\(String(describing: account))")
-                      //获取账号成功
-                      if let userUuid = account?.userUuid  {
-                          accountId = userUuid
-                      }
-                      
-                      if let token = account?.imToken {
-                          imToken = token
-                      }
-                      
-                      if let userToken = account?.userToken {
-                          accessToken = userToken
-                      }
-                      
-                      if let userName = account?.userName {
-                          nickName = userName
-                      }
-                      if let icon = account?.icon {
-                          avatar = icon
-                      }
-                      
-                      
-                     self.loginRoom(shouldInit: true)
-                  }
-                  
-              }
-          }
-      }
-      
-    
     checkFirstRun()
     // 自动化测试
     //    setupHawk()
     return true
   }
-  
+    func baseInit(){
+        let config = NELoginSampleConfig()
+        config.appKey = Configs.AppKey
+        config.appSecret = Configs.AppSecret
+        var loginSampleExtras = Configs.extras
+        loginSampleExtras["baseUrl"] = Configs.loginSampleBaseUrl
+        config.extras = loginSampleExtras
+        
+        ///如果用户自己填了账号，则直接用账号密码登录
+        if userUuid.count > 0 ,imToken.count > 0 ,userToken.count > 0 {
+            self.loginRoom(shouldInit: true)
+            return
+        }
+        
+        NELoginSample.getInstance().initialize(config) { code, msg, obj in
+            if code == 0 {
+                NELoginSample.getInstance().createAccount(nil, sceneType: .oneOnOne, userUuid: nil, imToken: nil) { code, msg, account in
+                    if code == 0{
+                        print("\(String(describing: account))")
+                        //获取账号成功
+                        userUuid = account?.userUuid ?? ""
+                        userToken = account?.userToken ?? ""
+                        imToken = account?.imToken ?? ""
+                        userName = account?.userName ?? ""
+                        icon = account?.icon ?? ""
+
+                       self.loginRoom(shouldInit: true)
+                    }
+                    
+                }
+            }
+        }
+    }
   
   ///远端推送
   func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
@@ -202,7 +192,7 @@ extension AppDelegate {
     
     func login() {
         
-        NEOneOnOneUIManager.sharedInstance().login(withAccount: accountId, token: accessToken, imToken: imToken, nickname: nickName, avatar: avatar ,resumeLogin: false) { code, msg, objc in
+        NEOneOnOneUIManager.sharedInstance().login(withAccount: userUuid, token: userToken, imToken: imToken, nickname: userName, avatar: icon ,resumeLogin: false) { code, msg, objc in
           if code != 0{
               DispatchQueue.main.async {
                 IHProgressHUD.dismiss()
@@ -212,7 +202,9 @@ extension AppDelegate {
             print("Error Happen")
           } else {
               //注册APNS，因为IM是在登录成功之后初始化的
-              self.registerAPNS()
+              DispatchQueue.main.async {
+                  self.registerAPNS()
+              }
             // 启动添加监听
             NEOneOnOneUIKitEngine.sharedInstance().addObserve()
             // 是否可以拨打
@@ -229,7 +221,7 @@ extension AppDelegate {
           DispatchQueue.main.async {
             // 刷新头像与昵称
             IHProgressHUD.dismiss()
-            NotificationCenter.default.post(name: NSNotification.Name("Logined"), object: nil, userInfo: ["nickname": nickName, "avatar": avatar ])
+            NotificationCenter.default.post(name: NSNotification.Name("Logined"), object: nil, userInfo: ["nickname": userName, "avatar": icon ])
             // 初始化美颜模块
             FUDemoManager.share()
           }
@@ -258,7 +250,11 @@ extension AppDelegate {
   func setupReachability(_ hostName: String) {
     self.reachability = try? NPTReachability(hostname: hostName)
     reachability?.whenReachable = { reachability in
-      
+        DispatchQueue.once(token: "Init") {
+            DispatchQueue.main.async {
+                self.baseInit()
+            }
+        }
     }
     reachability?.whenUnreachable = { reachability in
       

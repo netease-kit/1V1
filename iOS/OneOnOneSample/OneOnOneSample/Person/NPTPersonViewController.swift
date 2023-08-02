@@ -106,7 +106,7 @@ class NPTPersonViewController: UIViewController {
 
   override func viewWillAppear(_ animated: Bool) {
     super.viewWillAppear(animated)
-    updateUserInfo(nickname: nickName, avatar: avatar)
+    updateUserInfo(nickname: userName, avatar: icon)
   }
 
   func updateUserInfo(nickname: String?, avatar: String?) {

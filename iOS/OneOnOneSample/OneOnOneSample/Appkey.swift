@@ -30,11 +30,11 @@ let kAppAMapKey: String = "A Map key"
 
 // 获取userUuid和对应的userToken，请参考https://doc.yunxin.163.com/neroom/docs/TY1NzM5MjQ?platform=server
 
-
-// AccountId
-var accountId: String = ""
-// accessToken
-var accessToken: String = ""
+// MARK: 单租户模式下需要填写以下内容
+// userUuid
+var userUuid: String = ""
+// userToken
+var userToken: String = ""
 
 // imToken
 var imToken: String = ""
@@ -43,6 +43,6 @@ var imToken: String = ""
 //
 // 以下内容选填
 
-var nickName: String = ""
+var userName: String = ""
 
-var avatar: String = ""
+var icon: String = ""

@@ -28,7 +28,6 @@ table th:nth-of-type(2) {
 
 - [已创建应用并获取 App Key](https://doc.yunxin.163.com/docs/jcyOTA0ODM/jE3OTc5NTY?platformId=50002)
 - [已开通相关能力](https://doc.yunxin.163.com/1v1-social/docs/zk3NTk1NzU?platform=iOS)
-- 已开通统一登录功能，具体请联系网易云信商务经理。
 - [已跑通服务端源码](https://doc.yunxin.163.com/1v1-social/docs/jE2NjQ1MzY?platform=server)
 ## 注意事项
 
@@ -54,42 +53,26 @@ table th:nth-of-type(2) {
     ```
 3. 完成安装后，通过 Xcode 打开 `xxx.xcworkspace` 工程。
 
-4. 在 `OneOnOne/iOS/OneOnOneSample/OneOnOneSample/AppKey.h`中，替换您自己的 App Key，获取 App Key 的方法请参见<a href="https://doc.yunxin.163.com/docs/jcyOTA0ODM/jcwMDQ2MTg?platformId=50192#获取 App Key" target="_blank">获取 App Key</a>。并填写云信 IM 账号相关信息。
+4. 在 `OneOnOneSample/OneOnOneSample/AppKey.swift ` 中，替换您自己的 App Key 和 App Secret 。获取 App Key 和 App Secret 的方法请参见获取 App Key <a href="https://doc.yunxin.163.com/docs/jcyOTA0ODM/jcwMDQ2MTg?platformId=50192#获取 App Key" target="_blank">获取 App Key</a>。并填写云信 IM 账号相关信息。
+
     ```
-    static NSString *const APP_KEY_MAINLAND = @"your mainland appKey";  // 国内用户填写
+    请填写您的appKey,国内环境请填写APP_KEY_MAINLAND，海外环境请填写APP_KEY_OVERSEA
 
-    static NSString *const APP_KEY_OVERSEA = @"your oversea appKey";  // 海外用户填写
+    let APP_KEY_MAINLAND: String = "your mainland appKey" // 国内用户填写AppKey
 
-    // 获取userUuid和对应的userToken，请参考https://doc.yunxin.163.com/neroom/docs/TY1NzM5MjQ?platform=server
+    let APP_SECRET_MAINLAND: String = "your mainland appSecret" // 国内用户填写AppSecret
 
-    // AccountId
-    static NSString *const accountId = @"";
-    // accessToken
-    static NSString *const accessToken = @"";
+    let APP_KEY_OVERSEA: String = "your oversea appKey" // 海外用户填写AppKey
 
-    static NSString *const imToken = @"";
-    ```
-
-    ::: note note
-    `accountId`、`accessToken` 和 `imToken` 的值请填写 1 对 1 娱乐社交服务端返回的内容。
-    :::
-
-5. （可选）修改 `OneOnOne/iOS/OneOnOneSample/OneOnOneSample/AppKey.h`中设置当前的环境对应的域名。
-
-
-    ::: note note
-    如果您在本地运行了1 对 1 娱乐社交服务端工程，域名请设置为 `http://127.0.0.1:9981`。
-    :::
-    ```
-    /// 服务器
-    let kApiHost: String = "http://127.0.0.1:9981"
+    let APP_SECRET_OVERSEA: String = "your oversea appSecret" // 海外用户填写AppSecret
     
     ```
+
   
-6. 运行工程。
+5. 运行工程。
 
 ::: note note
-如果 1 对 1 娱乐社交服务端部署在本地，客户端需要和服务器连接到一个网络环境内，此时无法使用真机运行，需要用模拟器运行。
+    请使用两个手机运行工程，Demo 上才能显示用户列表，体验 1 对 1 聊天等功能。
 :::
 
 ## 示例项目结构
