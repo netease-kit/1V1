@@ -179,7 +179,7 @@ class NEOneOnOneVideoSalutuionCell: NEChatBaseCell {
 }
 
 // 礼物消息
-class NEOneOnOneRewardRightCell: ChatBaseRightCell {
+class NEOneOnOneRewardRightCell: NEBaseChatMessageCell {
   override func awakeFromNib() {
     super.awakeFromNib()
     // Initialization code
@@ -200,12 +200,12 @@ class NEOneOnOneRewardRightCell: ChatBaseRightCell {
   override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
     super.init(style: style, reuseIdentifier: reuseIdentifier)
     contentView.addSubview(salutionCell)
-    bubbleImage.isHidden = true
+    bubbleImageRight.isHidden = true
     salutionCell.snp.makeConstraints { make in
       make.bottom.equalToSuperview().offset(-12)
       make.top.equalToSuperview()
       make.width.equalTo(220)
-      make.right.equalTo(avatarImage.snp.left).offset(-8)
+      make.right.equalTo(avatarImageRight.snp.left).offset(-8)
     }
     selectionStyle = .none
   }
@@ -225,7 +225,7 @@ class NEOneOnOneRewardRightCell: ChatBaseRightCell {
 }
 
 // 礼物消息
-class NEOneOnOneRewardLeftCell: ChatBaseLeftCell {
+class NEOneOnOneRewardLeftCell: NEBaseChatMessageCell {
   override func awakeFromNib() {
     super.awakeFromNib()
     // Initialization code
@@ -246,12 +246,12 @@ class NEOneOnOneRewardLeftCell: ChatBaseLeftCell {
   override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
     super.init(style: style, reuseIdentifier: reuseIdentifier)
     contentView.addSubview(salutionCell)
-    bubbleImage.isHidden = true
+    bubbleImageLeft.isHidden = true
     salutionCell.snp.makeConstraints { make in
       make.bottom.equalToSuperview().offset(-12)
       make.top.equalToSuperview()
       make.width.equalTo(220)
-      make.left.equalTo(avatarImage.snp.right).offset(8)
+      make.left.equalTo(avatarImageLeft.snp.right).offset(8)
     }
     selectionStyle = .none
   }
@@ -271,7 +271,7 @@ class NEOneOnOneRewardLeftCell: ChatBaseLeftCell {
 }
 
 // 小秘书礼物消息
-class NEOneOnOneOfficialCell: ChatBaseLeftCell {
+class NEOneOnOneOfficialCell: NEBaseChatMessageCell {
   public var thanksForGiven: ((String) -> Void)?
   override func awakeFromNib() {
     super.awakeFromNib()
@@ -294,12 +294,12 @@ class NEOneOnOneOfficialCell: ChatBaseLeftCell {
   override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
     super.init(style: style, reuseIdentifier: reuseIdentifier)
     contentView.addSubview(salutionCell)
-    bubbleImage.isHidden = true
+    bubbleImageLeft.isHidden = true
     salutionCell.snp.makeConstraints { make in
       make.top.equalToSuperview()
       make.width.equalTo(200)
       make.height.equalTo(200)
-      make.left.equalTo(avatarImage.snp.right).offset(8)
+      make.left.equalTo(avatarImageLeft.snp.right).offset(8)
     }
     selectionStyle = .none
   }
@@ -320,7 +320,7 @@ class NEOneOnOneOfficialCell: ChatBaseLeftCell {
           make.top.equalToSuperview()
           make.width.equalTo(size.width)
           make.height.equalTo(size.height)
-          make.left.equalTo(avatarImage.snp.right).offset(8)
+          make.left.equalTo(avatarImageLeft.snp.right).offset(8)
         }
       }
     }

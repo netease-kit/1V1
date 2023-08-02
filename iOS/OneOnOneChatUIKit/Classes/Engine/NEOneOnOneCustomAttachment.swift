@@ -85,35 +85,27 @@ public class CustomAttachmentDecoder: NSObject, NIMCustomAttachmentCoding {
     customAttachment.customType = type
     if let senderUserUuid = info["senderUserUuid"] as? String {
       customAttachment.senderUserUuid = senderUserUuid
-      print("senderUserUuid:\(String(describing: customAttachment.senderUserUuid))")
     }
     if let sendTime = info["sendTime"] as? Int {
       customAttachment.sendTime = sendTime
-      print("sendTime:\(customAttachment.sendTime)")
     }
     if let rewarderUserName = info["rewarderUserName"] as? String {
       customAttachment.rewarderUserName = rewarderUserName
-      print("rewarderUserName:\(String(describing: customAttachment.rewarderUserName))")
     }
     if let giftId = info["giftId"] as? Int {
       customAttachment.giftId = giftId
-      print("giftId:\(customAttachment.giftId)")
     }
     if let giftCount = info["giftCount"] as? Int {
       customAttachment.giftCount = giftCount
-      print("giftCount:\(customAttachment.giftCount)")
     }
     if let targetUserUuid = info["targetUserUuid"] as? String {
       customAttachment.targetUserUuid = targetUserUuid
-      print("targetUserUuid:\(String(describing: customAttachment.targetUserUuid))")
     }
     if let targetUserName = info["targetUserName"] as? String {
       customAttachment.targetUserName = targetUserName
-      print("targetUserName:\(String(describing: customAttachment.targetUserName))")
     }
     if let msg = info["msg"] as? String {
       customAttachment.msg = msg
-      print("msg:\(String(describing: customAttachment.msg))")
     }
     switch customAttachment.type {
     case OneOnOneChatCustomMessageType.ACCOST_MESSAGE_TIPS_TYPE:

@@ -15,10 +15,13 @@ public class NEOneOnOneChatRegisterEngine: NSObject {
     NIMCustomObject.registerCustomDecoder(CustomAttachmentDecoder())
     IMKitClient.instance.repo.setShowReadStatus(true)
     /// 更多
-    var index = -1
     for moreModel in NEChatUIKitClient.instance.moreAction {
-      if moreModel.type == .file {
-        index = NEChatUIKitClient.instance.moreAction.firstIndex(of: moreModel) ?? -1
+      if moreModel.type == .file || moreModel.type == .rtc {
+        let index = (NEChatUIKitClient.instance.moreAction.firstIndex(of: moreModel) ?? -1)
+        if index != -1 {
+          NEChatUIKitClient.instance.moreAction.remove(at: index)
+        }
+
         continue
       }
 
@@ -33,10 +36,6 @@ public class NEOneOnOneChatRegisterEngine: NSObject {
         continue
       }
     }
-    if index != -1 {
-      NEChatUIKitClient.instance.moreAction.remove(at: index)
-    }
-
     return instance
   }
 

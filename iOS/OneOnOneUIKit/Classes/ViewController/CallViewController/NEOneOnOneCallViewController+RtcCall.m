@@ -4,7 +4,6 @@
 
 #import <NEOneOnOneKit/NEOneOnOneKit-Swift.h>
 #import <NERtcCallKit/NERtcCallKit.h>
-#import <libextobjc/extobjc.h>
 #import "NEOneOnOneCallViewController+RtcCall.h"
 #import "NEOneOnOneCallViewController.h"
 #import "NEOneOnOneLocalized.h"
@@ -44,6 +43,16 @@ static int RTCConfig_videoHeight = 480;
 }
 /// 自己加入成功的回调，通常用来上报、统计等
 - (void)onJoinChannel:(NERtcCallKitJoinChannelEvent *)event {
+  [[NEOneOnOneKit getInstance]
+      reportRtcRoom:event.cid
+           callback:^(NSInteger code, NSString *_Nullable msg, id _Nullable obj) {
+             if (code != 0) {
+               [NEOneOnOneLog infoLog:tag
+                                 desc:[NSString stringWithFormat:@"%@:reportRtcRoom:%llu,error:%@",
+                                                                 tag, event.cid, msg]];
+             }
+           }];
+
   [NERtcEngine.sharedEngine setChannelProfile:RTCConfig_channelProfile];
   [NERtcEngine.sharedEngine setAudioProfile:RTCConfig_audioProfile scenario:RTCConfig_scenario];
   NERtcVideoEncodeConfiguration *videoConfig = [[NERtcVideoEncodeConfiguration alloc] init];
@@ -71,7 +80,8 @@ static int RTCConfig_videoHeight = 480;
   [NEOneOnOneLog infoLog:tag desc:[NSString stringWithFormat:@"%@:onUserBusy:%@", tag, userID]];
   NSLog(@"delegate - onUserBusy");
   [self endRoom];
-  self.busyBlock();
+  [[NSNotificationCenter defaultCenter] postNotificationName:NEOneOnOneCallViewControllerBusy
+                                                      object:nil];
 }
 
 /// RTC通话超时

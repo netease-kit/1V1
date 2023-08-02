@@ -4,37 +4,45 @@
 
 import Foundation
 
-/// 服务器地址
-let kApiHost: String = ""
+// 国内服务器地址
+let kApiHost: String = "https://yiyong.netease.im"
 
-/// 数据收集
+// 国内服务器地址
+let kOverSeaApiHost: String = "https://yiyong-sg.netease.im"
 
+// 数据收集
 let kApiDataHost: String = "https://statistic.live.126.net"
 
-var isOverSea: Bool = false // 是否是海外环境
+// MARK: 海外环境与国内环境的切换可以在我的页面中进行修改
 
-let APP_KEY_MAINLAND: String = "your mainland appKey" // 国内用户填写
+// 请填写您的appKey,国内环境请填写APP_KEY_MAINLAND，海外环境请填写APP_KEY_OVERSEA
+let APP_KEY_MAINLAND: String = "your mainland appKey" // 国内用户填写AppKey
 
-let APP_KEY_OVERSEA: String = "your oversea appKey" // 海外用户填写
+let APP_SECRET_MAINLAND: String = "your mainland appSecret" // 国内用户填写AppSecret
 
-let pushCerName: String = "push notification name"
+let APP_KEY_OVERSEA: String = "your oversea appKey" // 海外用户填写AppKey
 
-let AppAMapKey: String = "A Map key"
+let APP_SECRET_OVERSEA: String = "your oversea appSecret" // 海外用户填写AppSecret
+
+let kPushCerName: String = "push notification name"
+
+let kAppAMapKey: String = "A Map key"
 
 // 获取userUuid和对应的userToken，请参考https://doc.yunxin.163.com/neroom/docs/TY1NzM5MjQ?platform=server
 
+
 // AccountId
-
-let accountId: String = ""
-
+var accountId: String = ""
 // accessToken
+var accessToken: String = ""
 
-let accessToken: String = ""
+// imToken
+var imToken: String = ""
 
-let imToken: String = ""
-
+// MARK: 以下内容选填
+//
 // 以下内容选填
 
-let nickname: String = "nickName"
+var nickName: String = ""
 
-let avatar: String = "https://yx-web-nosdn.netease.im/quickhtml/assets/yunxin/default/g2-demo-avatar-imgs/86117879900016640.jpg"
+var avatar: String = ""

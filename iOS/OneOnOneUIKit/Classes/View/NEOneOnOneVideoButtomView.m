@@ -12,6 +12,7 @@
 @property(nonatomic, strong) UIButton *loudspeakerButton;
 @property(nonatomic, strong) UIButton *switchButton;
 @property(nonatomic, strong) UIButton *closeButton;
+@property(nonatomic, strong) UIButton *videoCloseButton;
 
 @end
 
@@ -28,8 +29,9 @@
 - (void)loadSubviews {
   [self addSubview:self.backGrayView];
   [self.backGrayView mas_makeConstraints:^(MASConstraintMaker *make) {
-    make.centerX.centerY.equalTo(self);
-    make.width.equalTo(@284);
+    make.centerY.equalTo(self);
+    make.left.equalTo(self).offset(15);
+    make.right.equalTo(self).offset(-15);
     make.height.equalTo(@60);
   }];
 
@@ -37,26 +39,38 @@
   [self.micButton mas_makeConstraints:^(MASConstraintMaker *make) {
     make.centerY.equalTo(self.backGrayView);
     make.left.equalTo(self.backGrayView).offset(36);
-    make.height.width.equalTo(@24);
   }];
 
   [self.backGrayView addSubview:self.loudspeakerButton];
   [self.loudspeakerButton mas_makeConstraints:^(MASConstraintMaker *make) {
     make.centerY.equalTo(self.backGrayView);
-    make.left.equalTo(self.micButton.mas_right).offset(37);
-    make.height.width.equalTo(@24);
+    make.left.equalTo(self.micButton.mas_right);
+    make.height.equalTo(self.micButton.mas_height);
+    make.width.equalTo(self.micButton.mas_width);
   }];
   [self.backGrayView addSubview:self.switchButton];
   [self.switchButton mas_makeConstraints:^(MASConstraintMaker *make) {
     make.centerY.equalTo(self.backGrayView);
-    make.left.equalTo(self.loudspeakerButton.mas_right).offset(37);
-    make.height.width.equalTo(@24);
+    make.left.equalTo(self.loudspeakerButton.mas_right);
+    make.height.equalTo(self.micButton.mas_height);
+    make.width.equalTo(self.micButton.mas_width);
   }];
+
+  [self addSubview:self.videoCloseButton];
+  [self.videoCloseButton mas_makeConstraints:^(MASConstraintMaker *make) {
+    make.centerY.equalTo(self.backGrayView);
+    make.left.equalTo(self.switchButton.mas_right);
+    make.height.equalTo(self.micButton.mas_height);
+    make.width.equalTo(self.micButton.mas_width);
+  }];
+
   [self addSubview:self.closeButton];
   [self.closeButton mas_makeConstraints:^(MASConstraintMaker *make) {
     make.centerY.equalTo(self.backGrayView);
     make.right.equalTo(self.backGrayView).offset(-36);
-    make.height.width.equalTo(@32);
+    make.left.equalTo(self.videoCloseButton.mas_right);
+    make.height.equalTo(self.micButton.mas_height);
+    make.width.equalTo(self.micButton.mas_width);
   }];
 }
 
@@ -75,10 +89,10 @@
   if (!_micButton) {
     _micButton = [[UIButton alloc] init];
     _micButton.selected = NO;
-    [_micButton setBackgroundImage:[NEOneOnOneUI ne_imageName:@"mic_open_icon"]
-                          forState:UIControlStateNormal];
-    [_micButton setBackgroundImage:[NEOneOnOneUI ne_imageName:@"mic_close_icon"]
-                          forState:UIControlStateSelected];
+    [_micButton setImage:[NEOneOnOneUI ne_imageName:@"mic_open_icon"]
+                forState:UIControlStateNormal];
+    [_micButton setImage:[NEOneOnOneUI ne_imageName:@"mic_close_icon"]
+                forState:UIControlStateSelected];
     [_micButton addTarget:self
                    action:@selector(itemEvent:)
          forControlEvents:UIControlEventTouchUpInside];
@@ -91,10 +105,10 @@
   if (!_loudspeakerButton) {
     _loudspeakerButton = [[UIButton alloc] init];
     _loudspeakerButton.selected = NO;
-    [_loudspeakerButton setBackgroundImage:[NEOneOnOneUI ne_imageName:@"speaker_open_icon"]
-                                  forState:UIControlStateNormal];
-    [_loudspeakerButton setBackgroundImage:[NEOneOnOneUI ne_imageName:@"speaker_close_icon"]
-                                  forState:UIControlStateSelected];
+    [_loudspeakerButton setImage:[NEOneOnOneUI ne_imageName:@"speaker_open_icon"]
+                        forState:UIControlStateNormal];
+    [_loudspeakerButton setImage:[NEOneOnOneUI ne_imageName:@"speaker_close_icon"]
+                        forState:UIControlStateSelected];
     [_loudspeakerButton addTarget:self
                            action:@selector(itemEvent:)
                  forControlEvents:UIControlEventTouchUpInside];
@@ -106,10 +120,10 @@
   if (!_switchButton) {
     _switchButton = [[UIButton alloc] init];
     _switchButton.selected = NO;
-    [_switchButton setBackgroundImage:[NEOneOnOneUI ne_imageName:@"camera_icon"]
-                             forState:UIControlStateNormal];
-    [_switchButton setBackgroundImage:[NEOneOnOneUI ne_imageName:@"camera_icon"]
-                             forState:UIControlStateSelected];
+    [_switchButton setImage:[NEOneOnOneUI ne_imageName:@"camera_icon"]
+                   forState:UIControlStateNormal];
+    [_switchButton setImage:[NEOneOnOneUI ne_imageName:@"camera_icon"]
+                   forState:UIControlStateSelected];
     [_switchButton addTarget:self
                       action:@selector(itemEvent:)
             forControlEvents:UIControlEventTouchUpInside];
@@ -117,18 +131,34 @@
   }
   return _switchButton;
 }
+
+- (UIButton *)videoCloseButton {
+  if (!_videoCloseButton) {
+    _videoCloseButton = [[UIButton alloc] init];
+    _videoCloseButton.selected = NO;
+    [_videoCloseButton setImage:[NEOneOnOneUI ne_imageName:@"video_on_icon"]
+                       forState:UIControlStateNormal];
+    [_videoCloseButton setImage:[NEOneOnOneUI ne_imageName:@"video_off_icon"]
+                       forState:UIControlStateSelected];
+    [_videoCloseButton addTarget:self
+                          action:@selector(itemEvent:)
+                forControlEvents:UIControlEventTouchUpInside];
+    _videoCloseButton.tag = 3;
+  }
+  return _videoCloseButton;
+}
 - (UIButton *)closeButton {
   if (!_closeButton) {
     _closeButton = [[UIButton alloc] init];
     _closeButton.selected = NO;
-    [_closeButton setBackgroundImage:[NEOneOnOneUI ne_imageName:@"reject_small_icon"]
-                            forState:UIControlStateNormal];
-    [_closeButton setBackgroundImage:[NEOneOnOneUI ne_imageName:@"reject_small_icon"]
-                            forState:UIControlStateSelected];
+    [_closeButton setImage:[NEOneOnOneUI ne_imageName:@"reject_small_icon"]
+                  forState:UIControlStateNormal];
+    [_closeButton setImage:[NEOneOnOneUI ne_imageName:@"reject_small_icon"]
+                  forState:UIControlStateSelected];
     [_closeButton addTarget:self
                      action:@selector(itemEvent:)
            forControlEvents:UIControlEventTouchUpInside];
-    _closeButton.tag = 3;
+    _closeButton.tag = 4;
   }
   return _closeButton;
 }
@@ -156,6 +186,11 @@
       }
     } break;
     case 3: {
+      if (self.clickItem) {
+        self.clickItem(button_close_camera, sender.selected);
+      }
+    } break;
+    case 4: {
       /// 挂断
       if (self.clickItem) {
         self.clickItem(button_cancel, sender.selected);

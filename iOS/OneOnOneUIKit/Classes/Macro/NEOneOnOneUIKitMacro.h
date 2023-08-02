@@ -20,6 +20,7 @@
 
 #define NELocalConnectingDuration @"ConnectionDuration"
 #define NEOneOnOneCallViewControllerAppear @"NEOneOnOneCallViewControllerAppear"
+#define NEOneOnOneCallViewControllerBusy @"NEOneOnOneCallViewControllerBusy"
 
 typedef enum : NSUInteger {
   // 主动拨打音频
@@ -42,6 +43,8 @@ typedef enum : NSUInteger {
   button_speaker,
   /// 切换摄像头
   button_switch_camera,
+  /// 关闭本地摄像头
+  button_close_camera,
   /// 取消
   button_cancel,
 

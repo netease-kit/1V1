@@ -7,10 +7,10 @@
 #import <MJRefresh/MJRefresh.h>
 #import <Masonry/Masonry.h>
 #import <NEOneOnOneKit/NEOneOnOneKit-Swift.h>
+#import <NEOneOnOneUIKit/NEOneOnOneUIKit-Swift.h>
 #import <NERtcCallKit/NERtcCallKit.h>
 #import <NEUIKit/NEUIKit.h>
 #import <NIMSDK/NIMSDK.h>
-#import <ReactiveObjC/ReactiveObjC.h>
 #import "NEOneOnOneBottomPresentView.h"
 #import "NEOneOnOneCallViewController.h"
 #import "NEOneOnOneEmptyListView.h"
@@ -93,11 +93,10 @@
   [self getNewData];
   [self bindViewModel];
   [self setupSubviews];
-  @weakify(self);
+  __weak typeof(self) weakSelf = self;
   [[NERtcCallKit sharedInstance]
       setPushConfigHandler:^(NERtcCallKitPushConfig *config, NERtcCallKitContext *context) {
-        @strongify(self);
-        if (self.isAudio) {
+        if (weakSelf.isAudio) {
           config.pushContent =
               [NSString stringWithFormat:@"%@ %@", [NEOneOnOneKit getInstance].localMember.nickName,
                                          NELocalizedString(@"邀请您语音聊天")];
@@ -128,38 +127,34 @@
   [self.roomListViewModel requestNewDataWithLiveType:NEOneOnOneLiveRoomTypeMultiAudio];
 }
 - (void)bindViewModel {
-  @weakify(self);
-  [RACObserve(self.roomListViewModel, datas) subscribeNext:^(NSArray *array) {
-    @strongify(self);
+  __weak typeof(self) weakSelf = self;
+  self.roomListViewModel.datasChanged = ^(NSArray<NEOneOnOneOnlineUser *> *_Nonnull datas) {
     dispatch_async(dispatch_get_main_queue(), ^{
-      dispatch_async(dispatch_get_main_queue(), ^{
-        [self.collectionView reloadData];
-        self.emptyView.hidden = [array count] > 0;
-      });
+      [weakSelf.collectionView reloadData];
+      weakSelf.emptyView.hidden = [datas count] > 0;
     });
-  }];
+  };
 
-  [RACObserve(self.roomListViewModel, isLoading) subscribeNext:^(id _Nullable x) {
-    @strongify(self);
-    if (self.roomListViewModel.isLoading == NO) {
-      [self.collectionView.mj_header endRefreshing];
-      [self.collectionView.mj_footer endRefreshing];
+  self.roomListViewModel.isLoadingChanged = ^(BOOL isLoading) {
+    if (!isLoading) {
+      [weakSelf.collectionView.mj_header endRefreshing];
+      [weakSelf.collectionView.mj_footer endRefreshing];
       [NEOneOnOneToast hideLoading];
     } else {
       [NEOneOnOneToast showLoading];
     }
-  }];
+  };
 
-  [RACObserve(self.roomListViewModel, error) subscribeNext:^(NSError *_Nullable err) {
-    if (!err || ![err isKindOfClass:[NSError class]]) return;
-    if (err.code == 1003) {
+  self.roomListViewModel.errorChanged = ^(NSError *_Nonnull error) {
+    if (!error || ![error isKindOfClass:[NSError class]]) return;
+    if (error.code == 1003) {
       [NEOneOnOneToast showToast:NELocalizedString(@"直播列表为空")];
     } else {
       NSString *msg =
-          err.userInfo[NSLocalizedDescriptionKey] ?: NELocalizedString(@"请求直播列表错误");
+          error.userInfo[NSLocalizedDescriptionKey] ?: NELocalizedString(@"请求直播列表错误");
       [NEOneOnOneToast showToast:msg];
     }
-  }];
+  };
 }
 - (void)setupSubviews {
   [[UIApplication sharedApplication].keyWindow addSubview:self.bottomPresentView];
@@ -171,7 +166,8 @@
     make.left.equalTo(self.view).offset(16);
     make.right.equalTo(self.view).offset(-16);
     make.bottom.equalTo(self.view);
-    make.height.mas_equalTo(UIScreenHeight - [NEOneOnOneUIDeviceSizeInfo get_iPhoneNavBarHeight]);
+    make.height.mas_equalTo(UIScreenHeight - [NEOneOnOneUIDeviceSizeInfo get_iPhoneNavBarHeight] -
+                            15);
   }];
 
   [self.emptyView mas_makeConstraints:^(MASConstraintMaker *make) {
@@ -179,10 +175,9 @@
     make.centerY.equalTo(self.collectionView).offset(-40);
   }];
 
-  @weakify(self);
+  __weak typeof(self) weakSelf = self;
   MJRefreshGifHeader *mjHeader = [MJRefreshGifHeader headerWithRefreshingBlock:^{
-    @strongify(self);
-    [self.roomListViewModel requestNewDataWithLiveType:NEOneOnOneLiveRoomTypeMultiAudio];
+    [weakSelf.roomListViewModel requestNewDataWithLiveType:NEOneOnOneLiveRoomTypeMultiAudio];
   }];
   [mjHeader setTitle:NELocalizedString(@"下拉更新") forState:MJRefreshStateIdle];
   [mjHeader setTitle:NELocalizedString(@"下拉更新") forState:MJRefreshStatePulling];
@@ -192,12 +187,11 @@
   self.collectionView.mj_header = mjHeader;
 
   self.collectionView.mj_footer = [MJRefreshBackNormalFooter footerWithRefreshingBlock:^{
-    @strongify(self);
-    if (self.roomListViewModel.isEnd) {
+    if (weakSelf.roomListViewModel.isEnd) {
       [NEOneOnOneToast showToast:NELocalizedString(@"无更多内容")];
-      [self.collectionView.mj_footer endRefreshing];
+      [weakSelf.collectionView.mj_footer endRefreshing];
     } else {
-      [self.roomListViewModel requestMoreDataWithLiveType:NEOneOnOneLiveRoomTypeMultiAudio];
+      [weakSelf.roomListViewModel requestMoreDataWithLiveType:NEOneOnOneLiveRoomTypeMultiAudio];
     }
   }];
 }
@@ -281,34 +275,33 @@
 
 - (NEOneOnOneBottomPresentView *)bottomPresentView {
   if (!_bottomPresentView) {
-    @weakify(self) _bottomPresentView =
+    __weak typeof(self) weakSelf = self;
+    _bottomPresentView =
         [[NEOneOnOneBottomPresentView alloc] initWithFrame:[UIScreen mainScreen].bounds];
     _bottomPresentView.clickAudioAction = ^{
-      @strongify(self) @weakify(self)
-          // 选中音频通话1
-          [self.bottomPresentView dismiss:^{
-            @strongify(self) NSLog(@"点击音频通话");
-            [self dealWithAction:YES];
-          }];
+      // 选中音频通话1
+      [weakSelf.bottomPresentView dismiss:^{
+        NSLog(@"点击音频通话");
+        [weakSelf dealWithAction:YES];
+      }];
     };
     _bottomPresentView.clickVideoAction = ^{
-      @strongify(self) @weakify(self)
-          // 选择视频通话
-          [self.bottomPresentView dismiss:^{
-            @strongify(self) NSLog(@"点击视频通话");
-            [self dealWithAction:NO];
-          }];
+      // 选择视频通话
+      [weakSelf.bottomPresentView dismiss:^{
+        NSLog(@"点击视频通话");
+        [weakSelf dealWithAction:NO];
+      }];
     };
     _bottomPresentView.clickChatUpAction = ^{
-      @strongify(self) NetworkStatus status = [self.reachability currentReachabilityStatus];
+      NetworkStatus status = [weakSelf.reachability currentReachabilityStatus];
       if (status == NotReachable) {
         [NEOneOnOneToast showToast:NELocalizedString(@"网络异常，请稍后重试")];
         return;
       }
 
       // 搭讪
-      [self.bottomPresentView dismiss:^{
-        NIMSession *session = [NIMSession session:self.roomInfoModel.userUuid
+      [weakSelf.bottomPresentView dismiss:^{
+        NIMSession *session = [NIMSession session:weakSelf.roomInfoModel.userUuid
                                              type:NIMSessionTypeP2P];
         NIMMessage *message = [[NIMMessage alloc] init];
         NIMMessageSetting *setting = [[NIMMessageSetting alloc] init];
@@ -326,9 +319,9 @@
 
     _bottomPresentView.clickPrivateLatterAction = ^{
       // 私信
-      @strongify(self)[self.bottomPresentView dismiss:^{
-        if (self.privateLatter) {
-          self.privateLatter(self.roomInfoModel.userUuid);
+      [weakSelf.bottomPresentView dismiss:^{
+        if (weakSelf.privateLatter) {
+          weakSelf.privateLatter(weakSelf.roomInfoModel.userUuid);
         }
       }];
     };
@@ -379,191 +372,21 @@
 }
 
 - (void)startCallKitJudgeUserBusy:(BOOL)isAudio {
-  {
-    @weakify(self)[[NEOneOnOneKit getInstance]
-        getUserState:self.roomInfoModel.mobile
-            callback:^(NSInteger code, NSString *_Nullable msg, NSString *_Nullable onlineState) {
-              @strongify(self) if (code == 0) {
-                // 请求成功
-                if (onlineState.length > 0 && [onlineState isEqualToString:@"online"]) {
-                  // 在线
-                  /// 直接呼叫，对端收到邀请通知，如果在忙的话，hungUp配上原因，本段可以拿到状态
-                  [self startCallAction:isAudio];
-
-                } else {
-                  // 不在线
-                  [NEOneOnOneUIKitUtils
-                      presentAlertViewController:self
-                                          titile:NELocalizedString(@"对方不在线，请稍后再试")
-                                     cancelTitle:@""
-                                    confirmTitle:NELocalizedString(@"确定")
-                                 confirmComplete:^{
-
-                                 }];
-                  // 取消已点击通话数据
-                  self.isEnterRoom = NO;
-                }
-              }
-              else {
-                // 请求失败
-                [NEOneOnOneToast showToast:NELocalizedString(@"网络异常，请稍后重试")];
-                // 取消已点击通话数据
-                self.isEnterRoom = NO;
-              }
-            }];
-  }
-}
-
-- (void)startCallAction:(BOOL)isAudio {
-  {
-    __block BOOL hasPermissions = NO;
-    dispatch_semaphore_t semaphore = dispatch_semaphore_create(0);
-
-    if (isAudio) {
-      [NEOneOnOneUIKitUtils
-          getMicrophonePermissions:AVMediaTypeAudio
-                          complete:^(BOOL authorized) {
-                            if (authorized) {
-                              hasPermissions = YES;
-                              dispatch_semaphore_signal(semaphore);
-                            } else {
-                              [NEOneOnOneToast
-                                  showToast:NELocalizedString(@"麦克风权限已关闭，请开启后重试")];
-                              dispatch_semaphore_signal(semaphore);
-                            }
-                          }];
-    } else {
-      [NEOneOnOneUIKitUtils
-          getMicrophonePermissions:AVMediaTypeAudio
-                          complete:^(BOOL authorized) {
-                            if (authorized) {
-                              /// 已获得语音权限或者首次申请已通过
-                              [NEOneOnOneUIKitUtils
-                                  getMicrophonePermissions:AVMediaTypeVideo
-                                                  complete:^(BOOL authorized) {
-                                                    if (authorized) {
-                                                      /// 已获得视频权限或者首次申请已通过
-                                                      hasPermissions = YES;
-                                                      dispatch_semaphore_signal(semaphore);
-                                                    } else {
-                                                      /// 权限被拒
-                                                      [NEOneOnOneToast
-                                                          showToast:NELocalizedString(
-                                                                        @"摄像头权限已关闭，请开启"
-                                                                        @"后重试")];
-                                                      dispatch_semaphore_signal(semaphore);
-                                                    }
-                                                  }];
-
-                            } else {
-                              [NEOneOnOneUIKitUtils
-                                  getMicrophonePermissions:AVMediaTypeVideo
-                                                  complete:^(BOOL authorized) {
-                                                    if (authorized) {
-                                                      /// 已获得视频权限或者首次申请已通过
-                                                      [NEOneOnOneToast
-                                                          showToast:NELocalizedString(
-                                                                        @"麦克风权限已关闭，请开启"
-                                                                        @"后重试")];
-                                                      dispatch_semaphore_signal(semaphore);
-                                                    } else {
-                                                      /// 权限被拒
-                                                      [NEOneOnOneToast
-                                                          showToast:NELocalizedString(
-                                                                        @"麦克风和摄像头权限已关闭"
-                                                                        @"，请开启后重试")];
-                                                      dispatch_semaphore_signal(semaphore);
-                                                    }
-                                                  }];
-                            }
-                          }];
-    }
-    dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER);
-    if (hasPermissions) {
-    } else {
-      self.isEnterRoom = NO;
-      return;
-    }
-    NSLog(@"权限判断通过");
-  }
-
-  if (self.roomInfoModel.oc_callType != 1) {
-    [NERtcCallKit sharedInstance].timeOutSeconds = isAudio ? 15 : 30;
-  }
-
-  NSDictionary *attachment = @{
-    CALLER_USER_NAME : [NEOneOnOneKit getInstance].localMember.nickName,
-    CALLER_USER_MOBILE : [NEOneOnOneKit getInstance].localMember.mobile,
-    CALLER_USER_AVATAR : [NEOneOnOneKit getInstance].localMember.avatar
-  };
-  NSString *jsonString = [[NSString alloc]
-      initWithData:[NSJSONSerialization dataWithJSONObject:attachment
-                                                   options:NSJSONWritingPrettyPrinted
-                                                     error:nil]
-          encoding:NSUTF8StringEncoding];
-  @weakify(self) dispatch_async(dispatch_get_main_queue(), ^{
-    @strongify(self) NEOneOnOneCallViewController *callViewController =
-        [[NEOneOnOneCallViewController alloc] init];
-    callViewController.busyBlock = ^{
-      dispatch_async(dispatch_get_main_queue(), ^{
-        [[UIApplication sharedApplication].keyWindow addSubview:self.busyView];
-      });
-    };
-    if (self.roomInfoModel.oc_callType == 1) {
-      [[NERtcCallKit sharedInstance] changeStatusCalling];
-      [self startCallKit:isAudio controller:callViewController];
-      return;
-    }
-    [[NERtcCallKit sharedInstance] addDelegate:callViewController];
-    @weakify(
-        self)[[NERtcCallKit sharedInstance] call:self.roomInfoModel.userUuid
-                                            type:(isAudio) ? NERtcCallTypeAudio : NERtcCallTypeVideo
-                                      attachment:jsonString
-                                     globalExtra:nil
-                                       withToken:nil
-                                     channelName:nil
-                                      completion:^(NSError *_Nullable error) {
-                                        @strongify(self) NSLog(@"%@", error);
-                                        if (error.code != 0) {
-                                          // 未接通
-                                          [NEOneOnOneToast
-                                              showToast:NELocalizedString(@"呼叫未成功发出")];
-                                          // 取消已点击通话数据
-                                          self.isEnterRoom = NO;
-                                        } else {
-                                          [self startCallKit:isAudio controller:callViewController];
-                                        }
-                                      }];
-  });
-}
-- (void)startCallKit:(BOOL)isAudio controller:(NEOneOnOneCallViewController *)callViewController {
-  // 用户不在RTC房间中
-  // 自身不在RTC中
-  // 进入呼叫流程
-  NEOneOnOneOnlineUser *remoteUser = [[NEOneOnOneOnlineUser alloc] init];
-
-  remoteUser.userUuid = self.roomInfoModel.userUuid;
-  remoteUser.userName = self.roomInfoModel.userName;
-  remoteUser.mobile = self.roomInfoModel.mobile;
-  remoteUser.icon = self.roomInfoModel.icon;
-  remoteUser.oc_callType = self.roomInfoModel.oc_callType;
-  remoteUser.audioUrl = self.roomInfoModel.audioUrl;
-  remoteUser.videoUrl = self.roomInfoModel.videoUrl;
-  callViewController.remoteUser = remoteUser;
-  if (isAudio) {
-    callViewController.enterStatus = audio_call;
-  } else {
-    callViewController.enterStatus = video_call;
-  }
-  callViewController.modalPresentationStyle = UIModalPresentationOverFullScreen;
-  [self presentViewController:callViewController animated:YES completion:nil];
-  //  [self.navigationController pushViewController:callViewController animated:YES];
+  [[NEOneOnOneUIKitCallEngine getInstance] dealWithAction:self
+                                                sessionId:self.roomInfoModel.userUuid
+                                                  isAudio:isAudio
+                                            isVirtualRoom:self.roomInfoModel.oc_callType == 1
+                                                 nickName:self.roomInfoModel.userName
+                                                     icon:self.roomInfoModel.icon
+                                                 audioUrl:self.roomInfoModel.audioUrl
+                                                 videoUrl:self.roomInfoModel.videoUrl];
   // 取消已点击通话数据
   dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1 * NSEC_PER_SEC)),
                  dispatch_get_main_queue(), ^{
                    self.isEnterRoom = NO;
                  });
 }
+
 - (NEOneOnOneReachability *)reachability {
   if (!_reachability) {
     _reachability = [NEOneOnOneReachability reachabilityForInternetConnection];
