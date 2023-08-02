@@ -24,25 +24,24 @@ let APP_KEY_OVERSEA: String = "your oversea appKey" // 海外用户填写AppKey
 
 let APP_SECRET_OVERSEA: String = "your oversea appSecret" // 海外用户填写AppSecret
 
-let kPushCerName: String = "push notification name"
+let kPushCerName: String = "push notification name" //推送证书名称
 
-let kAppAMapKey: String = "A Map key"
+let kAppAMapKey: String = "A Map key" //高德地图Key
 
 // 获取userUuid和对应的userToken，请参考https://doc.yunxin.163.com/neroom/docs/TY1NzM5MjQ?platform=server
 
-// MARK: 单租户模式下需要填写以下内容
-// userUuid
-var userUuid: String = ""
-// userToken
-var userToken: String = ""
+// MARK: 云信IM账号（userUuid），用户Token（userToken）和 云信IM账号token（imToken） 默认为空，如果未填写或者只填写了个别数据， 则自动生成一个账号。如果填写完整则会使用填写的账号。
 
-// imToken
+// 云信IM账号
+var userUuid: String = ""
+// 用户Token
+var userToken: String = ""
+// 云信IM账号token
 var imToken: String = ""
 
 // MARK: 以下内容选填
-//
-// 以下内容选填
 
+// 用户名
 var userName: String = ""
-
+// 头像
 var icon: String = ""
