@@ -33,6 +33,7 @@
 		5EE29FB729B0AA74008EF538 /* Color+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5EE29FB629B0AA74008EF538 /* Color+Extension.swift */; };
 		D0B54E280B3C73536DA20F8E /* Pods_OneOnOneSample.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BD007587D108889C185DF9EA /* Pods_OneOnOneSample.framework */; };
 		ED36069F2A790AFA004BE08C /* OneOnOneSampleTestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED36069E2A790AFA004BE08C /* OneOnOneSampleTestsLaunchTests.swift */; };
+		ED696C312A7A461700D0C241 /* DispatchQueue+extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED696C302A7A461700D0C241 /* DispatchQueue+extension.swift */; };
 		EDCBACA22A6E207600589F75 /* AppKey.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDCBACA12A6E207600589F75 /* AppKey.swift */; };
 		EDCBACA42A6E4D1B00589F75 /* Configs.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDCBACA32A6E4D1B00589F75 /* Configs.swift */; };
 /* End PBXBuildFile section */
@@ -83,6 +84,7 @@
 		BA4CDABF0BEA525AB715B69A /* Pods-OneOnOneSample.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-OneOnOneSample.debug.xcconfig"; path = "../iOS/OneOnOneSample/Pods/Target Support Files/Pods-OneOnOneSample/Pods-OneOnOneSample.debug.xcconfig"; sourceTree = "<group>"; };
 		BD007587D108889C185DF9EA /* Pods_OneOnOneSample.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_OneOnOneSample.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		ED36069E2A790AFA004BE08C /* OneOnOneSampleTestsLaunchTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OneOnOneSampleTestsLaunchTests.swift; sourceTree = "<group>"; };
+		ED696C302A7A461700D0C241 /* DispatchQueue+extension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "DispatchQueue+extension.swift"; sourceTree = "<group>"; };
 		EDBA568029CAFBDC008EA1FB /* OneOnOneSampleDebug.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = OneOnOneSampleDebug.entitlements; sourceTree = "<group>"; };
 		EDC17AE029D67F29002516BE /* OneOnOneSampleRelease.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = OneOnOneSampleRelease.entitlements; sourceTree = "<group>"; };
 		EDCBACA12A6E207600589F75 /* AppKey.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppKey.swift; sourceTree = "<group>"; };
@@ -188,6 +190,7 @@
 		5EE29FA429B06E04008EF538 /* Utils */ = {
 			isa = PBXGroup;
 			children = (
+				ED696C302A7A461700D0C241 /* DispatchQueue+extension.swift */,
 				5EE29FA229B038BF008EF538 /* NPTCheckBox.swift */,
 				5EE29FA529B06E19008EF538 /* String+Extension.swift */,
 				5EE29FB629B0AA74008EF538 /* Color+Extension.swift */,
@@ -437,6 +440,7 @@
 				5EE29FB029B07B47008EF538 /* NPTPersonViewController.swift in Sources */,
 				5E38408229DAF7F600B4A1E6 /* NPTAboutViewController.swift in Sources */,
 				5E29F84629BEED170009E0EA /* NPTNetworkDetailView.swift in Sources */,
+				ED696C312A7A461700D0C241 /* DispatchQueue+extension.swift in Sources */,
 				5E73C2C429AE01AF00868D97 /* AppDelegate.swift in Sources */,
 				5E49C07F2A124AD100200D95 /* NPTAIGCViewController.swift in Sources */,
 				5EE29FB329B09E77008EF538 /* NPTNicknameSettingViewController.swift in Sources */,

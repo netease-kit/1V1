@@ -41,7 +41,7 @@ class NPTNicknameSettingViewController: UIViewController {
       nickname = nickname.replacingOccurrences(of: " ", with: "")
       if !nickname.isEmpty {
         DispatchQueue.main.async {
-          nickName = nickname
+          userName = nickname
           NEOneOnOneUIManager.sharedInstance().nickname = nickname
           self.navigationController?.popViewController(animated: true)
         }
@@ -68,7 +68,7 @@ class NPTNicknameSettingViewController: UIViewController {
     let leftView = UIView(frame: CGRect(x: 0, y: 0, width: 20, height: 40))
     textField.leftView = leftView
     textField.leftViewMode = .always
-    textField.text = nickName
+    textField.text = userName
     return textField
   }()
 
