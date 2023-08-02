@@ -34,7 +34,6 @@ dependencies {
     api("com.netease.yunxin.kit.common:common-network:1.1.8")
     implementation("com.netease.yunxin.kit.common:common-image:1.1.7")
 
-    implementation("com.netease.yunxin.kit.auth:auth-yunxin-login:1.0.4")
     implementation("com.squareup.okhttp3:logging-interceptor:4.7.2")
     implementation("com.squareup.okhttp3:okhttp:4.9.3")
     implementation("com.google.code.gson:gson:2.9.0")
