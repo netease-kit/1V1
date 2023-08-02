@@ -34,7 +34,6 @@ dependencies {
     api("com.netease.yunxin.kit.common:common-network:1.1.8")
     implementation("com.netease.yunxin.kit.common:common-image:1.1.7")
 
-    implementation("com.gyf.immersionbar:immersionbar:3.0.0")
     implementation("com.netease.yunxin.kit.auth:auth-yunxin-login:1.0.4")
     implementation("com.squareup.okhttp3:logging-interceptor:4.7.2")
     implementation("com.squareup.okhttp3:okhttp:4.9.3")
@@ -43,7 +42,6 @@ dependencies {
     implementation("androidx.navigation:navigation-fragment-ktx:2.4.2")
     implementation("androidx.navigation:navigation-ui-ktx:2.4.2")
     implementation("com.netease.yunxin.kit.common:common-ui:1.3.0")
-    api("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
 
     implementation(project(":beauty:beauty-faceunity"))
     implementation("com.netease.yunxin.kit.core:corekit:1.3.6")
