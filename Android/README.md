@@ -58,9 +58,32 @@
      * "http://yiyong.netease.im/"仅用于跑通体验Demo,请勿用于正式产品上线
      */
     public static final String BASE_URL = "http://yiyong.netease.im/";
+    /**
+   * 云信IM账号，说明：账号信息为空，则默认自动生成一个账号
+   */
+    public static String userUuid = "";
+    /**
+   * 用户Token，说明：账号信息为空，则默认自动生成一个账号
+     */
+     public static String userToken = "";
+
+    /**
+   * 云信IM账号 token，说明：账号信息为空，则默认自动生成一个账号
+     */
+     public  static String imToken = "";
+
+    // 以下内容选填
+    /**
+   * 用户名
+     */
+     public static String userName = "";
+     /**
+   * 头像
+     */
+     public static String icon = "";
  
-    ```
-   ![配置AppKey.png](https://yx-web-nosdn.netease.im/common/4fa23d7115b8cde79cc6204d24f7a7e1/配置AppKey.png)
+       ```
+      ![配置AppKey.png](https://yx-web-nosdn.netease.im/common/4fa23d7115b8cde79cc6204d24f7a7e1/配置AppKey.png)
 
 4. 在 Android Studio 中，单击 **Sync Project with Gradle Files** 按钮![SyncProjectwithGradleFiles.png](https://yx-web-nosdn.netease.im/common/c1108a218316297bb16d5d4080fcbf57/SyncProjectwithGradleFiles.png)，同步工程依赖。
 
