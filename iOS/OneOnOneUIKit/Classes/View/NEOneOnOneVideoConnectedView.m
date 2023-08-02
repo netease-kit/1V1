@@ -6,7 +6,6 @@
 #import <Masonry/Masonry.h>
 #import <NEUIKit/NEUIKit.h>
 #import <SDWebImage/SDWebImage.h>
-#import <libextobjc/extobjc.h>
 #import "NEOneOnOneLocalized.h"
 #import "NEOneOnOneVideoButtomView.h"
 #import "NEOneonOneUI.h"
@@ -21,7 +20,7 @@
 @property(nonatomic, strong) UIButton *videoChangeButton;
 /// 关闭视频按钮视图
 @property(nonatomic, strong) UIView *videoCloseView;
-@property(nonatomic, strong) UIButton *videoClose;
+//@property(nonatomic, strong) UIButton *videoClose;
 /// 小图关闭视频黑色视图
 @property(nonatomic, strong) UIView *localVideoBlackView;
 /// 小图关闭视频黑色视图文案
@@ -108,22 +107,23 @@
   }];
   self.smallEffectView.hidden = YES;
   /// 视频关闭按钮
-  [self addSubview:self.videoCloseView];
-  [self.videoCloseView mas_makeConstraints:^(MASConstraintMaker *make) {
-    make.left.bottom.equalTo(self.localVideoView);
-    make.width.equalTo(@32);
-    make.height.equalTo(@24);
-  }];
+  //  [self addSubview:self.videoCloseView];
+  //  [self.videoCloseView mas_makeConstraints:^(MASConstraintMaker *make) {
+  //    make.left.bottom.equalTo(self.localVideoView);
+  //    make.width.equalTo(@32);
+  //    make.height.equalTo(@24);
+  //  }];
+  //
+  //  [self.videoCloseView addSubview:self.videoClose];
+  //  [self.videoClose mas_makeConstraints:^(MASConstraintMaker *make) {
+  //    make.center.equalTo(self.videoCloseView);
+  //    make.width.equalTo(@16);
+  //    make.height.equalTo(@16);
+  //  }];
 
-  [self.videoCloseView addSubview:self.videoClose];
-  [self.videoClose mas_makeConstraints:^(MASConstraintMaker *make) {
-    make.center.equalTo(self.videoCloseView);
-    make.width.equalTo(@16);
-    make.height.equalTo(@16);
-  }];
-
-  @weakify(self) self.videoButtomView.clickItem = ^(ButtonItemType item, BOOL close) {
-    @strongify(self)[self videoBottomItemClick:item close:close];
+  __weak typeof(self) weakSelf = self;
+  self.videoButtomView.clickItem = ^(ButtonItemType item, BOOL close) {
+    [weakSelf videoBottomItemClick:item close:close];
   };
 
   [self addSubview:self.iconImageView];
@@ -187,7 +187,7 @@
         return;
       }
       if (self.itemExpand) {
-        self.videoCloseView.hidden = sender.selected;
+        //        self.videoCloseView.hidden = sender.selected;
         BOOL localBlackViewShow = self.localVideoBlackView.hidden;
         self.localVideoBlackView.hidden = self.remoteVideoBlackView.hidden;
         self.remoteVideoBlackView.hidden = localBlackViewShow;
@@ -258,6 +258,16 @@
       }
 
     } break;
+    case button_close_camera:
+      if (self.itemExpand) {
+        self.itemExpand(item_video_close, close);
+        if (close) {
+          self.localVideoBlackView.hidden = NO;
+        } else {
+          self.localVideoBlackView.hidden = YES;
+        }
+      }
+      break;
     case button_speaker:
       if (self.itemExpand) {
         self.itemExpand(item_speaker, close);
@@ -373,22 +383,22 @@
   return _remoteVideoView;
 }
 
-- (UIButton *)videoClose {
-  if (!_videoClose) {
-    _videoClose = [[UIButton alloc] init];
-    _videoClose.selected = NO;
-    _videoClose.contentMode = UIViewContentModeScaleAspectFit;
-    [_videoClose setBackgroundImage:[NEOneOnOneUI ne_imageName:@"video_on_icon"]
-                           forState:UIControlStateNormal];
-    [_videoClose setBackgroundImage:[NEOneOnOneUI ne_imageName:@"video_off_icon"]
-                           forState:UIControlStateSelected];
-    [_videoClose addTarget:self
-                    action:@selector(itemEvent:)
-          forControlEvents:UIControlEventTouchUpInside];
-    _videoClose.tag = 0;
-  }
-  return _videoClose;
-}
+//- (UIButton *)videoClose {
+//  if (!_videoClose) {
+//    _videoClose = [[UIButton alloc] init];
+//    _videoClose.selected = NO;
+//    _videoClose.contentMode = UIViewContentModeScaleAspectFit;
+//    [_videoClose setBackgroundImage:[NEOneOnOneUI ne_imageName:@"video_on_icon"]
+//                           forState:UIControlStateNormal];
+//    [_videoClose setBackgroundImage:[NEOneOnOneUI ne_imageName:@"video_off_icon"]
+//                           forState:UIControlStateSelected];
+//    [_videoClose addTarget:self
+//                    action:@selector(itemEvent:)
+//          forControlEvents:UIControlEventTouchUpInside];
+//    _videoClose.tag = 0;
+//  }
+//  return _videoClose;
+//}
 - (UIView *)videoCloseView {
   if (!_videoCloseView) {
     _videoCloseView = [[UIView alloc] init];
@@ -414,7 +424,7 @@
     _localVideoCloseLabel = [[UILabel alloc] init];
     _localVideoCloseLabel.textColor = [UIColor ne_colorWithHex:0x666666];
     _localVideoCloseLabel.text = NELocalizedString(@"已关闭摄像头");
-    _localVideoCloseLabel.font = [UIFont systemFontOfSize:12];
+    _localVideoCloseLabel.font = [UIFont systemFontOfSize:11];
     _localVideoCloseLabel.backgroundColor = [UIColor clearColor];
   }
   return _localVideoCloseLabel;

@@ -25,7 +25,7 @@ public class NEOneOnOneKit: NSObject {
   }
 
   /// 拦截器
-  public var interceptor: NEOneOnOneInterceptor?
+//  public var interceptor: NEOneOnOneInterceptor?
 
   /// NEOneOnOneKit 初始化
   /// - Parameters:

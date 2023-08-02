@@ -14,7 +14,7 @@ typedef NSString *_Nullable (^NEOneOnOneUITransducer)(void);
 @interface NEOneOnOneUIKitEngine : NSObject
 
 // 拦截器 ，是否拦截邀请消息
-@property(nonatomic, copy) NEOneOnOneUIInterceptor interceptor;
+//@property(nonatomic, copy) NEOneOnOneUIInterceptor interceptor;
 
 // 获取本地状态是否可以拨打，传入值为提示Toast
 @property(nonatomic, copy) NEOneOnOneUITransducer canCall;
@@ -33,9 +33,6 @@ typedef NSString *_Nullable (^NEOneOnOneUITransducer)(void);
 /// 状态机处理
 - (void)setRTCIdle;
 - (void)setRTCCaling;
-
-/// 获取当前视图控制器
-- (UIViewController *)findVisibleViewController;
 
 @end
 

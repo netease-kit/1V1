@@ -14,7 +14,7 @@
 "取消" = "Cancel";
 "拒绝" = "Reject";
 "接听" = "Accept";
-"聊天中" = "Busy";
+"聊天中" = "Busy...";
 "邀请您语音聊天" = "Incoming audio call";
 "邀请您视频聊天" = "Incoming video call";
 "对方邀请您语音聊天\n和对方进行开心之旅" = "You are invited for audio call\nJoin the chat";

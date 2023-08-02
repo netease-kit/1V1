@@ -81,6 +81,7 @@ class NPTHomeViewController: UIViewController {
     // Do any additional setup after loading the view.
 
     navigationItem.leftBarButtonItem = leftBarButtonItem
+    navigationItem.rightBarButtonItem = rightBarButtonItem
 
     if #available(iOS 13.0, *) {
       let appearance = UINavigationBarAppearance()
@@ -105,6 +106,23 @@ class NPTHomeViewController: UIViewController {
     return item
   }()
 
+  lazy var rightBarButtonItem: UIBarButtonItem = {
+    let item = UIBarButtonItem()
+    let btn = UIButton()
+    btn.setTitle("Feedback".localized, for: .normal)
+    btn.setTitleColor(UIColor.partyBlack, for: .normal)
+    btn.titleLabel?.font = UIFont(name: "PingFangSC-Medium", size: 17)
+    btn.addTarget(self, action: #selector(feedback), for: .touchUpInside)
+    item.customView = btn
+    return item
+  }()
+
+  @objc func feedback() {
+    let viewController = NPTFeedbackViewController()
+    viewController.hidesBottomBarWhenPushed = true
+    navigationController?.pushViewController(viewController, animated: true)
+  }
+
   lazy var tableView: UITableView = {
     let view = UITableView(frame: view.bounds, style: .grouped)
     view.delegate = self
@@ -119,11 +137,17 @@ class NPTHomeViewController: UIViewController {
 extension NPTHomeViewController: UITableViewDelegate {
   func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
     tableView.deselectRow(at: indexPath, animated: false)
+    if let delegate = UIApplication.shared.delegate as? AppDelegate {
+      if !delegate.checkNetwork() {
+        return
+      }
+    }
+
     if indexPath.section == 0 {
       let vc = NEOneOnOneRoomListViewController()
       vc.privateLatter = { sessionId in
         if let privateLatter = self.privateLatter {
-          self.navigationController?.popToRootViewController(animated: false)
+//          self.navigationController?.popToRootViewController(animated: false)
           privateLatter(sessionId)
         }
       }

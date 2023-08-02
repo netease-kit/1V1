@@ -1,87 +1,77 @@
 # Uncomment the next line to define a global platform for your project
- platform :ios, '11.0'
+# platform :ios, '9.0'
 
-source 'https://github.com/CocoaPods/Specs.git'
+target 'OneOnOneSample' do
+  # Comment the next line if you don't want to use dynamic frameworks
+  use_frameworks!
 
-def imVersion
-  '9.10.0'
-end
+#  use_frameworks!
+#  plugin 'cocoapods-pod-sign'
+#  skip_pod_bundle_sign
+  
+  def imVersion
+    '9.12.0'
+  end
 
-def rtcVersion
-  '4.6.50'
-end
+  def rtcVersion
+    '5.4.0'
+  end
 
-#公共库(被多余一个组件引用，可定义多个)
-def imSDKPod
-  pod 'NIMSDK_LITE',imVersion
-end
+  #公共库(被多余一个组件引用，可定义多个)
+  def imSDKPod
+    pod 'NIMSDK_LITE',imVersion
+  end
 
-def rtcBasicPod
-  pod 'NERtcSDK/RtcBasic',rtcVersion
-end
+  def rtcBasicPod
+    pod 'NERtcSDK/RtcBasic',rtcVersion
+  end
+
 
 def thirdPartyLibraryPod
   pod 'SDWebImage', '5.7.1'
   pod 'AFNetworking', '4.0'
-  pod 'ReactiveObjC'
   pod 'Masonry'
   pod 'Toast'
-  pod 'GCDWebServer', '3.5.4'
-  pod 'YYWebImage', '1.0.4'
-  pod 'YYImage/WebP','1.0.4'
-  pod 'SVProgressHUD'
 end
-
-target 'OneOnOneSample' do
-  
-  use_frameworks!
-  # Comment the next line if you don't want to use dynamic frameworks
-  
-
-plugin 'cocoapods-pod-sign'
-skip_pod_bundle_sign
 
   imSDKPod
   rtcBasicPod
   thirdPartyLibraryPod
   
+#源码依赖
+pod 'NEUIKit', :path => '../NEUIKit/NEUIKit.podspec'
+pod 'LottieSwift', :path => '../lottie/LottieSwift.podspec'
+pod 'NESocialUIKit', :path => '../NESocialUIKit/NESocialUIKit.podspec'
 
-  
-  # OneOnOne
-  pod 'NEUIKit', :path => '../UIKit/NEUIKit/NEUIKit.podspec'
-  pod 'NEOneOnOneUIKit', :path => '../OneOnOneUIKit/NEOneOnOneUIKit.podspec'
-  pod 'NEOneOnOneKit', :path => '../OneOnOneKit/NEOneOnOneKit.podspec'
-  pod 'NEOneOnOneChatUIKit', :path => '../OneOnOneChatUIKit/NEOneOnOneChatUIKit.podspec'
-  pod 'LottieSwift', :path => '../lottie/LottieSwift.podspec'
-  pod 'NESocialUIKit', :path => '../NESocialUIKit/NESocialUIKit.podspec'
 
-  pod 'NECommonUIKit','9.5.5-alpha01'
-  pod 'NECommonKit','9.5.5-alpha01'
-  pod 'NEConversationUIKit','9.5.5-alpha01'
-  pod 'NEChatUIKit','9.5.5-alpha01'
-  pod 'NEMapKit','9.5.5-alpha01'
-  pod 'NECommonExt'
-  pod 'NECoreIMKit','9.5.1'
-  pod 'NECoreKit','9.5.1'
-  
-  
-  
-#  pod 'UITextView+Placeholder'
-#  pod 'SDWebImageWebPCoder'
-#  pod 'SDWebImageSVGKitPlugin'
-  
+# 1v1
+pod 'NEOneOnOneKit', :path => '../OneOnOneKit/NEOneOnOneKit.podspec'
+pod 'NEOneOnOneUIKit', :path => '../OneOnOneUIKit/NEOneOnOneUIKit.podspec'
+pod 'NEOneOnOneChatUIKit', :path => '../OneOnOneChatUIKit/NEOneOnOneChatUIKit.podspec'
 
-  target 'OneOnOneSampleTests' do
-    inherit! :search_paths
-    # Pods for testing
-  end
+#设置
+pod 'FaceUnity', :path => '../FaceUnity/FaceUnity.podspec'
 
-  target 'OneOnOneSampleUITests' do
-    # Pods for testing
-  end
+#登录
+pod 'NELoginSample',:path => '../NELoginSample/NELoginSample.podspec'
+
+#远端依赖
+pod 'NERoomKit/Special_All', '1.18.0'
+pod 'IHProgressHUD'
+pod 'NERtcCallUIKit', '2.0.1'
+pod 'NERtcCallKit', '2.0.1'
+
+pod 'NECommonUIKit','9.6.1'
+pod 'NECommonKit','9.6.0'
+pod 'NEConversationUIKit','9.6.1'
+pod 'NEChatUIKit','9.6.1'
+pod 'NECoreIMKit','9.6.1'
+pod 'NECoreKit','9.6.0'
+
+#地图插件
+pod 'NEMapKit', '9.6.0'
 
 end
-
 
 # ---------------------------- 公用钩子处理 ----------------------------
 post_install do |installer|
