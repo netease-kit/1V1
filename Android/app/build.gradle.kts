@@ -83,7 +83,6 @@ dependencies {
     implementation("com.netease.yunxin.kit.call:call-ui:2.0.1"){
         exclude("com.netease.yunxin","nertc-base")
     }
-    implementation("com.netease.yunxin.kit.auth:auth-yunxin-login:1.0.4")
     implementation("com.squareup.okhttp3:logging-interceptor:4.7.2")
     implementation("com.squareup.okhttp3:okhttp:4.9.3")
     implementation("com.google.code.gson:gson:2.9.0")

@@ -19,7 +19,11 @@ import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
+
+import com.netease.nimlib.sdk.NIMClient;
 import com.netease.nimlib.sdk.RequestCallbackWrapper;
+import com.netease.nimlib.sdk.StatusCode;
+import com.netease.nimlib.sdk.auth.AuthServiceObserver;
 import com.netease.nimlib.sdk.avsignalling.constant.ChannelType;
 import com.netease.nimlib.sdk.avsignalling.model.ChannelFullInfo;
 import com.netease.yunxin.app.oneonone.ui.R;
@@ -36,10 +40,7 @@ import com.netease.yunxin.kit.alog.ALog;
 import com.netease.yunxin.kit.common.ui.utils.Permission;
 import com.netease.yunxin.kit.common.ui.utils.ToastX;
 import com.netease.yunxin.kit.entertainment.common.utils.BluetoothHeadsetUtil;
-import com.netease.yunxin.kit.login.AuthorManager;
-import com.netease.yunxin.kit.login.model.EventType;
-import com.netease.yunxin.kit.login.model.LoginEvent;
-import com.netease.yunxin.kit.login.model.LoginObserver;
+
 import com.netease.yunxin.nertc.nertcvideocall.model.JoinChannelCallBack;
 import com.netease.yunxin.nertc.nertcvideocall.model.NERTCCallingDelegate;
 import com.netease.yunxin.nertc.nertcvideocall.model.NERTCVideoCall;
@@ -89,16 +90,12 @@ public class CallActivity extends CommonCallActivity {
             @Override
             public void disconnect() {}
           };
-  private LoginObserver<LoginEvent> loginObserver =
-      new LoginObserver<LoginEvent>() {
 
-        @Override
-        public void onEvent(LoginEvent event) {
-          if (event.getEventType() == EventType.TYPE_LOGOUT) {
-            finish();
-          }
-        }
-      };
+  private final com.netease.nimlib.sdk.Observer<StatusCode> imOnlineStatusObserver= statusCode -> {
+      if (statusCode==StatusCode.KICKOUT){
+        finish();
+      }
+  };
 
   @RequiresApi(api = Build.VERSION_CODES.HONEYCOMB)
   @Override
@@ -120,7 +117,8 @@ public class CallActivity extends CommonCallActivity {
       handlePermission(
           savedInstanceState, Manifest.permission.RECORD_AUDIO, Manifest.permission.CAMERA);
     }
-    AuthorManager.INSTANCE.registerLoginObserver(loginObserver);
+    NIMClient.getService(AuthServiceObserver.class)
+            .observeOnlineStatus(imOnlineStatusObserver, true);
     if (savedInstanceState == null && !getSupportFragmentManager().isDestroyed()) {
       if (virtualCallViewModel != null) {
         handleVirtualRoomEvent();
@@ -342,7 +340,8 @@ public class CallActivity extends CommonCallActivity {
 
   @Override
   protected void onDestroy() {
-    AuthorManager.INSTANCE.unregisterLoginObserver(loginObserver);
+    NIMClient.getService(AuthServiceObserver.class)
+            .observeOnlineStatus(imOnlineStatusObserver, false);
     BluetoothHeadsetUtil.unregisterBluetoothHeadsetStatusObserver(
         bluetoothHeadsetStatusChangeListener);
     if (viewModel != null) {
