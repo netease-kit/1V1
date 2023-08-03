@@ -58,6 +58,8 @@
      * "http://yiyong.netease.im/"仅用于跑通体验Demo,请勿用于正式产品上线
      */
     public static final String BASE_URL = "http://yiyong.netease.im/";
+   
+    //  说明： 云信IM账号（userUuid）和 用户Token（userToken） 默认为空，如果未填写或者只填写了个别数据， 则自动生成一个账号。如果填写完整则会使用填写的账号。
     /**
    * 云信IM账号，说明：账号信息为空，则默认自动生成一个账号
    */
