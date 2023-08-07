@@ -21,7 +21,7 @@
 
 - [已创建应用并获取 App Key](https://doc.yunxin.163.com/docs/jcyOTA0ODM/jE3OTc5NTY?platformId=50002)
 - [已开通相关能力](https://doc.yunxin.163.com/docs/DgyMDc0NTA/DA3NzUzNzY)
-
+- [已配置RTC 和 IM 的消息抄送地址（抄送地址请填写`http://yiyong.netease.im/nemo/socialChat/nim/notify`）](https://doc.yunxin.163.com/nertc/docs/DExNjg2MDc?platform=server)
 
 ## 注意事项
 
@@ -32,11 +32,11 @@
 
 ## <span id="快速跑通 Sample Code">运行示例项目</span>
 
-::: note note
-- 1 对 1 娱乐社交的示例源码仅供开发者接入参考，实际应用开发场景中，请结合具体业务需求修改使用。
-
-- 若您计划将源码用于生产环境，请确保应用正式上线前已经过全面测试，以免因兼容性等问题造成损失。
-  :::
+> 注意：
+>- 1 对 1 娱乐社交的示例源码仅供开发者接入参考，实际应用开发场景中，请结合具体业务需求修改使用。
+>- 若您计划将源码用于生产环境，请确保应用正式上线前已经过全面测试，以免因兼容性等问题造成损失。
+>- 以下源码跑通无须部署服务端即可体验，请按照以下步骤设置客户端源码配置。
+ 
 
 
 
@@ -46,45 +46,22 @@
 
    在菜单栏中选择 **File** > **Open**，选择示例项目源码仓库（`1V1/Android`）所在目录。
 
-3. 在 `/app/java/com.netease.yunxin.app.oneonone/config/AppConfig.java` 文件中配置应用的 App Key，并填写云信 IM 账号相关信息。
+3. 在 `/app/java/com.netease.yunxin.app.oneonone/config/AppConfig.java` 文件中配置应用的 AppKey 和 AppSecret。
 
-    ```
+    ```  
     // 请填写您的AppKey和AppSecret
     private static final String APP_KEY = "your AppKey"; // 填入您的AppKey,可在云信控制台AppKey管理处获取
     public static final String APP_SECRET = "your AppSecret"; // 填入您的AppSecret,可在云信控制台AppKey管理处获取
-    public static final boolean IS_OVERSEA = false; // 海外用户填ture,国内用户填false
-    /**
-     * BASE_URL为服务端地址,请在跑通Server Demo(https://github.com/netease-kit/nemo)后，替换为您自己实际的服务端地址
-     * "http://yiyong.netease.im/"仅用于跑通体验Demo,请勿用于正式产品上线
-     */
-    public static final String BASE_URL = "http://yiyong.netease.im/";
-   
-    //  说明： 云信IM账号（userUuid）和 用户Token（userToken） 默认为空，如果未填写或者只填写了个别数据， 则自动生成一个账号。如果填写完整则会使用填写的账号。
-    /**
-   * 云信IM账号，说明：账号信息为空，则默认自动生成一个账号
-   */
-    public static String userUuid = "";
-    /**
-   * 用户Token，说明：账号信息为空，则默认自动生成一个账号
-     */
-     public static String userToken = "";
+    public static final boolean IS_OVERSEA = false; // 如果您的AppKey为海外，请设置为true；默认为中国国内环境
+  
+    public static final String BASE_URL = "http://yiyong.netease.im/";    //如果您的AppKey为海外，BASE_URL 地址请填写`http://yiyong-sg.netease.im`
+    ```
 
-    /**
-   * 云信IM账号 token，说明：账号信息为空，则默认自动生成一个账号
-     */
-     public  static String imToken = "";
-
-    // 以下内容选填
-    /**
-   * 用户名
-     */
-     public static String userName = "";
-     /**
-   * 头像
-     */
-     public static String icon = "";
- 
-       ```
+    > 注意：
+    > - 获取 AppKey 和 AppSecret 的方法请参见<a href="https://doc.yunxin.163.com/console/docs/TIzMDE4NTA?platform=console#获取-appkey" target="_blank">创建应用并获取 AppKey</a>。
+    > - BASE_URL 地址 `http://yiyong.netease.im`为云信派对服务端体验地址，该地址仅用于体验 Demo，请勿用于生产环境。您可以使用云信派对 Demo 体验 1 小时音视频通话。
+    > - 如果您想和自己的服务端联调时，客户端源码的配置请参见[常见问题](#常见问题)。
+    
       ![配置AppKey.png](https://yx-web-nosdn.netease.im/common/4fa23d7115b8cde79cc6204d24f7a7e1/配置AppKey.png)
 
 4. 在 Android Studio 中，单击 **Sync Project with Gradle Files** 按钮![SyncProjectwithGradleFiles.png](https://yx-web-nosdn.netease.im/common/c1108a218316297bb16d5d4080fcbf57/SyncProjectwithGradleFiles.png)，同步工程依赖。
@@ -109,9 +86,11 @@
 
      
 
-    ::: note note
-    建议在真机上运行，不支持模拟器调试。
-    :::
+    > 注意：
+    > - 建议在真机上运行，不支持模拟器调试。
+    > - 请使用两个手机运行工程，Demo 上才能显示用户列表，体验 1 对 1 聊天等功能。
+    > - 示例项目源码不包含虚拟主播，云信派对 Demo 中的虚拟主播是为了方便您快速体验相关功能而设计，不作为实际项目交付。
+    
 
 ## 示例项目结构
 目录 | 描述
@@ -177,11 +156,69 @@ oneonone核心目录结构
 ## 常见问题
 
 
-::: details 手机连接电脑后，Android Studio 中没有出现对应的手机
-如果 Android 设备连接电脑后，Android Studio 的 **Running Devices** 中没有出现对应的手机，可能原因如下：
-- 您的数据线不支持连接存储。
-- 电脑没有安装对应的驱动。请参考下图，安装和您的 Android 设备匹配的驱动。
+**1. 手机连接电脑后，Android Studio 中没有出现对应的手机**
 
-  ![Google_USB_driver.png](https://yx-web-nosdn.netease.im/common/a312dea2cd1368c4df3df75c14fc0ba0/Google_USB_driver.png)
-- Android 设备没有开启**开发者模式**和**USB 调试**，或者连接手机时，在弹出的授予调试权限对话框中，没有授予权限。
-  :::
+  如果 Android 设备连接电脑后，Android Studio 的 **Running Devices** 中没有出现对应的手机，可能原因如下：
+  - 您的数据线不支持连接存储。
+  - 电脑没有安装对应的驱动。请参考下图，安装和您的 Android 设备匹配的驱动。
+  
+    ![Google_USB_driver.png](https://yx-web-nosdn.netease.im/common/a312dea2cd1368c4df3df75c14fc0ba0/Google_USB_driver.png)
+  - Android 设备没有开启**开发者模式**和**USB 调试**，或者连接手机时，在弹出的授予调试权限对话框中，没有授予权限。
+    
+
+  
+ **2. 和服务端联调时，客户端源码需要修改哪些配置？**
+
+  在开发调试阶段，开发者集成 1 对 1 娱乐社交服务端 nemo 后，在[1 对 1 娱乐社交客户端源码](https://github.com/netease-kit/1V1)上需要修改如下配置，才能和服务器调通， 使用服务端下发的账号和 Token 进行登录。
+  
+  在 `/app/java/com.netease.yunxin.app.oneonone/config/AppConfig.java` 文件中，配置如下参数：
+  
+  
+  参数 | 描述
+  ---- | -------------- |
+  APP_KEY | 请填写您应用对应的 AppKey。获取 AppKey 和 AppSecret 的方法请参见<a href="https://doc.yunxin.163.com/console/docs/TIzMDE4NTA?platform=console#获取-appkey" target="_blank">获取 App Key</a>| 
+  APP_SECRET | 请填写您应用对应的 AppSecret。 |
+  BASE_URL | 请填写1 对 1 娱乐社交服务端域名地址，并确保客户端能访问该地址 | 
+  userUuid  |账号 ID。 请填写1 对 1 娱乐社交服务端工程返回的`userUuid` 的值 |
+  imToken  | 请填写1 对 1 娱乐社交服务端工程返回的 `imToken`的值|
+  userToken  | 请填写1 对 1 娱乐社交服务端工程返回的`userToken`的值|
+  userName  |用户昵称。请填写1 对 1 娱乐社交服务端工程返回的`userName`的值 |
+  icon   |用户头像。请填写1 对 1 娱乐社交服务端工程返回的`icon`的值
+  
+  ```
+  
+  // 请填写您的AppKey和AppSecret
+  private static final String APP_KEY = "your AppKey"; // 填入您的AppKey,可在云信控制台AppKey管理处获取
+  public static final String APP_SECRET = "your AppSecret"; // 填入您的AppSecret,可在云信控制台AppKey管理处获取
+  public static final boolean IS_OVERSEA = false; // 海外用户填ture,国内用户填false
+  /**
+      * BASE_URL为服务端地址,请在跑通Server Demo(https://github.com/netease-kit/nemo)后，替换为您自己实际的服务端地址
+  * "http://yiyong.netease.im/"仅用于跑通体验Demo,请勿用于正式产品上线
+  */
+  public static final String BASE_URL = "http://yiyong.netease.im/";
+  
+  /**
+      * 云信IM账号，说明：账号信息为空，则默认自动生成一个账号
+      */
+  public static String userUuid = "";
+  /**
+      * 用户Token，说明：账号信息为空，则默认自动生成一个账号
+  */
+  public static String userToken = "";
+  
+  /**
+      * 云信IM账号 token，说明：账号信息为空，则默认自动生成一个账号
+  */
+  public  static String imToken = "";
+  
+  // 以下内容选填
+  /**
+      * 用户名
+  */
+  public static String userName = "";
+  /**
+      * 头像
+  */
+  public static String icon = "";
+  
+  ```
