@@ -28,7 +28,8 @@ table th:nth-of-type(2) {
 
 - [已创建应用并获取 App Key](https://doc.yunxin.163.com/docs/jcyOTA0ODM/jE3OTc5NTY?platformId=50002)
 - [已开通相关能力](https://doc.yunxin.163.com/1v1-social/docs/zk3NTk1NzU?platform=iOS)
-- [已跑通服务端源码](https://doc.yunxin.163.com/1v1-social/docs/jE2NjQ1MzY?platform=server)
+- [已配置RTC 和 IM 的消息抄送地址（http://yiyong.netease.im/nemo/socialChat/nim/notify）](https://doc.yunxin.163.com/nertc/docs/DExNjg2MDc?platform=server)
+
 ## 注意事项
 
 示例项目需要在 **RTC 调试模式**下使用，此时无需传入 Token。修改鉴权方式的方法请参见 <a href="https://doc.yunxin.163.com/nertc/docs/TQ0MTI2ODQ?platform=android" target="_blank">Token 鉴权</a> 。
@@ -38,11 +39,11 @@ table th:nth-of-type(2) {
 
 ## <span id="快速跑通 Sample Code">运行示例项目</span>
 
-::: note note
-- 1 对 1 娱乐社交的示例源码仅供开发者接入参考，实际应用开发场景中，请结合具体业务需求修改使用。
+> 注意：
+> - 1 对 1 娱乐社交的示例源码仅供开发者接入参考，实际应用开发场景中，请结合具体业务需求修改使用。
+> - 若您计划将源码用于生产环境，请确保应用正式上线前已经过全面测试，以免因兼容性等问题造成损失。
+> - 以下源码跑通无须部署服务端即可体验，请按照以下步骤设置客户端源码配置。
 
-- 若您计划将源码用于生产环境，请确保应用正式上线前已经过全面测试，以免因兼容性等问题造成损失。
-:::
 
 1. 克隆<a href="https://github.com/netease-kit/1V1" target="_blank">示例项目源码</a>仓库至您本地工程。
 
@@ -56,24 +57,28 @@ table th:nth-of-type(2) {
 4. 在 `OneOnOneSample/OneOnOneSample/AppKey.swift ` 中，替换您自己的 App Key 和 App Secret 。获取 App Key 和 App Secret 的方法请参见获取 App Key <a href="https://doc.yunxin.163.com/docs/jcyOTA0ODM/jcwMDQ2MTg?platformId=50192#获取 App Key" target="_blank">获取 App Key</a>。并填写云信 IM 账号相关信息。
 
     ```
-    请填写您的appKey,国内环境请填写APP_KEY_MAINLAND，海外环境请填写APP_KEY_OVERSEA
+    请填写您的 AppKey，中国国内环境请填写APP_KEY_MAINLAND，中国境外环境请填写APP_KEY_OVERSEA
 
-    let APP_KEY_MAINLAND: String = "your mainland appKey" // 国内用户填写AppKey
-
-    let APP_SECRET_MAINLAND: String = "your mainland appSecret" // 国内用户填写AppSecret
-
-    let APP_KEY_OVERSEA: String = "your oversea appKey" // 海外用户填写AppKey
-
-    let APP_SECRET_OVERSEA: String = "your oversea appSecret" // 海外用户填写AppSecret
+    let APP_KEY_MAINLAND: String = "your mainland appKey" // 请填写您的应用对应的AppKey，如果您的应用是中国国内环境，请填写该字段
     
-    ```
+    let APP_SECRET_MAINLAND: String = "your mainland appSecret" // 请填写您的应用对应的AppSecret，如果您的应用是中国国内环境，请填写该字段
 
+    let APP_KEY_OVERSEA: String = "your oversea appKey" // 请填写您的应用对应的AppKey，如果您的应用是中国境外环境，请填写该字段
+
+    let APP_SECRET_OVERSEA: String = "your oversea appSecret" // 请填写您的应用对应的AppSecret，如果您的应用是中国境外环境，请填写该字段
+
+    ```
+    > 注意：
+    > - 获取 AppKey 和 AppSecret 的方法请参见<a href="https://doc.yunxin.163.com/docs/jcyOTA0ODM/jcwMDQ2MTg?platformId=50192#获取 App Key" target="_blank">获取 App Key</a>。
+    > - 配置文件中的 kApiHost 地址 `http://yiyong.netease.im`为云信派对服务端体验地址，该地址仅用于体验 Demo，请勿用于生产环境。 您可以使用云信派对 Demo 体验 1 小时音视频通话。
+    > - 如果您想和自己的服务端联调时，客户端源码的配置请参见[常见问题处理](#常见问题处理)。
   
 5. 运行工程。
 
-::: note note
-    请使用两个手机运行工程，Demo 上才能显示用户列表，体验 1 对 1 聊天等功能。
-:::
+    > 注意：
+    > - 请使用两个手机运行工程，Demo 上才能显示用户列表，体验 1 对 1 聊天等功能。
+    > - 示例项目源码不包含虚拟主播，云信派对 Demo 中的虚拟主播是为了方便您快速体验相关功能而设计，不作为实际项目交付。
+
 
 ## 示例项目结构
 ```
@@ -160,5 +165,67 @@ OneOnOne                # 1V1 文件夹
 ```
 
 
+## 常见问题处理
+
+**和服务端联调时，客户端源码需要修改哪些配置？**
+
+在开发调试阶段，开发者集成 1 对 1 娱乐社交服务端 nemo 后，在[1 对 1 娱乐社交客户端源码](https://github.com/netease-kit/1V1)上需要修改如下配置，才能和服务器调通， 使用服务端下发的账号和 Token 进行登录。
+
+在 `OneOnOneSample/OneOnOneSample/AppKey.swift` 文件中，配置如下参数：
+
+
+参数 | 描述
+---- | -------------- |
+APP_KEY_MAINLAND| 请填写您应用对应的 AppKey。获取 AppKey 和 AppSecret 的方法请参见<a href="https://doc.yunxin.163.com/console/docs/TIzMDE4NTA?platform=console#获取-appkey" target="_blank">获取 App Key</a>| 
+APP_SECRET_MAINLAND | 请填写您应用对应的 AppSecret。 |
+kApiHost | 请填写1 对 1 娱乐社交服务端域名地址，并确保客户端能访问该地址 | 
+userUuid |账号 ID。 请填写1 对 1 娱乐社交服务端工程返回的`userUuid` 的值 |
+imToken | 请填写1 对 1 娱乐社交服务端工程返回的 `imToken`的值|
+userToken | 请填写1 对 1 娱乐社交服务端工程返回的`userToken`的值|
+userName |用户昵称。请填写1 对 1 娱乐社交服务端工程返回的`userName`的值 |
+icon  |用户头像。请填写1 对 1 娱乐社交服务端工程返回的`icon`的值
+
+```
+// 国内服务器地址
+let kApiHost: String = "https://yiyong.netease.im"
+
+// 国外服务器地址
+let kOverSeaApiHost: String = "https://yiyong-sg.netease.im"
+
+// 数据收集
+let kApiDataHost: String = "https://statistic.live.126.net"
+
+// MARK: 海外环境与国内环境的切换可以在我的页面中进行修改
+
+// 请填写您的appKey,国内环境请填写APP_KEY_MAINLAND，海外环境请填写APP_KEY_OVERSEA
+let APP_KEY_MAINLAND: String = "your mainland appKey" // 国内用户填写AppKey
+
+let APP_SECRET_MAINLAND: String = "your mainland appSecret" // 国内用户填写AppSecret
+
+let APP_KEY_OVERSEA: String = "your oversea appKey" // 海外用户填写AppKey
+
+let APP_SECRET_OVERSEA: String = "your oversea appSecret" // 海外用户填写AppSecret
+
+
+
+// 获取userUuid和对应的userToken，请参考https://doc.yunxin.163.com/neroom/docs/TY1NzM5MjQ?platform=server
+
+// MARK: 云信IM账号（userUuid），用户Token（userToken）和 云信IM账号token（imToken） 默认为空，如果未填写或者只填写了个别数据， 则自动生成一个账号。如果填写完整则会使用填写的账号。
+
+// 云信IM账号
+var userUuid: String = ""
+// 用户Token
+var userToken: String = ""
+// 云信IM账号token
+var imToken: String = ""
+
+// MARK: 以下内容选填
+
+// 用户名
+var userName: String = ""
+// 头像
+var icon: String = ""
+
+```
 
 
