@@ -12,12 +12,13 @@ public class AppConfig {
   // 请填写您的AppKey和AppSecret
   private static final String APP_KEY = "your AppKey"; // 填入您的AppKey,可在云信控制台AppKey管理处获取
   public static final String APP_SECRET = "your AppSecret"; // 填入您的AppSecret,可在云信控制台AppKey管理处获取
-  public static final boolean IS_OVERSEA = false; // 海外用户填ture,国内用户填false
+  public static final boolean IS_OVERSEA = false; // 如果您的AppKey为海外，填ture；如果您的AppKey为国内，填false
   /**
    * BASE_URL为服务端地址,请在跑通Server Demo(https://github.com/netease-kit/nemo)后，替换为您自己实际的服务端地址
-   * "http://yiyong.netease.im/"仅用于跑通体验Demo,请勿用于正式产品上线
+   * "http://yiyong.netease.im/"(国内)或者"http://yiyong-sg.netease.im"(海外)仅用于跑通体验Demo,请勿用于正式产品上线
    */
-  public static final String BASE_URL = "http://yiyong.netease.im/";
+  public static final String BASE_URL = "http://yiyong.netease.im/";//如果您的AppKey为海外，填http://yiyong.netease.im/；如果您的AppKey为国内，填http://yiyong-sg.netease.im/
+
   // 说明： 云信IM账号（userUuid）和 用户Token（userToken） 默认为空，如果未填写或者只填写了个别数据， 则自动生成一个账号。如果填写完整则会使用填写的账号。
   /**
    * 云信IM账号，说明：账号信息为空，则默认自动生成一个账号
