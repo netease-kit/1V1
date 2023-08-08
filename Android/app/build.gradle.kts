@@ -99,7 +99,7 @@ dependencies {
     implementation(project(":entertainment:entertainment-common"))
     implementation(project(":beauty:beauty-faceunity"))
     //会话列表组件
-    api("com.netease.yunxin.kit.conversation:conversationkit-ui:9.6.3-alpha01")
+    api(project(":imkit:conversationkit-ui"))
     implementation("com.github.bumptech.glide:glide:4.13.1")
     annotationProcessor("com.github.bumptech.glide:compiler:4.13.1")
 

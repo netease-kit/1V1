@@ -46,11 +46,11 @@ dependencies {
     implementation("com.netease.yunxin.kit.core:corekit:1.3.6")
     api(project(":entertainment:entertainment-common"))
     // 会话列表功能组件
-    api("com.netease.yunxin.kit.conversation:conversationkit-ui:9.6.3-alpha01")
+    api(project(":imkit:conversationkit-ui"))
     // 聊天功能组件
-    api("com.netease.yunxin.kit.chat:chatkit-ui:9.6.3-alpha01")
+    api(project(":imkit:chatkit-ui"))
     //位置消息模块
-    api("com.netease.yunxin.kit.locationkit:locationkit:9.6.3-alpha01")
+    api(project(":imkit:locationkit"))
     implementation("com.airbnb.android:lottie:5.0.3")
 
     implementation("com.netease.nimlib:neliveplayer:3.2.2")
