@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Copyright (c) 2022 NetEase, Inc. All rights reserved.
+  ~ Use of this source code is governed by a MIT license that can be
+  ~ found in the LICENSE file.
+  -->
+
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.netease.yunxin.kit.chatkit.ui">
+
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <!--获取运营商信息，用于支持提供运营商信息相关的接口-->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <!--用于访问wifi网络信息，wifi信息会用于进行网络定位-->
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
+    <!--这个权限用于获取wifi的获取权限，wifi信息会用来进行网络定位-->
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE"/>
+    <!-- 请求网络 --> <uses-permission android:name="android.permission.INTERNET"/>
+    <!--用于进行网络定位-->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <!-- 可以提高室内定位的精确度 -->
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
+    <!-- 可以提高室内定位的精确度 -->
+    <uses-permission android:name="android.permission.BLUETOOTH"/>
+    <!--用于访问GPS定位-->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <!--用于提高GPS定位速度-->
+    <uses-permission android:name="android.permission.ACCESS_LOCATION_EXTRA_COMMANDS"/>
+    <!--写入扩展存储，向扩展卡写入数据，用于写入缓存定位数据-->
+<!--    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"-->
+<!--        tools:ignore="ScopedStorage" />-->
+    <!--读取缓存数据-->
+<!--    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />-->
+    <!--用于读取手机当前的状态-->
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <application>
+        <provider
+            android:name="com.netease.yunxin.kit.corekit.startup.InitializationProvider"
+            android:authorities="${applicationId}.xkit-startup"
+            android:exported="false"
+            tools:node="merge">
+            <meta-data
+                android:name="com.netease.yunxin.kit.chatkit.ui.ChatUIService"
+                android:value="xkit.startup" />
+        </provider>
+
+        <activity
+            android:name="com.netease.yunxin.kit.chatkit.ui.normal.page.ChatP2PActivity"
+            android:screenOrientation="portrait"
+            android:launchMode="singleTask"
+            />
+
+        <activity
+            android:name="com.netease.yunxin.kit.chatkit.ui.normal.page.ChatTeamActivity"
+            android:screenOrientation="portrait"
+            android:launchMode="singleTask"
+            />
+
+        <activity
+            android:name="com.netease.yunxin.kit.chatkit.ui.normal.page.ChatSettingActivity"
+            android:screenOrientation="portrait"
+            android:launchMode="singleTop"
+            />
+
+        <activity
+            android:name="com.netease.yunxin.kit.chatkit.ui.normal.page.ChatReaderActivity"
+            android:screenOrientation="portrait"
+            android:launchMode="singleTop"
+            />
+
+        <activity
+            android:name="com.netease.yunxin.kit.chatkit.ui.normal.page.ChatSearchActivity"
+            android:screenOrientation="portrait"
+            android:launchMode="singleTop"
+            />
+
+        <activity
+            android:name="com.netease.yunxin.kit.chatkit.ui.page.WatchImageActivity"
+            android:screenOrientation="portrait"
+             />
+
+        <activity
+            android:name="com.netease.yunxin.kit.chatkit.ui.page.WatchVideoActivity"
+            android:screenOrientation="portrait"
+             />
+
+        <activity
+            android:name="com.netease.yunxin.kit.chatkit.ui.page.LocationPageActivity"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustResize"
+            android:finishOnTaskLaunch="true"/>
+        <activity
+            android:name="com.netease.yunxin.kit.chatkit.ui.normal.page.ChatPinActivity"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustResize"/>
+
+
+        <!-- Fun -->
+        <activity android:name=".fun.page.FunChatP2PActivity"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustResize"
+            android:launchMode="singleTask"/>
+
+        <activity android:name=".fun.page.FunChatTeamActivity"
+            android:screenOrientation="portrait"
+            android:launchMode="singleTask"
+            android:windowSoftInputMode="adjustResize"/>
+
+        <activity android:name=".fun.page.FunChatPinActivity"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustResize"/>
+
+        <activity android:name=".fun.page.FunChatSettingActivity"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustResize"/>
+
+        <activity
+            android:name="com.netease.yunxin.kit.chatkit.ui.fun.page.FunChatSearchActivity"
+            android:screenOrientation="portrait"
+            android:launchMode="singleTop"
+            />
+        <activity
+            android:name="com.netease.yunxin.kit.chatkit.ui.fun.page.FunChatReaderActivity"
+            android:screenOrientation="portrait"
+            android:launchMode="singleTop"
+            />
+
+        <provider
+            android:name="com.netease.yunxin.kit.common.utils.CommonFileProvider"
+            android:authorities="${applicationId}.IMKitFileProvider"
+            android:exported="false"
+            tools:replace="name,authorities,exported,grantUriPermissions"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths"
+                tools:replace="android:resource"/>
+        </provider>
+    </application>
+
+</manifest>

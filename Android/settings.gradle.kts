@@ -38,4 +38,7 @@ include(":app")
 include(":oneonone:oneonone-ui")
 include(":entertainment:entertainment-common")
 include(":beauty:beauty-faceunity")
+include(":imkit:chatkit-ui")
+include(":imkit:conversationkit-ui")
+include(":imkit:locationkit")
 
