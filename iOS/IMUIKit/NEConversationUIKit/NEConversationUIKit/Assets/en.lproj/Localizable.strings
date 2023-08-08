@@ -1,0 +1,42 @@
+
+// Copyright (c) 2022 NetEase, Inc. All rights reserved.
+// Use of this source code is governed by a MIT license that can be
+// found in the LICENSE file.
+
+//MAKR：common
+"add_friend"="Add Contacts";
+"create_discussion_group"="Create Temp Group";
+"create_senior_group"="Create Group";
+"cancel_stickTop"="Cancel topping";
+"stickTop"="Sticky on Top";
+"delete"="Delete";
+"friend"="Contact";
+"contact"="Contact";
+"group"="Group";
+"discussion_group"="Temp Group";
+"senior_group"="Group";
+"search"="Search";
+"cancel"="Cancel";
+"search_keyword"="Enter the key words";
+"user_not_exist"="Not Exist";
+"session_empty"="No Session";
+"hm"="HH:mm";
+"mdhm"="MM.dd HH:mm";
+"ymdhm"="yyyy.MM.dd HH:mm";
+"voice"="[aduio Message]";
+"picture"="[picture Message]";
+"video"="[Video Message]";
+"location"="[Geographic Loaction]";
+"notification"="[Tip Message]";
+"file"="[File Message]";
+"internet_phone"="[Audio_Chat]";
+"video_chat"="[Video_Chat]";
+"unknown"="[Unknown Message]";
+"appName"="CommsEase IM";
+
+"message_recalled"="message recalled";
+
+"you_were_mentioned"="[You were mentioned]";
+
+// error toast
+"network_error"="Network is not available, please check";
