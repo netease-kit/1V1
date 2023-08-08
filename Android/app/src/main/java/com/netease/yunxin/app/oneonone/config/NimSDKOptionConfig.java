@@ -48,7 +48,6 @@ public class NimSDKOptionConfig {
     options.shouldConsiderRevokedMessageUnreadCount = true;
     // 会话置顶是否漫游
     options.notifyStickTopSession = true;
-    //    options.mixPushConfig = buildMixPushConfig();
     options.serverConfig = configServer(context);
     // 打开消息撤回未读数-1的开关
     options.shouldConsiderRevokedMessageUnreadCount = true;
@@ -58,7 +57,9 @@ public class NimSDKOptionConfig {
   public static ServerAddresses configServer(Context context) {
 
     if (AppConfig.isOversea()) {
+      // IM SDK接入海外数据中心 https://doc.yunxin.163.com/messaging/docs/zA5OTg4Njc?platform=android#Android%20%E7%AB%AF
       ServerAddresses serverAddresses = new ServerAddresses();
+      serverAddresses.defaultLink = "link-sg.netease.im:7000";
       serverAddresses.lbs = "https://lbs.netease.im/lbs/conf.jsp";
       serverAddresses.nosUploadLbs = "http://wannos.127.net/lbs";
       serverAddresses.nosUploadDefaultLink = "https://nosup-hz1.127.net";
@@ -97,36 +98,6 @@ public class NimSDKOptionConfig {
     config.ledOnMs = LED_ON_MS;
     config.ledOffMs = LED_OFF_MS;
     config.showBadge = true;
-    return config;
-  }
-
-  private static MixPushConfig buildMixPushConfig() {
-    MixPushConfig config = new MixPushConfig();
-    // xiaomi
-    config.xmAppId = "2882303761520055541";
-    config.xmAppKey = "5222005592541";
-    config.xmCertificateName = "KIT_MI_PUSH";
-
-    // huawei
-    config.hwAppId = "104776841";
-    config.hwCertificateName = "KIT_HW_PUSH";
-
-    // meizu
-    config.mzAppId = "148192";
-    config.mzAppKey = "6068c5a8323542deaf83ad5b6d3ca9e2";
-    config.mzCertificateName = "KIT_MEIZU_PUSH";
-
-    // fcm
-    //        config.fcmCertificateName = "DEMO_FCM_PUSH";
-
-    // vivo
-    config.vivoCertificateName = "KIT_VIVO_PUSH";
-
-    // oppo
-    config.oppoAppId = "30795055";
-    config.oppoAppKey = "6ffe2c1198c5448e84b75f3b78b711ce";
-    config.oppoAppSercet = "f55d519d05a04360a8ba3404a24594a0";
-    config.oppoCertificateName = "KIT_OPPO_PUSH";
     return config;
   }
 
