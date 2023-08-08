@@ -59,7 +59,7 @@ public class AppConfig {
   }
 
   public static boolean isOversea() {
-    return false;
+    return IS_OVERSEA;
   }
 
   public static boolean isChineseEnv() {
