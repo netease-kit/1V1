@@ -74,7 +74,4 @@ public class NEOneOnOneChatRegisterEngine: NSObject {
 //      }
     }
   }
-
-  /// 是否支持AIGC小助手
-  public var isSupportAIGC = true
 }
