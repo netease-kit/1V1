@@ -52,11 +52,11 @@ public class NEOneOnOneChatP2PViewController: P2PChatViewController, NIMEventSub
     NEKitChatConfig.shared.ui.leftBubbleBg = ne_chatUI_imageName(imageName: "left_back_icon")
 
     if viewmodel.session.sessionId != "yunxinassistaccid_1" {
-      inputTopExtendHeight = 95
+      inputTopExtendHeight = 55
       inputTopExtendView.addSubview(quickReplayView)
       quickReplayView.snp.makeConstraints { make in
         make.top.left.right.equalTo(inputTopExtendView)
-        make.height.equalTo(85)
+        make.height.equalTo(45)
       }
       customNavigationView.bottomLine.backgroundColor = .clear
       view.bringSubviewToFront(quickReplayView)
@@ -67,27 +67,6 @@ public class NEOneOnOneChatP2PViewController: P2PChatViewController, NIMEventSub
             self.viewmodel.sendTextMessage(text: self.quickReplayView.oneOnOneQuickReplyArray[index]) { error in
             }
           }
-        }
-      }
-      quickReplayView.rebortClicked = { [weak self] in
-        if let session = self?.viewmodel.session {
-          let ai = NEOneOnOneAIViewController()
-          ai.copyCompletion = { content in
-            DispatchQueue.main.async {
-              self?.menuView.textView.text = content
-              self?.menuView.textView.becomeFirstResponder()
-              ai.dismissAIViewController()
-            }
-          }
-          if let messages = NIMSDK.shared().conversationManager.messages(in: session, message: nil, limit: 30) {
-            let recvMessages = messages.filter { message in
-              (message.from == session.sessionId) && (message.messageType == .text)
-            }
-            if let lastMessage = recvMessages.last?.text {
-              ai.lastMessage = lastMessage
-            }
-          }
-          self?.present(ai, animated: true)
         }
       }
     }
