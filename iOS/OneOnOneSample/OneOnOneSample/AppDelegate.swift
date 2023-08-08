@@ -79,13 +79,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         var loginSampleExtras = Configs.extras
         loginSampleExtras["baseUrl"] = Configs.loginSampleBaseUrl
         config.extras = loginSampleExtras
-        
-        ///如果用户自己填了账号，则直接用账号密码登录
-        if userUuid.count > 0 ,imToken.count > 0 ,userToken.count > 0 {
-            self.loginRoom(shouldInit: true)
-            return
-        }
-        
+        // 通过调用Http请求从业务服务器获取新账号，然后再调用登录方法。 注意：在实际项目中时，开发者需要根据实际的业务逻辑调用登录方法。
         NELoginSample.getInstance().initialize(config) { code, msg, obj in
             if code == 0 {
                 NELoginSample.getInstance().createAccount(nil, sceneType: .oneOnOne, userUuid: nil, imToken: nil) { code, msg, account in

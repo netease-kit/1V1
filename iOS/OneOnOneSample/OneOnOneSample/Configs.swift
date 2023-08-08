@@ -27,7 +27,7 @@ enum Configs {
   }
   
   static var oneOnOneBaseUrl: String {
-    BASE_URL
+    IS_OVERSEA ? BASE_URL_OVERSEA : BASE_URL
   }
   
   static var AppAMapKey: String {
@@ -35,10 +35,18 @@ enum Configs {
   }
   
   static var loginSampleBaseUrl: String {
-    BASE_URL
+    IS_OVERSEA ? BASE_URL_OVERSEA : BASE_URL
   }
   
   static var pushCerName: String {
     kPushCerName
   }
 }
+
+// MARK: 全局变量，无需填写
+var userUuid: String = ""
+var userToken: String = ""
+var imToken: String = ""
+var userName: String = ""
+var icon: String = ""
+

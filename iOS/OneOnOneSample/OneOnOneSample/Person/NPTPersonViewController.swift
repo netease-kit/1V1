@@ -21,8 +21,8 @@ class NPTSettingItem: NSObject {
 
 class NPTPersonViewController: UIViewController {
   // 先隐藏美颜设置
-  let icons = ["setting_nickname", "setting_network", "setting_beauty", "setting_call", "setting_normal"]
-  let titles = ["Setting_Nickname".localized, "Setting_Network".localized, "Setting_Beauty".localized, "Setting_Call".localized, "Setting_Normal".localized]
+  let icons = ["setting_network", "setting_beauty", "setting_call", "setting_normal"]
+  let titles = ["Setting_Network".localized, "Setting_Beauty".localized, "Setting_Call".localized, "Setting_Normal".localized]
   var items: [NPTSettingItem] = []
 
   // 两个回调的结果同时满足
@@ -182,10 +182,6 @@ extension NPTPersonViewController: UITableViewDelegate {
 
     let icon = icons[indexPath.row]
     switch icon {
-    case "setting_nickname":
-      let vc = NPTNicknameSettingViewController()
-      vc.hidesBottomBarWhenPushed = true
-      navigationController?.pushViewController(vc, animated: true)
     case "setting_network":
       probeCompleted = (false, false)
       NERoomKit.shared().roomService.previewRoom { code, msg, context in
