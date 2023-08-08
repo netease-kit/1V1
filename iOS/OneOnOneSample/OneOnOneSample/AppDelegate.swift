@@ -164,7 +164,6 @@ extension AppDelegate {
         initQueue.async {
           oneOnOneInit = true
           NEOneOnOneChatRegisterEngine.getInstance().resgiterEngine()
-          NEOneOnOneChatRegisterEngine.getInstance().isSupportAIGC = Configs.isSupportAIGC
           //地图map初始化
           NEMapClient.shared().setupMapClient(withAppkey: Configs.AppAMapKey)
           checkCallback()
