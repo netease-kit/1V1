@@ -114,7 +114,7 @@ class NEOneOnOneRoomService {
   func startRepoty() {
     queue.async {
       self.cancelReport()
-      self.reportTimer = Timer(timeInterval: 5, target: self, selector: #selector(self.reportTimerAction), userInfo: nil, repeats: true)
+      self.reportTimer = Timer(timeInterval: 4, target: self, selector: #selector(self.reportTimerAction), userInfo: nil, repeats: true)
 
       if self.reportTimer != nil {
         RunLoop.current.add(self.reportTimer!, forMode: .common)
