@@ -76,12 +76,6 @@ public class HomeActivity extends BasePartyActivity {
             if (ProcessUtils.isMainProcess(HomeActivity.this)
                 && !TextUtils.equals(
                     CallKitUI.INSTANCE.getCurrentUserAccId(), UserInfoManager.getSelfImAccid())) {
-              NERtcParameters parameters = new NERtcParameters();
-              // 开启服务器录制
-              parameters.set(NERtcParameters.KEY_SERVER_RECORD_AUDIO, true);
-              parameters.set(NERtcParameters.KEY_SERVER_RECORD_VIDEO, true);
-              NERtcEx.getInstance().setParameters(parameters);
-
               NERtcOption neRtcOption = new NERtcOption();
               neRtcOption.logLevel = NERtcConstants.LogLevel.INFO;
               HttpService.getInstance()
