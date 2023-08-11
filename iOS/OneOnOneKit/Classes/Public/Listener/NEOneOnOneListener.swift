@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import Foundation
+import NERtcSDK
 
 @objc
 public protocol NEOneOnOneListener: NSObjectProtocol {
@@ -18,4 +19,7 @@ public protocol NEOneOnOneListener: NSObjectProtocol {
 
   /// 接收到礼物
   @objc optional func onReceiveGift(gift: NEOneOnOneOneGift)
+
+  /// RTCSDK的视频采集回调
+  @objc optional func onRtcVideoFrameCaptured(_ bufferRef: CVPixelBuffer, rotation: NERtcVideoRotationType)
 }
