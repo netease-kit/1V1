@@ -48,6 +48,8 @@ pod 'NESocialUIKit', :path => '../NESocialUIKit/NESocialUIKit.podspec'
 pod 'NEOneOnOneKit', :path => '../OneOnOneKit/NEOneOnOneKit.podspec'
 pod 'NEOneOnOneUIKit', :path => '../OneOnOneUIKit/NEOneOnOneUIKit.podspec'
 pod 'NEOneOnOneChatUIKit', :path => '../OneOnOneChatUIKit/NEOneOnOneChatUIKit.podspec'
+pod 'NEConversationUIKit', :path => '../IMUIKit/NEConversationUIKit/NEConversationUIKit.podspec'
+pod 'NEChatUIKit',:path => '../IMUIKit/NEChatUIKit/NEChatUIKit.podspec'
 
 #设置
 pod 'FaceUnity', :path => '../FaceUnity/FaceUnity.podspec'
@@ -63,8 +65,8 @@ pod 'NERtcCallKit', '2.0.1'
 
 pod 'NECommonUIKit','9.6.1'
 pod 'NECommonKit','9.6.0'
-pod 'NEConversationUIKit','9.6.1'
-pod 'NEChatUIKit','9.6.1'
+#pod 'NEConversationUIKit','9.6.1'
+#pod 'NEChatUIKit','9.6.1'
 pod 'NECoreIMKit','9.6.1'
 pod 'NECoreKit','9.6.0'
 

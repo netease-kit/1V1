@@ -5,33 +5,27 @@
 package com.netease.yunxin.app.oneonone.callkit;
 
 import com.netease.lava.nertc.sdk.NERtcEx;
+import com.netease.lava.nertc.sdk.NERtcParameters;
 import com.netease.yunxin.app.oneonone.ui.constant.AppRtcConfig;
 import com.netease.yunxin.app.oneonone.ui.utils.RtcUtil;
-import com.netease.yunxin.kit.alog.ALog;
 import com.netease.yunxin.nertc.nertcvideocall.model.NERtcCallExtension;
 
 public class RtcCallExtension extends NERtcCallExtension {
-  private static final String TAG = "PartyNERtcCallExtension";
 
   @Override
-  public void configVideoConfigBeforeJoin() {
+  public int toJoinChannel(String token, String channelName, long rtcUid) {
+    NERtcParameters parameters = new NERtcParameters();
+    // 开启服务器录制
+    parameters.set(NERtcParameters.KEY_SERVER_RECORD_AUDIO, true);
+    parameters.set(NERtcParameters.KEY_SERVER_RECORD_VIDEO, true);
+    NERtcEx.getInstance().setParameters(parameters);
+    // 该方法仅可在加入房间前调用。
     RtcUtil.setChannelProfile(AppRtcConfig.CHANNEL_PROFILE);
+    //该方法在加入房间前后均可调用。
     RtcUtil.configAudioConfig(AppRtcConfig.PROFILE, AppRtcConfig.SCENARIO);
+    // 该方法在加入房间前后均可调用。
     RtcUtil.configVideoConfig(AppRtcConfig.VIDEO_WIDTH, AppRtcConfig.VIDEO_HEIGHT);
-  }
-
-  @Override
-  protected void initRtc() {
-    try {
-      NERtcEx.getInstance().release();
-    } catch (Exception e) {
-      ALog.e(TAG, "e:" + e);
-    }
-    super.initRtc();
-  }
-
-  @Override
-  protected void releaseRtc() {
-    // PSTN需要RTC的初始化，所以需要覆盖呼叫组件的release RTC 方法。呼叫组件不做release
+    configRtcStatsObserver();
+    return super.toJoinChannel(token, channelName, rtcUid);
   }
 }
