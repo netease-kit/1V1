@@ -27,6 +27,26 @@ extension NEOneOnOneKit: NERtcCallKitDelegate {
 //  }
 
   public func onRtcInitEnd() {
+    NERtcEngine.shared().setChannelProfile(.liveBroadcasting)
+    NERtcEngine.shared().setAudioProfile(.standard, scenario: .speech)
+    let videoConfig = NERtcVideoEncodeConfiguration()
+    videoConfig.height = 360
+    videoConfig.width = 640
+    videoConfig.frameRate = .fps15
+    NERtcEngine.shared().setLocalVideoConfig(videoConfig)
     NERtcEngine.shared().setParameters([kNERtcKeyRecordAudioEnabled: true, kNERtcKeyRecordVideoEnabled: true])
+    NERtcEngine.shared().setParameters([kNERtcKeyVideoCaptureObserverEnabled: true])
+    NERtcEngine.shared().setVideoFrameObserver(self)
+  }
+}
+
+extension NEOneOnOneKit: NERtcEngineVideoFrameObserver {
+  public func onNERtcEngineVideoFrameCaptured(_ bufferRef: CVPixelBuffer, rotation: NERtcVideoRotationType) {
+    for pointerListener in listeners.allObjects {
+      if let listener = pointerListener as? NEOneOnOneListener,
+         listener.responds(to: #selector(NEOneOnOneListener.onRtcVideoFrameCaptured(_:rotation:))) {
+        listener.onRtcVideoFrameCaptured?(bufferRef, rotation: rotation)
+      }
+    }
   }
 }
