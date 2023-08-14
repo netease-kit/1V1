@@ -44,7 +44,7 @@
         <activity
             android:name=".activity.CallActivity"
             android:theme="@style/Theme.AppCompat.NoActionBar"
-            android:launchMode="singleTop"
+            android:launchMode="singleTask"
             android:screenOrientation="portrait" />
 
         <activity
