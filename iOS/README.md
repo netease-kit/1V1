@@ -19,15 +19,13 @@
 请确认您已完成以下操作：
 
 - [已创建应用并获取 App Key](https://doc.yunxin.163.com/docs/jcyOTA0ODM/jE3OTc5NTY?platformId=50002)
-- [已开通相关能力](https://doc.yunxin.163.com/1v1-social/docs/zk3NTk1NzU?platform=iOS)
+- [已开通IM 即时通讯、信令和音视频通话2.0](https://doc.yunxin.163.com/1v1-social/docs/zk3NTk1NzU?platform=iOS)
+  ![开通IM和RTC.png](https://yx-web-nosdn.netease.im/common/3191fccdcab4cb7f39f647c261f4fa96/开通IM和RTC.png)
+  ![开通信令.png](https://yx-web-nosdn.netease.im/common/3f3de9246c62c15432fb5b2cb6f3b65b/开通信令.png)
+
 - [已配置RTC 和 IM 的消息抄送地址（http://yiyong.netease.im/nemo/socialChat/nim/notify）](https://doc.yunxin.163.com/nertc/docs/DExNjg2MDc?platform=server)
-
-## 注意事项
-
-示例项目需要在 **RTC 调试模式**下使用，此时无需传入 Token。修改鉴权方式的方法请参见 <a href="https://doc.yunxin.163.com/nertc/docs/TQ0MTI2ODQ?platform=android" target="_blank">Token 鉴权</a> 。
-
-您可以在集成开发阶段使用调试模式进行应用开发与测试。但是出于安全考虑，应用正式上线前，请在控制台中将指定应用的鉴权方式改回安全模式。
-
+    ![消息抄送.png](https://yx-web-nosdn.netease.im/common/f972950448a9aab5e4707ab363082b5b/消息抄送.png)
+  
 
 ## <span id="快速跑通 Sample Code">运行示例项目</span>
 
@@ -69,8 +67,8 @@
 5. 运行工程。
 
     > 注意：
-    > - 请使用两个手机运行工程，Demo 上才能显示用户列表，体验 1 对 1 聊天等功能。
-    > - 示例项目源码不包含虚拟主播，云信派对 Demo 中的虚拟主播是为了方便您快速体验相关功能而设计，不作为实际项目交付。
+    > 请使用两个手机运行工程，Demo 上才能显示用户列表，体验 1 对 1 聊天等功能。
+
 
 
 ## 示例项目结构
