@@ -8,7 +8,6 @@ import android.Manifest;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Color;
-import android.media.AudioManager;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -33,6 +32,7 @@ import com.netease.yunxin.app.oneonone.ui.utils.DisplayUtils;
 import com.netease.yunxin.app.oneonone.ui.utils.LogUtil;
 import com.netease.yunxin.app.oneonone.ui.utils.NECallback;
 import com.netease.yunxin.app.oneonone.ui.utils.NERTCCallStateManager;
+import com.netease.yunxin.app.oneonone.ui.utils.RtcUtil;
 import com.netease.yunxin.app.oneonone.ui.viewmodel.CallViewModel;
 import com.netease.yunxin.kit.alog.ALog;
 import com.netease.yunxin.kit.common.image.ImageLoader;
@@ -110,24 +110,13 @@ public class CallFragment extends Fragment {
       handleCall();
     }
     if (callParams.isCalled()) {
-      // 被叫扬声器响铃
-      setSpeakerphoneOn(true);
+      // 被叫逻辑,被叫扬声器响铃,系统默认是扬声器播放
       playRing(AVChatSoundPlayer.RingerTypeEnum.RING);
+      RtcUtil.setSpeakerphoneOn(requireActivity(), true);
     }
     subscribeUi();
     initEvent();
     return binding.getRoot();
-  }
-
-  private void setSpeakerphoneOn(boolean speakerphoneOn) {
-    AudioManager audioManager = (AudioManager) activity.getSystemService(Context.AUDIO_SERVICE);
-    if (speakerphoneOn) {
-      audioManager.setMode(AudioManager.MODE_NORMAL);
-      audioManager.setSpeakerphoneOn(true);
-    } else {
-      audioManager.setMode(AudioManager.MODE_IN_CALL);
-      audioManager.setSpeakerphoneOn(false);
-    }
   }
 
   public void handleCall() {
@@ -135,39 +124,51 @@ public class CallFragment extends Fragment {
     if (callParams.getCallExtraInfo() == null) {
       return;
     }
-    JSONObject callParamExtraInfo;
+    JSONObject callParamExtraInfo = null;
     try {
       callParamExtraInfo = new JSONObject(callParams.getCallExtraInfo());
-      if (!callParams.isCalled()) {
-        callFinished = false;
-        calledMobile = callParamExtraInfo.getString(AppParams.CALLED_USER_MOBILE);
-        callerUserName = callParamExtraInfo.getString(AppParams.CALLER_USER_NAME);
-        if (activity.isVirtualCall()) {
-          NERTCCallStateManager.setCallOutState();
-          setSpeakerphoneOn(callParams.getChannelType() != ChannelType.AUDIO.getValue());
-          AVChatSoundPlayer.INSTANCE.play(activity, AVChatSoundPlayer.RingerTypeEnum.RING);
-        } else {
-          activity.rtcCall(
-              new NECallback<ChannelFullInfo>() {
-                @Override
-                public void onSuccess(ChannelFullInfo channelFullInfo) {
-                  callFinished = true;
-                  AVChatSoundPlayer.INSTANCE.play(activity, AVChatSoundPlayer.RingerTypeEnum.RING);
-                  NERtcEx.getInstance()
-                      .setSpeakerphoneOn(
-                          callParams.getChannelType() != ChannelType.AUDIO.getValue());
-                }
-
-                @Override
-                public void onError(int code, String errorMsg) {
-                  ToastX.showShortToast(R.string.call_failed);
-                }
-              });
-        }
-        LogUtil.i(TAG, "handleCall->rtcCall");
-      }
     } catch (JSONException e) {
-      e.printStackTrace();
+      ALog.e(TAG, "handleCall,json parse callParamExtraInfo error:" + e.getMessage());
+    }
+    if (!callParams.isCalled()) {
+      callFinished = false;
+      if (callParamExtraInfo != null) {
+        try {
+          calledMobile = callParamExtraInfo.getString(AppParams.CALLED_USER_MOBILE);
+        } catch (JSONException e) {
+          ALog.e(TAG, "handleCall,json parse calledMobile error:" + e.getMessage());
+        }
+        try {
+          callerUserName = callParamExtraInfo.getString(AppParams.CALLER_USER_NAME);
+        } catch (JSONException e) {
+          ALog.e(TAG, "handleCall,json parse callerUserName error:" + e.getMessage());
+        }
+      }
+      if (activity.isVirtualCall()) {
+        NERTCCallStateManager.setCallOutState();
+        // 主叫逻辑,虚拟人呼叫，音频通话设置为听筒播放、视频通话设置为扬声器播放
+        RtcUtil.setSpeakerphoneOn(
+            requireActivity(), callParams.getChannelType() != ChannelType.AUDIO.getValue());
+        AVChatSoundPlayer.INSTANCE.play(activity, AVChatSoundPlayer.RingerTypeEnum.RING);
+      } else {
+        activity.rtcCall(
+            new NECallback<ChannelFullInfo>() {
+              @Override
+              public void onSuccess(ChannelFullInfo channelFullInfo) {
+                callFinished = true;
+                AVChatSoundPlayer.INSTANCE.play(activity, AVChatSoundPlayer.RingerTypeEnum.RING);
+                // 主叫逻辑,音频通话设置为听筒播放、视频通话设置为扬声器播放
+                NERtcEx.getInstance()
+                    .setSpeakerphoneOn(callParams.getChannelType() != ChannelType.AUDIO.getValue());
+              }
+
+              @Override
+              public void onError(int code, String errorMsg) {
+                ToastX.showShortToast(R.string.call_failed);
+              }
+            });
+      }
+      LogUtil.i(TAG, "handleCall->rtcCall");
     }
   }
 
@@ -244,6 +245,8 @@ public class CallFragment extends Fragment {
         new View.OnClickListener() {
           @Override
           public void onClick(View view) {
+            stopRing();
+            RtcUtil.resetAudioManagerMode(requireContext());
             handleInvitedAcceptEvent();
           }
         });
@@ -301,6 +304,7 @@ public class CallFragment extends Fragment {
       }
     }
     activity.rtcAccept();
+
     binding.ivInvitedAccept.setEnabled(false);
     binding.ivInvitedReject.setEnabled(false);
   }
@@ -334,11 +338,14 @@ public class CallFragment extends Fragment {
     AVChatSoundPlayer.INSTANCE.play(activity, ringerTypeEnum);
   }
 
+  private void stopRing() {
+    AVChatSoundPlayer.INSTANCE.stop(activity);
+  }
+
   @Override
   public void onDestroyView() {
     super.onDestroyView();
     binding = null;
-    setSpeakerphoneOn(true);
   }
 
   private void pstnHangup() {

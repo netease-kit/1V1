@@ -67,7 +67,7 @@
         android:theme="@style/OneOnOne">
         <meta-data
             android:name="com.amap.api.v2.apikey"
-            android:value="your amap key" />
+            android:value="02266a1c23b5c2ddd04e8dc64a228505" />
         <service android:name="com.amap.api.location.APSService" />
 
         <meta-data
@@ -101,7 +101,6 @@
             android:exported="false"
             android:launchMode="singleTask">
             <intent-filter>
-                <action android:name="https://netease.yunxin.party.home"/>
                 <category android:name="android.intent.category.DEFAULT"/>
             </intent-filter>
         </activity>
@@ -109,6 +108,12 @@
         <activity
             android:name=".activity.CommonSettingActivity"
             android:screenOrientation="portrait"
+            android:theme="@style/Theme.AppCompat.NoActionBar" />
+
+        <activity
+            android:name="com.netease.yunxin.app.oneonone.activity.SampleLoginActivity"
+            android:screenOrientation="portrait"
+            android:launchMode="singleTask"
             android:theme="@style/Theme.AppCompat.NoActionBar" />
 
         <!--        // 云信IM-->
@@ -161,6 +166,7 @@
             android:exported="false" />
 
         <service android:name="com.netease.lava.nertc.foreground.ForegroundService"
+            android:foregroundServiceType="microphone|camera"
             android:enabled="true"
             android:exported="false"
             />

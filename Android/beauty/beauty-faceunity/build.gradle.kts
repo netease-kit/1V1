@@ -19,7 +19,7 @@ dependencies {
     implementation("androidx.appcompat:appcompat:1.4.1")
     implementation("androidx.recyclerview:recyclerview:1.2.1")
     implementation("com.netease.yunxin.kit:alog:1.0.9")
-    implementation("com.netease.yunxin:nertc-base:5.4.0")
+    implementation("com.netease.yunxin:nertc-base:5.4.8")
     implementation("com.netease.yunxin.kit.common:common:1.3.0")
     implementation("com.netease.yunxin.kit.common:common-ui:1.3.0")
     implementation(project(":entertainment:entertainment-common"))

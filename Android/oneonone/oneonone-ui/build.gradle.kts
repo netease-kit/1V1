@@ -23,7 +23,7 @@ dependencies {
     implementation("androidx.constraintlayout:constraintlayout:2.1.3")
     implementation("androidx.recyclerview:recyclerview:1.2.1")
 
-    api("com.netease.yunxin:nertc-base:5.4.0")
+    api("com.netease.yunxin:nertc-base:5.4.8")
     api("com.netease.yunxin.kit.call:call-ui:2.0.1"){
         exclude("com.netease.yunxin","nertc-base")
     }

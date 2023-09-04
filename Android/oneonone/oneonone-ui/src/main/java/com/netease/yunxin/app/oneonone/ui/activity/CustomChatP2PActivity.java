@@ -26,6 +26,7 @@ import androidx.core.widget.PopupWindowCompat;
 import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
+import com.netease.yunxin.app.oneonone.ui.OneOnOneUI;
 import com.netease.yunxin.app.oneonone.ui.R;
 import com.netease.yunxin.app.oneonone.ui.constant.Constants;
 import com.netease.yunxin.app.oneonone.ui.custommessage.GiftAttachment;
@@ -279,6 +280,10 @@ public class CustomChatP2PActivity extends BasePartyActivity {
         viewBinding.tvTitle.setText(getString(R.string.one_one_one_littie_secre));
       }
     }
+    viewBinding.llVirtualTips.setVisibility(
+        (ChatUtil.isVirtualManSession(sessionId) && !OneOnOneUI.getInstance().isOversea())
+            ? View.VISIBLE
+            : View.GONE);
     mAudioTv.setOnTouchListener(
         (v, event) -> {
           if (event.getAction() == MotionEvent.ACTION_DOWN) {

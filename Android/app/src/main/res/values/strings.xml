@@ -107,8 +107,6 @@
     <string name="app_no">No</string>
     <string name="app_data_center_mainland">China</string>
     <string name="app_data_center_oversea">Global</string>
-    <string name="app_notification_new_incoming_audio_call">Incoming audio call</string>
-    <string name="app_notification_new_incoming_video_call">Incoming video call</string>
     <string name="app_probing_in_progress">Probing in progress</string>
     <string name="app_beauty_setting">Beauty settings</string>
     <string name="app_log_upload">Upload log</string>
@@ -163,4 +161,7 @@
     <string name="app_tip">tips</string>
     <string name="app_permission_content">CommsEase Party requires microphone and camera permissions to enable the use of audio, video, and live streaming.</string>
     <string name="app_ok">OK</string>
+    <string name="sample_login_desc">CommsEase Party - 1-on-1 Social App\nSample App</string>
+    <string name="start_exploring">Start exploring</string>
+    <string name="logining">logining...</string>
 </resources>

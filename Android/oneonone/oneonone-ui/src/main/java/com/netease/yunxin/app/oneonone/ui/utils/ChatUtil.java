@@ -157,7 +157,7 @@ public class ChatUtil {
     return -1;
   }
 
-  public static boolean isCurrentConversationMessage(IMMessageInfo messageInfo, String sessionId) {
+  public static boolean isCurrentSessionMessage(IMMessageInfo messageInfo, String sessionId) {
     return messageInfo != null
         && TextUtils.equals(messageInfo.getMessage().getSessionId(), sessionId);
   }
@@ -169,5 +169,9 @@ public class ChatUtil {
 
   public static boolean isSystemAccount(String account) {
     return Constants.ASSIST_ACCOUNT.equals(account);
+  }
+
+  public static boolean isVirtualManSession(String sessionId) {
+    return sessionId != null && sessionId.contains("virtually_user");
   }
 }

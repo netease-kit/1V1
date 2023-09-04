@@ -74,6 +74,25 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
     </androidx.constraintlayout.widget.ConstraintLayout>
+    <LinearLayout
+        android:id="@+id/ll_virtual_tips"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
+        android:paddingStart="2dp"
+        android:paddingEnd="2dp"
+        android:background="@color/color_fee3e3"
+        android:visibility="gone">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/one_on_one_virtual_tips"
+            android:textSize="14sp"
+            app:drawableLeftCompat="@drawable/warn"
+            android:drawablePadding="4dp" />
+    </LinearLayout>
 
     <FrameLayout
         android:id="@+id/chat_container"

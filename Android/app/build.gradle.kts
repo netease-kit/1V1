@@ -17,8 +17,8 @@ android {
         applicationId = "com.netease.yunxin.app.oneonone"
         minSdk = 21
         targetSdk = 30
-        versionCode = 150
-        versionName = "1.5.0"
+        versionCode = 160
+        versionName = "1.6.0"
         multiDexEnabled = true
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

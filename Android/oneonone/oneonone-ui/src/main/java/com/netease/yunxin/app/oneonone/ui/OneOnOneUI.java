@@ -24,6 +24,8 @@ public class OneOnOneUI {
 
   private String baseUrl;
 
+  private boolean isOverSea;
+
   private OneOnOneUI() {}
 
   public static OneOnOneUI getInstance() {
@@ -62,6 +64,14 @@ public class OneOnOneUI {
 
   public boolean isChineseEnv() {
     return isChineseEnv;
+  }
+
+  public void setIsOversea(boolean isOverSea) {
+    this.isOverSea = isOverSea;
+  }
+
+  public boolean isOversea() {
+    return isOverSea;
   }
 
   public String getAppKey() {

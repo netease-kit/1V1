@@ -18,7 +18,6 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import com.faceunity.nama.BeautyLog;
-import com.netease.lava.nertc.sdk.LastmileProbeConfig;
 import com.netease.lava.nertc.sdk.LastmileProbeResult;
 import com.netease.lava.nertc.sdk.NERtcConstants;
 import com.netease.lava.nertc.sdk.NERtcEx;
@@ -34,7 +33,6 @@ import com.netease.yunxin.kit.common.ui.utils.Permission;
 import com.netease.yunxin.kit.common.ui.utils.ToastX;
 import com.netease.yunxin.kit.entertainment.common.Constants;
 import com.netease.yunxin.kit.entertainment.common.dialog.NetworkInfoDialog;
-import com.netease.yunxin.kit.entertainment.common.dialog.PhoneConsultBottomDialog;
 import com.netease.yunxin.kit.entertainment.common.fragment.BaseFragment;
 import com.netease.yunxin.kit.entertainment.common.utils.DialogUtil;
 import com.netease.yunxin.nertc.nertcvideocall.model.impl.NERtcCallbackExTemp;
@@ -96,13 +94,6 @@ public class UserCenterFragment extends BaseFragment {
   }
 
   private void initViews() {
-    binding.logUpload.setOnClickListener(
-        v -> {
-          initRTC();
-          NERtcEx.getInstance().uploadSdkInfo();
-          ToastX.showLongToast(R.string.please_wait_five_second_upload);
-          NERtcEx.getInstance().release();
-        });
     binding.beautySetting.setOnClickListener(
         v -> {
           ArrayList<String> list = new ArrayList<>();
@@ -154,18 +145,7 @@ public class UserCenterFragment extends BaseFragment {
                     public void onException(Exception exception) {}
                   });
         });
-    binding.networkDetect.setOnClickListener(
-        v -> {
-          initRTC();
-          NERtcEx.getInstance().startLastmileProbeTest(new LastmileProbeConfig());
-          toggleLoading(true);
-        });
     binding.commonSetting.setOnClickListener(v -> NavUtils.toCommonSettingPage(requireActivity()));
-    binding.phoneConsult.setOnClickListener(
-        v -> {
-          PhoneConsultBottomDialog dialog = new PhoneConsultBottomDialog(requireActivity());
-          dialog.show();
-        });
   }
 
   private void initUser() {

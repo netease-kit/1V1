@@ -36,9 +36,9 @@ public class ChatMessageViewHolderUIOptions {
     this.userInfoUIOption = userInfoUIOption;
   }
 
-  public static ChatMessageViewHolderUIOptions.Builder wrapExitsOptions(
+  public static Builder wrapExitsOptions(
       ChatMessageViewHolderUIOptions uiOptions) {
-    ChatMessageViewHolderUIOptions.Builder builder = new ChatMessageViewHolderUIOptions.Builder();
+    Builder builder = new Builder();
     if (uiOptions == null) {
       return builder;
     }

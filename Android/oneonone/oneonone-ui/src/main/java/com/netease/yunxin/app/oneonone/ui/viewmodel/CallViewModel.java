@@ -91,12 +91,6 @@ public class CallViewModel extends AndroidViewModel {
         }
 
         @Override
-        public void onFirstVideoFrameDecoded(@Nullable String userId, int width, int height) {
-          super.onFirstVideoFrameDecoded(userId, width, height);
-          switchToInTheCall.postValue(true);
-        }
-
-        @Override
         public void onVideoMuted(String userId, boolean isMuted) {
           super.onVideoMuted(userId, isMuted);
           remoteVideoMute.postValue(isMuted);
@@ -106,9 +100,7 @@ public class CallViewModel extends AndroidViewModel {
         public void onUserEnter(@Nullable String userId) {
           super.onUserEnter(userId);
           LogUtil.i(TAG, "onUserEnter,userId:" + userId);
-          if (callParam.getChannelType() == ChannelType.AUDIO.getValue()) {
-            switchToInTheCall.postValue(true);
-          }
+          switchToInTheCall.postValue(true);
           // 对方断网重连会重新触发onUserEnter回调
           startInTheCallTimer();
         }
@@ -187,7 +179,7 @@ public class CallViewModel extends AndroidViewModel {
         public void onEvent(@Nullable List<IMMessageInfo> event) {
           if (event != null) {
             for (IMMessageInfo messageInfo : event) {
-              if (ChatUtil.isCurrentConversationMessage(messageInfo, userInfo.accId)) {
+              if (ChatUtil.isCurrentSessionMessage(messageInfo, userInfo.accId)) {
                 if (ChatUtil.isGiftMessageType(messageInfo)) {
                   handleGiftMessage((GiftAttachment) messageInfo.getMessage().getAttachment());
                 }
