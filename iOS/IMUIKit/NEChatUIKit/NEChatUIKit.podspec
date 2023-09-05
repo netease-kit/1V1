@@ -5,50 +5,81 @@
 #  To learn more about Podspec attributes see https://guides.cocoapods.org/syntax/pods.html
 #  To see working Podspecs in the CocoaPods repo see https://github.com/CocoaPods/Specs/
 #
+require_relative "../../PodConfigs/config_podspec.rb"
+require_relative "../../PodConfigs/config_third.rb"
+require_relative "../../PodConfigs/config_local_core.rb"
+require_relative "../../PodConfigs/config_local_common.rb"
+require_relative "../../PodConfigs/config_local_im.rb"
 
 Pod::Spec.new do |s|
-
-  # ―――  Spec Metadata  ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――― #
-  #
-  #  These will help people to find your library, and whilst it
-  #  can feel like a chore to fill in it's definitely to your advantage. The
-  #  summary should be tweet-length, and the description more in depth.
-  #
-
   s.name         = 'NEChatUIKit'
   s.version      = '9.6.0'
   s.summary      = 'Chat Module of IM.'
-
-  # This description is used to generate tags and improve search results.
-  #   * Think: What does it do? Why did you write it? What is the focus?
-  #   * Try to keep it short, snappy and to the point.
-  #   * Write the description between the DESC delimiters below.
-  #   * Finally, don't worry about the indent, CocoaPods strips it!
-    s.description      = <<-DESC
-TODO: Add long description of the pod here.
-                       DESC
-  s.homepage         = 'http://netease.im'
-  s.license          = { :'type' => 'Copyright', :'text' => ' Copyright 2022 Netease '}
-  s.author           = 'yunxin engineering department'
-  s.source           = { :git => 'ssh://git@g.hz.netease.com:22222/yunxin-app/xkit-ios.git', :tag => s.version.to_s }
-
-  s.ios.deployment_target = '10.0'
-  s.swift_version = '5.0'
-
-  s.source_files = 'NEChatUIKit/Classes/**/*'
-  s.pod_target_xcconfig = {
-    'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'arm64',
-      'BUILD_LIBRARY_FOR_DISTRIBUTION' => 'YES'
-    }
+  s.homepage         = YXConfig.homepage
+  s.license          = YXConfig.license
+  s.author           = YXConfig.author
+  s.ios.deployment_target = YXConfig.deployment_target
+  s.swift_version = YXConfig.swift_version
   
-  s.resource = 'NEChatUIKit/Assets/**/*'
-  s.dependency 'NEChatKit'
-  s.dependency 'NECommonUIKit'
-  s.dependency 'NECommonKit'
-  s.dependency 'MJRefresh'
-  s.dependency 'UITextView+Placeholder'
-  s.dependency 'SDWebImageWebPCoder'
-  s.dependency 'SDWebImageSVGKitPlugin'
-  s.dependency 'lottie-ios'
+  if ENV["USE_SOURCE_FILES"] == "true"
+    s.source = { :git => "https://github.com/netease-kit/" }
+    s.source_files = 'NEChatUIKit/Classes/**/*'
+    s.resource = 'NEChatUIKit/Assets/**/*'
+    s.dependency NEChatKit.name
+    s.dependency NECommonUIKit.name
+    s.dependency NECommonKit.name
+    s.dependency MJRefresh.name
+    s.dependency 'SDWebImageWebPCoder'
+    s.dependency 'SDWebImageSVGKitPlugin'
+    s.dependency LottieOC.name, LottieOC.version
+  else
+    s.source = { :http => "https://yx-web-nosdn.netease.im/xkit/IMUIKit/9.6.0/NEChatUIKit_iOS_v9.6.0.framework.zip?download=NEChatUIKit_iOS_v9.6.0.framework.zip" }
+    
+    s.subspec 'NOS' do |nos|
+      nos.vendored_frameworks = 'NEChatUIKit.framework'
+      nos.dependency NEChatKit.NOS
+      nos.dependency NECommonUIKit.name
+      nos.dependency NECommonKit.name
+      nos.dependency MJRefresh.name
+      nos.dependency 'SDWebImageWebPCoder'
+      nos.dependency 'SDWebImageSVGKitPlugin'
+      nos.dependency LottieOC.name, LottieOC.version
+    end
+    
+    s.subspec 'NOS_Special' do |nos|
+      nos.vendored_frameworks = 'NEChatUIKit.framework'
+      nos.dependency NEChatKit.NOS_Special
+      nos.dependency NECommonUIKit.name
+      nos.dependency NECommonKit.name
+      nos.dependency MJRefresh.name
+      nos.dependency 'SDWebImageWebPCoder'
+      nos.dependency 'SDWebImageSVGKitPlugin'
+      nos.dependency LottieOC.name, LottieOC.version
+    end
+    
+    s.subspec 'FCS' do |fcs|
+      fcs.vendored_frameworks = 'NEChatUIKit.framework'
+      fcs.dependency NEChatKit.FCS
+      fcs.dependency NECommonUIKit.name
+      fcs.dependency NECommonKit.name
+      fcs.dependency MJRefresh.name
+      fcs.dependency 'SDWebImageWebPCoder'
+      fcs.dependency 'SDWebImageSVGKitPlugin'
+      fcs.dependency LottieOC.name, LottieOC.version
+    end
+    
+    s.subspec 'FCS_Special' do |fcs|
+      fcs.vendored_frameworks = 'NEChatUIKit.framework'
+      fcs.dependency NEChatKit.FCS_Special
+      fcs.dependency NECommonUIKit.name
+      fcs.dependency NECommonKit.name
+      fcs.dependency MJRefresh.name
+      fcs.dependency 'SDWebImageWebPCoder'
+      fcs.dependency 'SDWebImageSVGKitPlugin'
+      fcs.dependency LottieOC.name, LottieOC.version
+    end
+    s.default_subspecs = 'NOS'
+  end
 
+  YXConfig.pod_target_xcconfig(s)
 end

@@ -5,39 +5,58 @@
 # Any lines starting with a # are optional, but their use is encouraged
 # To learn more about a Podspec see https://guides.cocoapods.org/syntax/podspec.html
 #
+require_relative "../../PodConfigs/config_podspec.rb"
+require_relative "../../PodConfigs/config_third.rb"
+require_relative "../../PodConfigs/config_local_core.rb"
+require_relative "../../PodConfigs/config_local_common.rb"
+require_relative "../../PodConfigs/config_local_im.rb"
 
 Pod::Spec.new do |s|
   s.name             = 'NEConversationUIKit'
   s.version          = '9.6.0'
   s.summary          = 'Netease XKit'
-
-# This description is used to generate tags and improve search results.
-#   * Think: What does it do? Why did you write it? What is the focus?
-#   * Try to keep it short, snappy and to the point.
-#   * Write the description between the DESC delimiters below.
-#   * Finally, don't worry about the indent, CocoaPods strips it!
-
-  s.description      = <<-DESC
-TODO: Add long description of the pod here.
-                       DESC
-
-  s.homepage         = 'http://netease.im'
-  s.license          = { :'type' => 'Copyright', :'text' => ' Copyright 2022 Netease '}
-  s.author           = 'yunxin engineering department'
-  s.source           = { :git => 'ssh://git@g.hz.netease.com:22222/yunxin-app/xkit-ios.git', :tag => s.version.to_s }
-  # s.social_media_url = 'https://twitter.com/<TWITTER_USERNAME>'
-
-  s.ios.deployment_target = '10.0'
-  s.swift_version = '5.0'
-
-  s.source_files = 'NEConversationUIKit/Classes/**/*'
-  s.resource = 'NEConversationUIKit/Assets/**/*'
-  # s.public_header_files = 'Pod/Classes/**/*.h'
-  s.pod_target_xcconfig = {
-    'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'arm64',
-      'BUILD_LIBRARY_FOR_DISTRIBUTION' => 'YES'
-    }
+  s.homepage         = YXConfig.homepage
+  s.license          = YXConfig.license
+  s.author           = YXConfig.author
+  s.ios.deployment_target = YXConfig.deployment_target
+  s.swift_version = YXConfig.swift_version
   
-  s.dependency 'NECommonUIKit'
-  s.dependency 'NEChatKit'
+  if ENV["USE_SOURCE_FILES"] == "true"
+    s.source = { :git => "https://github.com/netease-kit/" }
+
+    s.source_files = 'NEConversationUIKit/Classes/**/*'
+    s.resource = 'NEConversationUIKit/Assets/**/*'
+    s.dependency NECommonUIKit.name
+    s.dependency NEChatKit.name
+  else
+    s.source = { :http => "https://yx-web-nosdn.netease.im/package/NEConversationUIKit_iOS_v9.4.0.framework.zip?download=NEConversationUIKit_iOS_v9.4.0.framework.zip" }
+    
+    s.subspec 'NOS' do |nos|
+      nos.vendored_frameworks = 'NEConversationUIKit.framework'
+      nos.dependency NEChatKit.NOS
+      nos.dependency NECommonUIKit.name
+    end
+    
+    s.subspec 'NOS_Special' do |nos|
+      nos.vendored_frameworks = 'NEConversationUIKit.framework'
+      nos.dependency NEChatKit.NOS_Special
+      nos.dependency NECommonUIKit.name
+    end
+    
+    s.subspec 'FCS' do |fcs|
+      fcs.vendored_frameworks = 'NEConversationUIKit.framework'
+      fcs.dependency NEChatKit.FCS
+      fcs.dependency NECommonUIKit.name
+    end
+    
+    s.subspec 'FCS_Special' do |fcs|
+      fcs.vendored_frameworks = 'NEConversationUIKit.framework'
+      fcs.dependency NEChatKit.FCS_Special
+      fcs.dependency NECommonUIKit.name
+    end
+    s.default_subspecs = 'NOS'
+  end
+
+  YXConfig.pod_target_xcconfig(s)
+  
 end

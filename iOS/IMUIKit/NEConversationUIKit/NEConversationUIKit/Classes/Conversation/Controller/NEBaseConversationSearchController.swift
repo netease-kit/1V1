@@ -3,8 +3,8 @@
 // Use of this source code is governed by a MIT license that can be
 // found in the LICENSE file.
 
-import UIKit
 import NIMSDK
+import UIKit
 
 @objcMembers
 open class NEBaseConversationSearchController: NEBaseConversationNavigationController, UITableViewDelegate,
@@ -111,6 +111,10 @@ open class NEBaseConversationSearchController: NEBaseConversationNavigationContr
     textField.returnKeyType = .search
     textField.addTarget(self, action: #selector(searchTextFieldChange), for: .editingChanged)
     textField.placeholder = localizable("search")
+    if let clearButton = textField.value(forKey: "_clearButton") as? UIButton {
+      clearButton.accessibilityIdentifier = "id.clear"
+    }
+    textField.accessibilityIdentifier = "id.search"
     return textField
   }()
 
@@ -146,19 +150,21 @@ open class NEBaseConversationSearchController: NEBaseConversationNavigationContr
 
   open func tableView(_ tableView: UITableView,
                       cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-    let cell = tableView.dequeueReusableCell(
+    if let cell = tableView.dequeueReusableCell(
       withIdentifier: "\(NSStringFromClass(NEBaseConversationSearchCell.self))",
       for: indexPath
-    ) as! NEBaseConversationSearchCell
-    if indexPath.section == 0 {
-      cell.searchModel = viewModel.searchResult?.friend[indexPath.row]
-    } else if indexPath.section == 1 {
-      cell.searchModel = viewModel.searchResult?.contactGroup[indexPath.row]
-    } else {
-      cell.searchModel = viewModel.searchResult?.seniorGroup[indexPath.row]
+    ) as? NEBaseConversationSearchCell {
+      if indexPath.section == 0 {
+        cell.searchModel = viewModel.searchResult?.friend[indexPath.row]
+      } else if indexPath.section == 1 {
+        cell.searchModel = viewModel.searchResult?.contactGroup[indexPath.row]
+      } else {
+        cell.searchModel = viewModel.searchResult?.seniorGroup[indexPath.row]
+      }
+      cell.searchText = searchStr
+      return cell
     }
-    cell.searchText = searchStr
-    return cell
+    return NEBaseConversationListCell()
   }
 
   open func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
