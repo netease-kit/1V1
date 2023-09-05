@@ -160,6 +160,7 @@ extension AppDelegate {
           NEOneOnOneChatRegisterEngine.getInstance().resgiterEngine()
           //地图map初始化
           NEMapClient.shared().setupMapClient(withAppkey: Configs.AppAMapKey)
+          NEOneOnOneKit.getInstance().addOneOnOneListener(self)
           checkCallback()
         }
       }
@@ -318,4 +319,11 @@ extension AppDelegate:NEOneOnOneUIDelegate{
         }
       }
     
+}
+
+extension AppDelegate: NEOneOnOneListener {
+  // 一对一视频采集回调，用于美颜
+  func onRtcVideoFrameCaptured(_ bufferRef: CVPixelBuffer, rotation: NERtcVideoRotationType) {
+    FUManager.share().renderItems(to: bufferRef)
+  }
 }
