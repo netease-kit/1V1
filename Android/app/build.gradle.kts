@@ -78,7 +78,7 @@ dependencies {
     implementation("com.google.android.material:material:1.5.0")
     implementation("androidx.constraintlayout:constraintlayout:2.1.3")
     implementation("androidx.recyclerview:recyclerview:1.2.1")
-    implementation("com.netease.yunxin.kit:alog:1.0.9")
+    implementation("com.netease.yunxin.kit:alog:1.1.0")
 
     implementation("com.netease.yunxin.kit.call:call-ui:2.0.1"){
         exclude("com.netease.yunxin","nertc-base")
@@ -91,7 +91,7 @@ dependencies {
     implementation("io.reactivex.rxjava2:rxandroid:2.1.1")
     implementation("androidx.navigation:navigation-fragment-ktx:2.4.2")
     implementation("androidx.navigation:navigation-ui-ktx:2.4.2")
-    implementation("com.netease.yunxin.kit.common:common-ui:1.3.0")
+    implementation("com.netease.yunxin.kit.common:common-ui:1.3.1")
     implementation("com.netease.nimlib:chatroom:9.12.0")
     implementation("com.netease.nimlib:avsignalling:9.12.0")
 //    implementation("com.android.support:support-v4:28.0.0")

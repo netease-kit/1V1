@@ -40,10 +40,10 @@ dependencies {
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("androidx.navigation:navigation-fragment-ktx:2.4.2")
     implementation("androidx.navigation:navigation-ui-ktx:2.4.2")
-    implementation("com.netease.yunxin.kit.common:common-ui:1.3.0")
+    implementation("com.netease.yunxin.kit.common:common-ui:1.3.1")
 
     implementation(project(":beauty:beauty-faceunity"))
-    implementation("com.netease.yunxin.kit.core:corekit:1.3.6")
+    implementation("com.netease.yunxin.kit.core:corekit:1.4.1")
     api(project(":entertainment:entertainment-common"))
     // 会话列表功能组件
     api(project(":imkit:conversationkit-ui"))

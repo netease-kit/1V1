@@ -36,7 +36,7 @@ android {
 dependencies {
 
     implementation(project(":imkit:chatkit-ui"))
-    api("com.netease.yunxin.kit.common:common-ui:1.3.0")
+    api("com.netease.yunxin.kit.common:common-ui:1.3.1")
     api("org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.6.21")
     implementation("androidx.appcompat:appcompat:1.4.2")
     implementation("com.google.android.material:material:1.5.0")
