@@ -213,8 +213,6 @@
     <string name="login_tips">登录即视为您已同意 隐私政策 和 用户服务协议</string>
     <string name="terms_of_service">用户服务协议</string>
     <string name="general_settings">通用设置</string>
-    <string name="app_notification_new_incoming_audio_call">邀请您语音聊天</string>
-    <string name="app_notification_new_incoming_video_call">邀请您视频聊天</string>
     <string name="app_probing_in_progress">正在探测中...</string>
 
     <string name="app_beauty_setting">美颜设置</string>
@@ -231,4 +229,7 @@
     <string name="app_tip">提示</string>
     <string name="app_permission_content">云信派对需使用麦克风及相机权限，以正常使用语音、视频、直播等功能</string>
     <string name="app_ok">确认</string>
+    <string name="sample_login_desc">云信派对-1对1业务\n源码跑通示例</string>
+    <string name="start_exploring">开始体验</string>
+    <string name="logining">登录中...</string>
 </resources>

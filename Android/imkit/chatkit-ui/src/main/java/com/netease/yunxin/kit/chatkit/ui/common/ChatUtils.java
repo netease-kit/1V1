@@ -248,11 +248,32 @@ public class ChatUtils {
       ChatRepo.downloadAttachment(messageInfo.getMessage(), false, null);
     }
     ArrayList<IMMessage> messages = new ArrayList<>();
-    for (int i = 0; i < imageMessages.size(); ++i) {
+    int maxLimit = 100;
+    int halfLimit = 50;
+    int arraySize = imageMessages.size();
+    for (int i = 0; i < arraySize; ++i) {
       if (messageInfo.equals(imageMessages.get(i))) {
         index = i;
       }
       messages.add(imageMessages.get(i).getMessage());
+    }
+    //防止消息数量过多造成传递数据超限，设置消息最多100个
+    if (arraySize > maxLimit) {
+      int start = 0;
+      int end = arraySize;
+      if (index > halfLimit) {
+        if (index + halfLimit >= arraySize) {
+          start = arraySize - maxLimit;
+          index = index - start;
+        } else if (index + halfLimit < arraySize) {
+          start = index - halfLimit;
+          end = index + halfLimit;
+          index = halfLimit;
+        }
+      } else {
+        end = maxLimit;
+      }
+      messages = new ArrayList<>(messages.subList(start, end));
     }
     WatchImageActivity.launch(context, messages, index);
   }

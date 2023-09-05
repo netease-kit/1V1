@@ -2,7 +2,7 @@
 // Use of this source code is governed by a MIT license that can be
 // found in the LICENSE file.
 
-package com.netease.yunxin.app.oneonone.ui.dialog;
+package com.netease.yunxin.kit.entertainment.common.dialog;
 
 import android.annotation.SuppressLint;
 import android.view.LayoutInflater;
@@ -13,9 +13,9 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import com.netease.yunxin.app.oneonone.ui.R;
 import com.netease.yunxin.kit.common.ui.dialog.BaseBottomDialog;
 import com.netease.yunxin.kit.common.ui.utils.ToastUtils;
+import com.netease.yunxin.kit.entertainment.common.R;
 
 public class ReportDialog extends BaseBottomDialog {
   public static final String TAG = "ReportDialog";

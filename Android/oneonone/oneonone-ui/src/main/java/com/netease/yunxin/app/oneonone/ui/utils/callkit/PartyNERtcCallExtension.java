@@ -2,7 +2,7 @@
 // Use of this source code is governed by a MIT license that can be
 // found in the LICENSE file.
 
-package com.netease.yunxin.app.oneonone.callkit;
+package com.netease.yunxin.app.oneonone.ui.utils.callkit;
 
 import com.netease.lava.nertc.sdk.NERtcEx;
 import com.netease.lava.nertc.sdk.NERtcParameters;
@@ -10,10 +10,9 @@ import com.netease.yunxin.app.oneonone.ui.constant.AppRtcConfig;
 import com.netease.yunxin.app.oneonone.ui.utils.RtcUtil;
 import com.netease.yunxin.nertc.nertcvideocall.model.NERtcCallExtension;
 
-public class RtcCallExtension extends NERtcCallExtension {
-
+public class PartyNERtcCallExtension extends NERtcCallExtension {
   @Override
-  public int toJoinChannel(String token, String channelName, long rtcUid) {
+  public void beforeJoinChannel() {
     NERtcParameters parameters = new NERtcParameters();
     // 开启服务器录制
     parameters.set(NERtcParameters.KEY_SERVER_RECORD_AUDIO, true);
@@ -26,6 +25,7 @@ public class RtcCallExtension extends NERtcCallExtension {
     // 该方法在加入房间前后均可调用。
     RtcUtil.configVideoConfig(AppRtcConfig.VIDEO_WIDTH, AppRtcConfig.VIDEO_HEIGHT);
     configRtcStatsObserver();
-    return super.toJoinChannel(token, channelName, rtcUid);
+    // 该方法在加入房间前后均可调用。
+    RtcUtil.enableDualStreamMode(false);
   }
 }

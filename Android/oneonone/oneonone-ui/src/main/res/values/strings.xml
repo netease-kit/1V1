@@ -332,13 +332,6 @@
         <item>The ones who have a crush on you has rushed over!</item>
     </string-array>
 
-    <string-array name="report_content">
-        <item>Political bias</item>
-        <item>Pornographic vulgarity</item>
-        <item>Ad and marketing</item>
-        <item>Fraudulent information</item>
-    </string-array>
-
     <string name="one_on_one_chat_hot_topic">Hot topics</string>
     <string name="one_on_one_chat_audio_title">Hold to talk</string>
     <string name="one_on_one_accost_text">Hey there! Your bio caught my attention, wanna talk?</string>
@@ -355,7 +348,9 @@
     <string name="one_on_one_chat_text_hint">Send a message</string>
     <string name="one_on_one_chat_inputing">typing...</string>
     <string name="one_one_one_littie_secre">CommsEase Party Helpmate</string>
-    <string name="one_one_one_report_success">Reported successfully</string>
     <string name="one_on_one_virtual_call_error">Network abnormality, please redial</string>
     <string name="one_on_one_virtual_call_end">The call has ended~</string>
+    <string name="one_on_one_virtual_tips">The current account is used for testing only (up to 10 replies from the chatbot allowed). For more information, inquire on the official website.</string>
+    <string name="app_notification_new_incoming_audio_call">Incoming audio call</string>
+    <string name="app_notification_new_incoming_video_call">Incoming video call</string>
 </resources>

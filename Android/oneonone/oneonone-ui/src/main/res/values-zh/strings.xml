@@ -241,13 +241,6 @@
         <item>喜欢你的人匆匆赶来了</item>
     </string-array>
 
-    <string-array name="report_content">
-        <item>政治造谣</item>
-        <item>色情低俗</item>
-        <item>广告营销</item>
-        <item>欺诈信息</item>
-    </string-array>
-
     <string name="one_on_one_chat_hot_topic">热聊话题</string>
     <string name="one_on_one_chat_audio_title">按住说话</string>
     <string name="one_on_one_accost_text">真心交友，愿意聊聊吗？\n很喜欢你呢~</string>
@@ -264,7 +257,7 @@
     <string name="one_on_one_chat_text_hint">请输入信息</string>
     <string name="one_on_one_chat_inputing">对方正在输入中...</string>
     <string name="one_one_one_littie_secre">云信派对小秘书</string>
-    <string name="one_one_one_report_success">举报成功</string>
     <string name="one_on_one_virtual_call_error">网络异常，请重新拨打</string>
     <string name="one_on_one_virtual_call_end">通话已结束哦~</string>
+    <string name="one_on_one_virtual_tips">当前账号仅用于功能测试（限制10次）详情请咨询官网</string>
 </resources>

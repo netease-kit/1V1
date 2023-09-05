@@ -145,7 +145,7 @@ public class ChatPopMenu {
 
     @NonNull
     @Override
-    public MenuAdapter.MenuItemViewHolder onCreateViewHolder(
+    public MenuItemViewHolder onCreateViewHolder(
         @NonNull ViewGroup parent, int viewType) {
       View view =
           LayoutInflater.from(IMKitClient.getApplicationContext())
@@ -154,7 +154,7 @@ public class ChatPopMenu {
     }
 
     @Override
-    public void onBindViewHolder(@NonNull MenuAdapter.MenuItemViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull MenuItemViewHolder holder, int position) {
       ChatPopMenuAction chatPopMenuAction = getChatPopMenuAction(position);
       holder.title.setText(chatPopMenuAction.getTitle());
       Drawable drawable =

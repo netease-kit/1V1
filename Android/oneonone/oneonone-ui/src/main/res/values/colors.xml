@@ -54,6 +54,7 @@
     <color name="color_f9627c">#F9627c</color>
     <color name="color_fc435b">#FC435B</color>
     <color name="color_2a6bf2">#2A6BF2</color>
+    <color name="color_fee3e3">#FEE3E3</color>
 
     <color name="colorPrimary">@color/white</color>
     <color name="colorPrimaryDark">@color/white</color>

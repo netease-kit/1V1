@@ -711,7 +711,6 @@ public abstract class ChatBaseMessageViewHolder extends CommonBaseMessageViewHol
       baseViewBinding.otherUserAvatar.setVisibility(View.GONE);
       baseViewBinding.myAvatar.setVisibility(View.GONE);
       baseViewBinding.messageStatus.setVisibility(View.GONE);
-      baseViewBinding.tvTime.setVisibility(View.GONE);
     }
     // 撤回消息消息状态隐藏
     if (messageBean.isRevoked()) {

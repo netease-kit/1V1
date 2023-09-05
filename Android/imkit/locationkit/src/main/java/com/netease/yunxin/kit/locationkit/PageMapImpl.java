@@ -49,7 +49,7 @@ public class PageMapImpl
   private ChatMapWrapper chatMapWrapper;
 
   // location
-  private LocationSource.OnLocationChangedListener mListener;
+  private OnLocationChangedListener mListener;
   private AMapLocationClient mLocationClient;
   private ChatLocationBean currentLocation;
   private String searchText = "searchText";

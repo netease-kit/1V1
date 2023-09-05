@@ -81,7 +81,7 @@ public class CustomP2PViewModel extends AndroidViewModel {
           if (event != null && !event.isEmpty()) {
             for (IMMessageInfo messageInfo : event) {
               // 消息发送者是当前会话对象
-              if (ChatUtil.isCurrentConversationMessage(messageInfo, sessionId)) {
+              if (ChatUtil.isCurrentSessionMessage(messageInfo, sessionId)) {
                 if (ChatUtil.isGiftMessageType(messageInfo)) {
                   giftMessageLiveData.setValue(
                       (GiftAttachment) messageInfo.getMessage().getAttachment());

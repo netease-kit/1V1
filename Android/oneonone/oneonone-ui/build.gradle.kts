@@ -23,7 +23,7 @@ dependencies {
     implementation("androidx.constraintlayout:constraintlayout:2.1.3")
     implementation("androidx.recyclerview:recyclerview:1.2.1")
 
-    api("com.netease.yunxin:nertc-base:5.4.0")
+    api("com.netease.yunxin:nertc-base:5.4.8")
     api("com.netease.yunxin.kit.call:call-ui:2.0.1"){
         exclude("com.netease.yunxin","nertc-base")
     }
@@ -40,10 +40,10 @@ dependencies {
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("androidx.navigation:navigation-fragment-ktx:2.4.2")
     implementation("androidx.navigation:navigation-ui-ktx:2.4.2")
-    implementation("com.netease.yunxin.kit.common:common-ui:1.3.0")
+    implementation("com.netease.yunxin.kit.common:common-ui:1.3.1")
 
     implementation(project(":beauty:beauty-faceunity"))
-    implementation("com.netease.yunxin.kit.core:corekit:1.3.6")
+    implementation("com.netease.yunxin.kit.core:corekit:1.4.1")
     api(project(":entertainment:entertainment-common"))
     // 会话列表功能组件
     api(project(":imkit:conversationkit-ui"))

@@ -19,19 +19,20 @@ import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
-
 import com.netease.nimlib.sdk.NIMClient;
 import com.netease.nimlib.sdk.RequestCallbackWrapper;
 import com.netease.nimlib.sdk.StatusCode;
 import com.netease.nimlib.sdk.auth.AuthServiceObserver;
 import com.netease.nimlib.sdk.avsignalling.constant.ChannelType;
 import com.netease.nimlib.sdk.avsignalling.model.ChannelFullInfo;
+import com.netease.yunxin.app.oneonone.ui.OneOnOneUI;
 import com.netease.yunxin.app.oneonone.ui.R;
 import com.netease.yunxin.app.oneonone.ui.constant.AppParams;
 import com.netease.yunxin.app.oneonone.ui.constant.CallConfig;
 import com.netease.yunxin.app.oneonone.ui.fragment.CallFragment;
 import com.netease.yunxin.app.oneonone.ui.fragment.InTheAudioCallFragment;
 import com.netease.yunxin.app.oneonone.ui.fragment.InTheVideoCallFragment;
+import com.netease.yunxin.app.oneonone.ui.utils.HighKeepAliveUtil;
 import com.netease.yunxin.app.oneonone.ui.utils.LogUtil;
 import com.netease.yunxin.app.oneonone.ui.utils.NECallback;
 import com.netease.yunxin.app.oneonone.ui.viewmodel.CallViewModel;
@@ -40,11 +41,11 @@ import com.netease.yunxin.kit.alog.ALog;
 import com.netease.yunxin.kit.common.ui.utils.Permission;
 import com.netease.yunxin.kit.common.ui.utils.ToastX;
 import com.netease.yunxin.kit.entertainment.common.utils.BluetoothHeadsetUtil;
-
 import com.netease.yunxin.nertc.nertcvideocall.model.JoinChannelCallBack;
 import com.netease.yunxin.nertc.nertcvideocall.model.NERTCCallingDelegate;
 import com.netease.yunxin.nertc.nertcvideocall.model.NERTCVideoCall;
 import com.netease.yunxin.nertc.nertcvideocall.model.impl.state.CallState;
+import com.netease.yunxin.nertc.ui.CallKitUI;
 import com.netease.yunxin.nertc.ui.base.AVChatSoundPlayer;
 import com.netease.yunxin.nertc.ui.base.CallParam;
 import com.netease.yunxin.nertc.ui.base.CommonCallActivity;
@@ -91,17 +92,23 @@ public class CallActivity extends CommonCallActivity {
             public void disconnect() {}
           };
 
-  private final com.netease.nimlib.sdk.Observer<StatusCode> imOnlineStatusObserver= statusCode -> {
-      if (statusCode==StatusCode.KICKOUT){
-        finish();
-      }
-  };
+  private final com.netease.nimlib.sdk.Observer<StatusCode> imOnlineStatusObserver =
+      statusCode -> {
+        if (statusCode == StatusCode.KICKOUT) {
+          finish();
+        }
+      };
 
   @RequiresApi(api = Build.VERSION_CODES.HONEYCOMB)
   @Override
   public void doOnCreate(@Nullable Bundle savedInstanceState) {
     adapterStatusBar();
     super.doOnCreate(savedInstanceState);
+    if (!CallKitUI.INSTANCE.getInit()) {
+      ALog.e(TAG, "CallKitUI not init");
+      finish();
+      return;
+    }
     callParam = getCallParam();
     if (isVirtualCall() && !callParam.isCalled()) {
       virtualCallViewModel = new ViewModelProvider(this).get(VirtualCallViewModel.class);
@@ -118,7 +125,7 @@ public class CallActivity extends CommonCallActivity {
           savedInstanceState, Manifest.permission.RECORD_AUDIO, Manifest.permission.CAMERA);
     }
     NIMClient.getService(AuthServiceObserver.class)
-            .observeOnlineStatus(imOnlineStatusObserver, true);
+        .observeOnlineStatus(imOnlineStatusObserver, true);
     if (savedInstanceState == null && !getSupportFragmentManager().isDestroyed()) {
       if (virtualCallViewModel != null) {
         handleVirtualRoomEvent();
@@ -128,6 +135,7 @@ public class CallActivity extends CommonCallActivity {
         handleFinishEvent();
       }
     }
+    HighKeepAliveUtil.openHighKeepAlive(this, OneOnOneUI.getInstance().getAppKey());
   }
 
   private void loadInTheCallFragment(Bundle savedInstanceState) {
@@ -225,7 +233,7 @@ public class CallActivity extends CommonCallActivity {
           .beginTransaction()
           .setReorderingAllowed(true)
           .replace(R.id.fragment_container_view, CallFragment.class, bundle)
-          .commit();
+          .commitAllowingStateLoss();
       if (autoCall && virtualCallViewModel != null) {
         virtualCallViewModel.startCountDown();
       }
@@ -341,7 +349,7 @@ public class CallActivity extends CommonCallActivity {
   @Override
   protected void onDestroy() {
     NIMClient.getService(AuthServiceObserver.class)
-            .observeOnlineStatus(imOnlineStatusObserver, false);
+        .observeOnlineStatus(imOnlineStatusObserver, false);
     BluetoothHeadsetUtil.unregisterBluetoothHeadsetStatusObserver(
         bluetoothHeadsetStatusChangeListener);
     if (viewModel != null) {
@@ -354,6 +362,7 @@ public class CallActivity extends CommonCallActivity {
       virtualCallViewModel.getSwitchToInTheCall().removeObserver(switchInToTheVirtualCallObserver);
       virtualCallViewModel.getPlayError().removeObserver(playErrorObserver);
     }
+    HighKeepAliveUtil.closeHighKeepAlive(this);
     super.onDestroy();
   }
 

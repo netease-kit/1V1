@@ -1,21 +1,22 @@
+
 // Copyright (c) 2022 NetEase, Inc. All rights reserved.
 // Use of this source code is governed by a MIT license that can be
 // found in the LICENSE file.
 
-package com.netease.yunxin.app.oneonone.callkit;
+package com.netease.yunxin.app.oneonone.ui.utils.callkit;
 
 import com.netease.nimlib.sdk.avsignalling.model.SignallingPushConfig;
-import com.netease.yunxin.app.oneonone.R;
 import com.netease.yunxin.app.oneonone.ui.constant.AppParams;
+import com.netease.yunxin.app.oneonone.ui.utils.CallKitUtil;
 import com.netease.yunxin.kit.alog.ALog;
-import com.netease.yunxin.kit.entertainment.common.utils.Utils;
+import com.netease.yunxin.kit.common.utils.XKitUtils;
 import com.netease.yunxin.nertc.nertcvideocall.bean.InvitedInfo;
 import com.netease.yunxin.nertc.nertcvideocall.model.PushConfigProvider;
 import java.util.HashMap;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class RtcPushConfigProvider implements PushConfigProvider {
+public class PartyPushConfigProvider implements PushConfigProvider {
   private static final String TAG = "PartyPushConfigProvider";
 
   @Override
@@ -32,6 +33,6 @@ public class RtcPushConfigProvider implements PushConfigProvider {
     HashMap<String, Object> pushPayload = new HashMap<>();
     pushPayload.put("attachment", invitedInfo.attachment);
     return new SignallingPushConfig(
-        true, Utils.getApp().getString(R.string.one_on_one_app_name), nickname, pushPayload);
+        true, CallKitUtil.getAppName(XKitUtils.getApplicationContext()), nickname, pushPayload);
   }
 }

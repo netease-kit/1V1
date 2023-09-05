@@ -13,7 +13,7 @@ import android.view.ViewGroup;
 import android.widget.PopupWindow;
 import androidx.appcompat.app.AppCompatActivity;
 import com.netease.yunxin.app.oneonone.ui.R;
-import com.netease.yunxin.app.oneonone.ui.dialog.ReportDialog;
+import com.netease.yunxin.kit.entertainment.common.dialog.ReportDialog;
 
 public class SettingPopupWindows extends PopupWindow {
   private static final String TAG = "SettingPopupWindows";

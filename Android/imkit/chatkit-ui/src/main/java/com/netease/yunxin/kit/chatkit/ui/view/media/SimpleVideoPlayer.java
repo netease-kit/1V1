@@ -290,8 +290,8 @@ public class SimpleVideoPlayer extends ConstraintLayout {
 
     if (screenRatio > videoRatio) {
       int newWidth = screenHeight * width / height;
-      ConstraintLayout.LayoutParams params =
-          (ConstraintLayout.LayoutParams) binding.videoView.getLayoutParams();
+      LayoutParams params =
+          (LayoutParams) binding.videoView.getLayoutParams();
       params.width = newWidth;
       params.height = screenHeight;
       int margin = (screenWidth - newWidth) / 2;
@@ -299,8 +299,8 @@ public class SimpleVideoPlayer extends ConstraintLayout {
       binding.videoView.setLayoutParams(params);
     } else {
       int newHeight = screenWidth * height / width;
-      ConstraintLayout.LayoutParams params =
-          (ConstraintLayout.LayoutParams) binding.videoView.getLayoutParams();
+      LayoutParams params =
+          (LayoutParams) binding.videoView.getLayoutParams();
       params.width = screenWidth;
       params.height = newHeight;
       int margin = (screenHeight - newHeight) / 2;
