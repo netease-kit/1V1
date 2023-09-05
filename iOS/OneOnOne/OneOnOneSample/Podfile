@@ -1,0 +1,93 @@
+# Uncomment the next line to define a global platform for your project
+# platform :ios, '9.0'
+# 引入配置文件
+require_relative '../../PodConfigs/config_third.rb'
+require_relative '../../PodConfigs/config_local_common.rb'
+require_relative '../../PodConfigs/config_local_core.rb'
+require_relative '../../PodConfigs/config_local_im.rb'
+require_relative '../../PodConfigs/config_local_room.rb'
+require_relative '../../PodConfigs/config_local_social.rb'
+
+target 'OneOnOneSample' do
+# Comment the next line if you don't want to use dynamic frameworks
+use_frameworks!
+
+# 工程的podspec引用采用源码的环境变量
+ENV['USE_SOURCE_FILES'] = 'true'
+
+#  use_frameworks!
+#  plugin 'cocoapods-pod-sign'
+#  skip_pod_bundle_sign
+
+
+
+def thirdPartyLibraryPod
+pod 'AFNetworking', '4.0'
+end
+
+pod NIMSDK.name, NIMSDK.version
+pod NERtcSDK.RtcBasic, NERtcSDK.version
+pod SDWebImage.name, SDWebImage.version
+pod Masonry.name, Masonry.version
+
+thirdPartyLibraryPod
+
+#源码依赖
+
+pod 'NEUIKit', :path => '../../UIKit/NEUIKit/NEUIKit.podspec'
+pod 'LottieSwift', :path => '../../third_party/lottie/LottieSwift.podspec'
+pod 'NESocialUIKit', :path => '../../Party/NESocialUIKit/NESocialUIKit.podspec'
+
+
+
+# 1v1
+pod 'NEOneOnOneKit', :path => '../../OneOnOne/OneOnOneKit/NEOneOnOneKit.podspec'
+pod 'NEOneOnOneUIKit', :path => '../../OneOnOne/OneOnOneUIKit/NEOneOnOneUIKit.podspec'
+pod 'NEOneOnOneChatUIKit', :path => '../../OneOnOne/OneOnOneChatUIKit/NEOneOnOneChatUIKit.podspec'
+pod 'NEConversationUIKit', :path => '../../IMUIKit/NEConversationUIKit/NEConversationUIKit.podspec'
+pod 'NEChatUIKit',:path => '../../IMUIKit/NEChatUIKit/NEChatUIKit.podspec'
+
+
+#设置
+pod 'FaceUnity', :path => '../../third_party/FaceUnity/FaceUnity.podspec'
+
+#登录
+pod 'NELoginSample',:path => '../NELoginSample/NELoginSample.podspec'
+
+#发布需要打开注释
+#远端依赖
+#GitPushStart
+pod NERoomKit.Special_All , NERoomKit.version
+pod IHProgressHUD.name
+pod NERtcCallUIKit.name,NERtcCallUIKit.version
+pod NERtcCallKit.name,NERtcCallKit.version
+pod NECommonKit.name,NECommonKit.version
+pod NECommonUIKit.name,NECommonUIKit.version
+pod NECoreIMKit.name,NECoreIMKit.version
+pod NECoreKit.name , NECoreKit.version
+pod NEChatKit.name , NEChatKit.version
+
+#GitPushEnd
+
+
+#地图插件
+#GitPushStart
+pod NEMapKit.name,NEMapKit.version
+#GitPushEnd
+
+#发布需要删除
+
+end
+
+# ---------------------------- 公用钩子处理 ----------------------------
+post_install do |installer|
+installer.pods_project.targets.each do |target|
+target.build_configurations.each do |config|
+config.build_settings['ENABLE_BITCODE'] = 'NO'
+end
+end
+# M1 模拟器运行打开一下代码
+installer.pods_project.build_configurations.each do |config|
+config.build_settings["EXCLUDED_ARCHS[sdk=iphonesimulator*]"] = "arm64"
+end
+end

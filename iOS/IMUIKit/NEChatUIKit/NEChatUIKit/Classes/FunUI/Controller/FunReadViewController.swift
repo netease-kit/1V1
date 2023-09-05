@@ -2,10 +2,10 @@
 // Use of this source code is governed by a MIT license that can be
 // found in the LICENSE file.
 
-import UIKit
-import NIMSDK
-import NECoreIMKit
 import NECommonUIKit
+import NECoreIMKit
+import NIMSDK
+import UIKit
 
 @objcMembers
 open class FunReadViewController: NEBaseReadViewController {
@@ -19,7 +19,7 @@ open class FunReadViewController: NEBaseReadViewController {
 
     readTableView.register(
       FunUserTableViewCell.self,
-      forCellReuseIdentifier: "\(FunUserTableViewCell.self)"
+      forCellReuseIdentifier: "\(UserBaseTableViewCell.self)"
     )
     readTableView.rowHeight = 64
 

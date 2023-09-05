@@ -3,8 +3,8 @@
 // Use of this source code is governed by a MIT license that can be
 // found in the LICENSE file.
 
-import UIKit
 import NIMSDK
+import UIKit
 
 @objcMembers
 open class SearchSessionHeaderView: SearchSessionBaseView {
@@ -59,11 +59,11 @@ open class ConversationSearchController: NEBaseConversationSearchController {
     ])
     tableView.register(
       ConversationSearchCell.self,
-      forCellReuseIdentifier: "\(NSStringFromClass(ConversationSearchCell.self))"
+      forCellReuseIdentifier: "\(NSStringFromClass(NEBaseConversationSearchCell.self))"
     )
     tableView.register(
       SearchSessionHeaderView.self,
-      forHeaderFooterViewReuseIdentifier: "\(NSStringFromClass(SearchSessionHeaderView.self))"
+      forHeaderFooterViewReuseIdentifier: "\(NSStringFromClass(SearchSessionBaseView.self))"
     )
   }
 }

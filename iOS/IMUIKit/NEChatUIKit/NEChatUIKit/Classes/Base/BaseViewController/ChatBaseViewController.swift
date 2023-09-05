@@ -3,9 +3,9 @@
 // Use of this source code is governed by a MIT license that can be
 // found in the LICENSE file.
 
-import UIKit
-import NECoreKit
 import NECommonUIKit
+import NECoreKit
+import UIKit
 
 @objcMembers
 open class ChatBaseViewController: UIViewController, UIGestureRecognizerDelegate {
@@ -36,6 +36,7 @@ open class ChatBaseViewController: UIViewController, UIGestureRecognizerDelegate
     if let useSystemNav = NEConfigManager.instance.getParameter(key: useSystemNav) as? Bool, useSystemNav {
       navigationController?.isNavigationBarHidden = false
       setupBackUI()
+      topConstant = NEConstant.navigationAndStatusHeight
     } else {
       navigationController?.isNavigationBarHidden = true
       topConstant = NEConstant.navigationAndStatusHeight
@@ -54,12 +55,14 @@ open class ChatBaseViewController: UIViewController, UIGestureRecognizerDelegate
 
   private func setupBackUI() {
     let image = UIImage.ne_imageNamed(name: "backArrow")?.withRenderingMode(.alwaysOriginal)
-    navigationItem.leftBarButtonItem = UIBarButtonItem(
+    let backItem = UIBarButtonItem(
       image: image,
       style: .plain,
       target: self,
       action: #selector(backEvent)
     )
+    backItem.accessibilityIdentifier = "id.backArrow"
+    navigationItem.leftBarButtonItem = backItem
     navigationController?.navigationBar.topItem?.backBarButtonItem = UIBarButtonItem()
     navigationController?.navigationBar.topItem?.backBarButtonItem?.tintColor = .ne_darkText
   }
