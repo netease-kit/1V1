@@ -18,14 +18,17 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
-import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
+
 import com.netease.yunxin.kit.common.utils.SizeUtils;
 import com.netease.yunxin.kit.entertainment.common.R;
 import com.netease.yunxin.kit.entertainment.common.adapter.LiveBaseAdapter;
 import com.netease.yunxin.kit.entertainment.common.dialog.BottomBaseDialog;
+
 import java.util.List;
+
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 public class GiftDialog extends BottomBaseDialog {
 
@@ -73,9 +76,6 @@ public class GiftDialog extends BottomBaseDialog {
   protected void renderBottomView(FrameLayout parent) {
     View bottomView =
         LayoutInflater.from(getContext()).inflate(R.layout.view_gift_dialog_bottom, parent);
-    SelectMemberSendGiftView selectMemberSendGiftView =
-        bottomView.findViewById(R.id.select_member_view);
-    selectMemberSendGiftView.setActivityContext(activity);
     // 礼物列表初始化
     RecyclerView rvGiftList = bottomView.findViewById(R.id.rv_dialog_gift_list);
     rvGiftList.setLayoutManager(new GridLayoutManager(getContext(), GIFT_COUNT));
@@ -88,10 +88,7 @@ public class GiftDialog extends BottomBaseDialog {
         giftCount -> {
           if (sendListener != null) {
             dismiss();
-            sendListener.onSendGift(
-                adapter.getFocusedInfo().getGiftId(),
-                giftCount,
-                selectMemberSendGiftView.getSelectUserUuid());
+            sendListener.onSendGift(adapter.getFocusedInfo().getGiftId(), giftCount);
           }
         });
   }
@@ -108,7 +105,7 @@ public class GiftDialog extends BottomBaseDialog {
 
   /** 礼物发送回调 */
   public interface GiftSendListener {
-    void onSendGift(int giftId, int giftCount, List<String> userUuids);
+    void onSendGift(int giftId, int giftCount);
   }
 
   /** 内部礼物列表 adapter */

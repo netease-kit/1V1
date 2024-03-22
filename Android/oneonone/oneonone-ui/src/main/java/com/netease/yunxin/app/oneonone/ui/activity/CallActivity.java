@@ -20,7 +20,6 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import com.netease.nimlib.sdk.NIMClient;
-import com.netease.nimlib.sdk.RequestCallbackWrapper;
 import com.netease.nimlib.sdk.StatusCode;
 import com.netease.nimlib.sdk.auth.AuthServiceObserver;
 import com.netease.nimlib.sdk.avsignalling.constant.ChannelType;
@@ -38,17 +37,21 @@ import com.netease.yunxin.app.oneonone.ui.utils.NECallback;
 import com.netease.yunxin.app.oneonone.ui.viewmodel.CallViewModel;
 import com.netease.yunxin.app.oneonone.ui.viewmodel.VirtualCallViewModel;
 import com.netease.yunxin.kit.alog.ALog;
+import com.netease.yunxin.kit.alog.ParameterMap;
+import com.netease.yunxin.kit.call.NEResultObserver;
+import com.netease.yunxin.kit.call.p2p.NECallEngine;
+import com.netease.yunxin.kit.call.p2p.model.NECallInfo;
 import com.netease.yunxin.kit.common.ui.utils.Permission;
 import com.netease.yunxin.kit.common.ui.utils.ToastX;
 import com.netease.yunxin.kit.entertainment.common.utils.BluetoothHeadsetUtil;
-import com.netease.yunxin.nertc.nertcvideocall.model.JoinChannelCallBack;
-import com.netease.yunxin.nertc.nertcvideocall.model.NERTCCallingDelegate;
-import com.netease.yunxin.nertc.nertcvideocall.model.NERTCVideoCall;
+import com.netease.yunxin.nertc.nertcvideocall.bean.CommonResult;
 import com.netease.yunxin.nertc.nertcvideocall.model.impl.state.CallState;
+import com.netease.yunxin.nertc.ui.CallKitNotificationConfig;
 import com.netease.yunxin.nertc.ui.CallKitUI;
 import com.netease.yunxin.nertc.ui.base.AVChatSoundPlayer;
 import com.netease.yunxin.nertc.ui.base.CallParam;
 import com.netease.yunxin.nertc.ui.base.CommonCallActivity;
+import com.netease.yunxin.nertc.ui.p2p.P2PUIConfig;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -116,14 +119,16 @@ public class CallActivity extends CommonCallActivity {
     } else {
       viewModel = new ViewModelProvider(this).get(CallViewModel.class);
     }
-    showCallingUI(savedInstanceState, false);
-    loadInTheCallFragment(savedInstanceState);
-    if (callParam.getChannelType() == ChannelType.AUDIO.getValue()) {
-      handlePermission(savedInstanceState, Manifest.permission.RECORD_AUDIO);
-    } else if (callParam.getChannelType() == ChannelType.VIDEO.getValue()) {
-      handlePermission(
-          savedInstanceState, Manifest.permission.RECORD_AUDIO, Manifest.permission.CAMERA);
+    if (!isFromFloatWindow()) {
+      showCallingUI(savedInstanceState, false);
+      if (callParam.getCallType() == ChannelType.AUDIO.getValue()) {
+        handlePermission(savedInstanceState, Manifest.permission.RECORD_AUDIO);
+      } else if (callParam.getCallType() == ChannelType.VIDEO.getValue()) {
+        handlePermission(
+            savedInstanceState, Manifest.permission.RECORD_AUDIO, Manifest.permission.CAMERA);
+      }
     }
+    loadInTheCallFragment(savedInstanceState);
     NIMClient.getService(AuthServiceObserver.class)
         .observeOnlineStatus(imOnlineStatusObserver, true);
     if (savedInstanceState == null && !getSupportFragmentManager().isDestroyed()) {
@@ -136,11 +141,30 @@ public class CallActivity extends CommonCallActivity {
       }
     }
     HighKeepAliveUtil.openHighKeepAlive(this, OneOnOneUI.getInstance().getAppKey());
+    BluetoothHeadsetUtil.registerBluetoothHeadsetStatusObserver(
+        bluetoothHeadsetStatusChangeListener);
+    if (BluetoothHeadsetUtil.isBluetoothHeadsetConnected()
+        && !BluetoothHeadsetUtil.hasBluetoothConnectPermission(CallActivity.this)) {
+      BluetoothHeadsetUtil.requestBluetoothConnectPermission(CallActivity.this);
+    }
+  }
+
+  @Nullable
+  @Override
+  protected P2PUIConfig provideUIConfig(@Nullable CallParam callParam) {
+    ALog.d(TAG, new ParameterMap("provideUIConfig").append("param", callParam).toValue());
+    return new P2PUIConfig.Builder()
+        //        .enableForegroundService(true)
+        .foregroundNotificationConfig(new CallKitNotificationConfig(R.mipmap.ic_launcher))
+        .enableFloatingWindow(true)
+        .enableAutoFloatingWindowWhenHome(true)
+        .enableVirtualBlur(true)
+        .build();
   }
 
   private void loadInTheCallFragment(Bundle savedInstanceState) {
     if (savedInstanceState == null && !getSupportFragmentManager().isDestroyed()) {
-      if (callParam.getChannelType() == ChannelType.VIDEO.getValue()) {
+      if (callParam.getCallType() == ChannelType.VIDEO.getValue()) {
         inTheCallFragment = new InTheVideoCallFragment();
       } else {
         inTheCallFragment = new InTheAudioCallFragment();
@@ -182,8 +206,7 @@ public class CallActivity extends CommonCallActivity {
                 }
                 ArrayList<String> list = new ArrayList<>(Arrays.asList(permissions));
                 if (granted.containsAll(list)) {
-                  if (callParam.isCalled()
-                      && getVideoCall().getCurrentState() == CallState.STATE_IDLE) {
+                  if (callParam.isCalled() && currentCallState() == CallState.STATE_IDLE) {
                     releaseAndFinish(false);
                     return;
                   }
@@ -237,12 +260,6 @@ public class CallActivity extends CommonCallActivity {
       if (autoCall && virtualCallViewModel != null) {
         virtualCallViewModel.startCountDown();
       }
-      BluetoothHeadsetUtil.registerBluetoothHeadsetStatusObserver(
-          bluetoothHeadsetStatusChangeListener);
-      if (BluetoothHeadsetUtil.isBluetoothHeadsetConnected()
-          && !BluetoothHeadsetUtil.hasBluetoothConnectPermission(CallActivity.this)) {
-        BluetoothHeadsetUtil.requestBluetoothConnectPermission(CallActivity.this);
-      }
     }
   }
 
@@ -252,11 +269,6 @@ public class CallActivity extends CommonCallActivity {
   }
 
   @NonNull
-  @Override
-  protected NERTCCallingDelegate provideRtcDelegate() {
-    return null;
-  }
-
   public void switchToInTheCallFragment() {
     stopRing();
     findViewById(R.id.fragment_in_the_call).setVisibility(View.VISIBLE);
@@ -271,45 +283,42 @@ public class CallActivity extends CommonCallActivity {
 
   public void rtcCall(NECallback<ChannelFullInfo> callback) {
     doCall(
-        new JoinChannelCallBack() {
+        new NEResultObserver<CommonResult<NECallInfo>>() {
           @Override
-          public void onJoinChannel(ChannelFullInfo channelFullInfo) {
-            LogUtil.i(TAG, "rtcCall onJoinChannel");
-            callback.onSuccess(channelFullInfo);
-          }
-
-          @Override
-          public void onJoinFail(String msg, int code) {
-            LogUtil.e(TAG, "rtcCall,onJoinFail msg:" + msg + ",code:" + code);
-            callback.onError(code, msg);
+          public void onResult(CommonResult<NECallInfo> neCallInfoCommonResult) {
+            if (neCallInfoCommonResult.isSuccessful()) {
+              LogUtil.i(TAG, "rtcCall success");
+            } else {
+              LogUtil.e(TAG, "rtcCall fail:" + neCallInfoCommonResult.msg);
+              callback.onError(neCallInfoCommonResult.code, neCallInfoCommonResult.msg);
+            }
           }
         });
   }
 
   public void rtcAccept() {
     doAccept(
-        new JoinChannelCallBack() {
+        new NEResultObserver<CommonResult<NECallInfo>>() {
           @Override
-          public void onJoinChannel(ChannelFullInfo channelFullInfo) {
-            LogUtil.i(TAG, "rtcAccept onJoinChannel");
-          }
-
-          @Override
-          public void onJoinFail(String msg, int code) {
-            LogUtil.e(TAG, "rtcAccept,onJoinFail msg:" + msg + ",code:" + code);
-            ToastX.showShortToast(getString(R.string.one_on_one_network_error));
+          public void onResult(CommonResult<NECallInfo> neCallInfoCommonResult) {
+            if (neCallInfoCommonResult.isSuccessful()) {
+              LogUtil.i(TAG, "rtcAccept success");
+            } else {
+              LogUtil.e(TAG, "rtcAccept fail:" + neCallInfoCommonResult.msg);
+              ToastX.showShortToast(getString(R.string.one_on_one_network_error));
+            }
           }
         });
   }
 
   public void rtcHangup(NECallback<Integer> callback) {
     doHangup(
-        new RequestCallbackWrapper<Void>() {
+        new NEResultObserver<CommonResult<Void>>() {
           @Override
-          public void onResult(int code, Void result, Throwable exception) {
-            LogUtil.i(TAG, "rtcHangup,code:" + code + ",exception:" + exception);
+          public void onResult(CommonResult<Void> voidCommonResult) {
+            //                 LogUtil.i(TAG, "rtcHangup,code:" + code + ",exception:" + exception);
             if (callback != null) {
-              callback.onSuccess(code);
+              callback.onSuccess(voidCommonResult.code);
             }
           }
         });
@@ -319,8 +328,8 @@ public class CallActivity extends CommonCallActivity {
     return callParam;
   }
 
-  public NERTCVideoCall getRtcCall() {
-    return getVideoCall();
+  public NECallEngine getRtcCall() {
+    return getCallEngine();
   }
 
   @RequiresApi(api = Build.VERSION_CODES.HONEYCOMB)
@@ -372,7 +381,7 @@ public class CallActivity extends CommonCallActivity {
   }
 
   private void stopRing() {
-    AVChatSoundPlayer.INSTANCE.stop(CallActivity.this);
+    AVChatSoundPlayer.stop(CallActivity.this);
   }
 
   public boolean isVirtualCall() {
@@ -386,5 +395,13 @@ public class CallActivity extends CommonCallActivity {
       ALog.e(TAG, "isVirtualCall json parse exception:" + e);
     }
     return false;
+  }
+
+  public void doShowFloatingWindow() {
+    super.doShowFloatingWindow();
+  }
+
+  public boolean isFromFloatWindow() {
+    return super.isFromFloatingWindow();
   }
 }

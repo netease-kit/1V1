@@ -15,7 +15,6 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.Observer;
-import com.netease.lava.nertc.sdk.NERtcEx;
 import com.netease.yunxin.app.oneonone.ui.R;
 import com.netease.yunxin.app.oneonone.ui.activity.CallActivity;
 import com.netease.yunxin.app.oneonone.ui.databinding.FragmentInAudioCallBinding;
@@ -32,8 +31,6 @@ public class InTheAudioCallFragment extends InTheBaseCallFragment {
   private static final String TAG = "InTheAudioCallFragment";
   private FragmentInAudioCallBinding binding;
   private CallActivity activity;
-  private boolean muteLocal = false;
-  private long otherRtcUid;
 
   @Override
   public void onAttach(@NonNull Context context) {
@@ -116,16 +113,6 @@ public class InTheAudioCallFragment extends InTheBaseCallFragment {
                 binding.tvSubtitle.setText(TimeUtil.formatSecondTime(aLong));
               }
             });
-    viewModel
-        .getOtherRtcUid()
-        .observe(
-            viewLifecycleOwner,
-            new Observer<Long>() {
-              @Override
-              public void onChanged(Long aLong) {
-                otherRtcUid = aLong;
-              }
-            });
 
     if (virtualCallViewModel != null) {
       virtualCallViewModel
@@ -134,6 +121,29 @@ public class InTheAudioCallFragment extends InTheBaseCallFragment {
               viewLifecycleOwner,
               aLong -> binding.tvSubtitle.setText(TimeUtil.formatSecondTime(aLong)));
     }
+  }
+
+  @Override
+  protected void handleFloatWindowEvent() {
+    refreshUIByFloatWindowEvent();
+  }
+
+  private void refreshUIByFloatWindowEvent() {
+
+    binding
+        .bottomBar
+        .getViewBinding()
+        .ivMicrophone
+        .setImageResource(
+            viewModel.isMuteLocalAudio()
+                ? R.drawable.icon_microphone_mute
+                : R.drawable.icon_microphone);
+    binding
+        .bottomBar
+        .getViewBinding()
+        .ivAudio
+        .setImageResource(
+            !viewModel.isSpeakerOn() ? R.drawable.icon_audio_mute : R.drawable.icon_audio);
   }
 
   private void handleSecurityTips(SecurityTipsModel securityTipsModel) {
@@ -170,6 +180,13 @@ public class InTheAudioCallFragment extends InTheBaseCallFragment {
           }
         });
 
+    if (activity.isVirtualCall()) {
+      binding.floatWindow.setVisibility(View.GONE);
+    }
+    binding.floatWindow.setOnClickListener(
+        v -> {
+          activity.doShowFloatingWindow();
+        });
     binding.sendGift.setOnClickListener(
         v -> {
           showGiftDialog();
@@ -177,20 +194,18 @@ public class InTheAudioCallFragment extends InTheBaseCallFragment {
   }
 
   private void handleAudioEvent() {
-    boolean lastSpeakerOn = NERtcEx.getInstance().isSpeakerphoneOn();
-    boolean currentSpeakOn = !lastSpeakerOn;
-    NERtcEx.getInstance().setSpeakerphoneOn(currentSpeakOn);
+    viewModel.doConfigSpeaker(!viewModel.isSpeakerOn());
     binding
         .bottomBar
         .getViewBinding()
         .ivAudio
-        .setImageResource(currentSpeakOn ? R.drawable.icon_audio : R.drawable.icon_audio_mute);
+        .setImageResource(
+            viewModel.isSpeakerOn() ? R.drawable.icon_audio : R.drawable.icon_audio_mute);
   }
 
   private void handleMicroPhoneEvent() {
-    muteLocal = !muteLocal;
-    activity.getRtcCall().muteLocalAudio(muteLocal);
-    if (muteLocal) {
+    viewModel.doMuteAudio(!viewModel.isMuteLocalAudio());
+    if (viewModel.isMuteLocalAudio()) {
       binding
           .bottomBar
           .getViewBinding()

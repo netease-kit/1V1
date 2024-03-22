@@ -11,8 +11,9 @@ import com.netease.yunxin.app.oneonone.ui.utils.RtcUtil;
 import com.netease.yunxin.nertc.nertcvideocall.model.NERtcCallExtension;
 
 public class PartyNERtcCallExtension extends NERtcCallExtension {
+
   @Override
-  public void beforeJoinChannel() {
+  public int toJoinChannel(String token, String channelName, long rtcUid) {
     NERtcParameters parameters = new NERtcParameters();
     // 开启服务器录制
     parameters.set(NERtcParameters.KEY_SERVER_RECORD_AUDIO, true);
@@ -27,5 +28,6 @@ public class PartyNERtcCallExtension extends NERtcCallExtension {
     configRtcStatsObserver();
     // 该方法在加入房间前后均可调用。
     RtcUtil.enableDualStreamMode(false);
+    return super.toJoinChannel(token, channelName, rtcUid);
   }
 }

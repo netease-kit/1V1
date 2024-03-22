@@ -15,15 +15,16 @@ import com.netease.yunxin.app.oneonone.ui.R;
 import com.netease.yunxin.app.oneonone.ui.activity.CallActivity;
 import com.netease.yunxin.app.oneonone.ui.constant.AppParams;
 import com.netease.yunxin.app.oneonone.ui.constant.CallConfig;
-import com.netease.yunxin.app.oneonone.ui.utils.callkit.CustomCallOrderHelper;
+import com.netease.yunxin.app.oneonone.ui.utils.callkit.CustomCallOrderProvider;
 import com.netease.yunxin.app.oneonone.ui.utils.callkit.PartyNERtcCallExtension;
-import com.netease.yunxin.app.oneonone.ui.utils.callkit.PartyPushConfigProvider;
 import com.netease.yunxin.kit.alog.ALog;
+import com.netease.yunxin.kit.call.p2p.NECallEngine;
+import com.netease.yunxin.kit.call.p2p.internal.NECallEngineImpl;
 import com.netease.yunxin.kit.call.p2p.model.NECallInitRtcMode;
+import com.netease.yunxin.kit.call.p2p.model.NEInviteInfo;
 import com.netease.yunxin.kit.common.utils.XKitUtils;
 import com.netease.yunxin.kit.entertainment.common.utils.UserInfoManager;
-import com.netease.yunxin.nertc.nertcvideocall.bean.InvitedInfo;
-import com.netease.yunxin.nertc.nertcvideocall.model.NERTCVideoCall;
+import com.netease.yunxin.nertc.nertcvideocall.model.impl.state.CallState;
 import com.netease.yunxin.nertc.ui.CallKitNotificationConfig;
 import com.netease.yunxin.nertc.ui.CallKitUI;
 import com.netease.yunxin.nertc.ui.CallKitUIOptions;
@@ -47,17 +48,15 @@ public class CallKitUtil {
             .rtcAppKey(appKey)
             // 非必要：这里是设置自定义Rtc uid，这里主要用于本Demo的业务服务器处理安全通业务逻辑，在音视频违规时，
             // 必要：当前用户 AccId
-            .currentUserAccId(UserInfoManager.getSelfImAccid())
+            .currentUserAccId(UserInfoManager.getSelfUserUuid())
             .currentUserRtcUId(customRtcUid)
             .timeOutMillisecond(CallConfig.CALL_TOTAL_WAIT_TIMEOUT)
-            .enableAutoJoinWhenCalled(true)
             // 此处为 收到来电时展示的 notification 相关配置，如图标，提示语等。
             .notificationConfigFetcher(
                 invitedInfo -> {
                   ALog.i(TAG, "invitedInfo:" + invitedInfo.toString());
                   return generateNotificationConfig(invitedInfo);
                 })
-            .pushConfigProvider(new PartyPushConfigProvider())
             // 收到被叫时若 app 在后台，在恢复到前台时是否自动唤起被叫页面，默认为 true
             .resumeBGInvitation(true)
             .joinRtcWhenCall(true)
@@ -70,22 +69,22 @@ public class CallKitUtil {
       builder.incomingCallEx(incomingCallEx);
     }
     CallKitUIOptions options = builder.build();
-    NERTCVideoCall.sharedInstance().setCallOrderListener(new CustomCallOrderHelper());
+    NECallEngine.sharedInstance().setCallRecordProvider(new CustomCallOrderProvider());
     CallKitUI.init(AppGlobals.getApplication(), options);
   }
 
-  private static CallKitNotificationConfig generateNotificationConfig(InvitedInfo invitedInfo) {
+  private static CallKitNotificationConfig generateNotificationConfig(NEInviteInfo invitedInfo) {
     CallKitNotificationConfig callKitNotificationConfig;
-    String nickname = invitedInfo.currentAccId;
+    String nickname = UserInfoManager.getSelfUserUuid();
     JSONObject jsonObject = null;
     try {
-      jsonObject = new JSONObject(invitedInfo.attachment);
+      jsonObject = new JSONObject(invitedInfo.extraInfo);
       nickname = jsonObject.optString(AppParams.CALLER_USER_NAME);
     } catch (JSONException e) {
       e.printStackTrace();
       ALog.e(TAG, "e:" + e);
     }
-    if (invitedInfo.channelType == ChannelType.AUDIO.getValue()) {
+    if (invitedInfo.callType == ChannelType.AUDIO.getValue()) {
       callKitNotificationConfig =
           new CallKitNotificationConfig(
               R.mipmap.ic_launcher,
@@ -119,5 +118,12 @@ public class CallKitUtil {
       e.printStackTrace();
     }
     return null;
+  }
+
+  /** @return 是否在通话中 */
+  public static boolean isInTheCall() {
+    NECallEngineImpl callEngine = (NECallEngineImpl) NECallEngine.sharedInstance();
+    CallState currentState = callEngine.getRecorder().getCurrentState();
+    return currentState.getStatus() != CallState.STATE_IDLE;
   }
 }

@@ -353,4 +353,5 @@
     <string name="one_on_one_virtual_tips">The current account is used for testing only (up to 10 replies from the chatbot allowed). For more information, inquire on the official website.</string>
     <string name="app_notification_new_incoming_audio_call">Incoming audio call</string>
     <string name="app_notification_new_incoming_video_call">Incoming video call</string>
+    <string name="one_on_one_in_the_call_set_beauty_tips">You are currently on a call, apply face filter later</string>
 </resources>

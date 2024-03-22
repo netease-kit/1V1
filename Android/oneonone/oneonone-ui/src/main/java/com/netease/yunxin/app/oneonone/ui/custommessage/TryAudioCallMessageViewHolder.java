@@ -9,12 +9,14 @@ import android.view.View;
 import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import com.netease.yunxin.app.oneonone.ui.R;
+import com.netease.yunxin.app.oneonone.ui.utils.CallKitUtil;
 import com.netease.yunxin.app.oneonone.ui.utils.NavUtils;
 import com.netease.yunxin.app.oneonone.ui.utils.OneOnOneUtils;
 import com.netease.yunxin.kit.chatkit.ui.databinding.ChatBaseMessageViewHolderBinding;
 import com.netease.yunxin.kit.chatkit.ui.model.ChatMessageBean;
 import com.netease.yunxin.kit.chatkit.ui.view.message.viewholder.ChatBaseMessageViewHolder;
 import com.netease.yunxin.kit.common.utils.SizeUtils;
+import com.netease.yunxin.kit.common.utils.XKitUtils;
 
 public class TryAudioCallMessageViewHolder extends ChatBaseMessageViewHolder {
   private static final String TAG = "TryAudioCallMessageViewHolder";
@@ -49,7 +51,16 @@ public class TryAudioCallMessageViewHolder extends ChatBaseMessageViewHolder {
         .setOnClickListener(
             v -> {
               if (OneOnOneUtils.isInVoiceRoom()) {
-                OneOnOneUtils.showTipsDialog(getMessageContainer().getContext());
+                OneOnOneUtils.showTipsDialog(
+                    getMessageContainer().getContext(),
+                    XKitUtils.getApplicationContext()
+                        .getString(R.string.one_on_one_other_you_are_in_the_chatroom));
+                return;
+              }
+              if (CallKitUtil.isInTheCall()) {
+                OneOnOneUtils.showTipsDialog(
+                    getMessageContainer().getContext(),
+                    XKitUtils.getApplicationContext().getString(R.string.ec_in_the_call_tips));
                 return;
               }
               NavUtils.toCallAudioPage(

@@ -44,41 +44,58 @@ import com.netease.yunxin.app.oneonone.ui.activity.CallActivity;
 import com.netease.yunxin.app.oneonone.ui.databinding.FragmentInVideoCallBinding;
 import com.netease.yunxin.app.oneonone.ui.model.OtherUserInfo;
 import com.netease.yunxin.app.oneonone.ui.utils.AppGlobals;
-import com.netease.yunxin.app.oneonone.ui.utils.LogUtil;
 import com.netease.yunxin.app.oneonone.ui.utils.NECallback;
 import com.netease.yunxin.app.oneonone.ui.utils.TimeUtil;
 import com.netease.yunxin.app.oneonone.ui.utils.security.SecurityTipsModel;
 import com.netease.yunxin.app.oneonone.ui.utils.security.SecurityType;
 import com.netease.yunxin.app.oneonone.ui.view.InTheVideoCallBottomBar;
 import com.netease.yunxin.kit.alog.ALog;
+import com.netease.yunxin.kit.call.p2p.NECallEngine;
 import com.netease.yunxin.kit.common.image.ImageLoader;
 import com.netease.yunxin.kit.common.ui.utils.ToastX;
-import com.netease.yunxin.nertc.nertcvideocall.model.NERTCVideoCall;
 import com.netease.yunxin.nertc.nertcvideocall.model.impl.NERtcCallbackExTemp;
+import com.netease.yunxin.nertc.ui.p2p.CallUIOperationsMgr;
 
 public class InTheVideoCallFragment extends InTheBaseCallFragment implements SensorEventListener {
   private static final String TAG = "InTheVideoCallFragment";
   private FragmentInVideoCallBinding binding;
   private CallActivity activity;
-  private boolean muteLocal = false;
-  private boolean muteRemote = false;
-  /** 本端摄像头是否打开 */
-  private boolean localCameraIsOpen = true;
-  /** 远端摄像头打开是否打开 */
-  private boolean remoteCameraIsOpen = true;
-  /** 本端是否为小屏 */
-  private boolean isSelfInSmallUi = true;
-
-  private NERTCVideoCall rtcCall;
-  private String otherUid;
+  private NECallEngine rtcCall;
   private SecurityTipsModel securityTipsModel;
   private int mCameraFacing = Camera.CameraInfo.CAMERA_FACING_FRONT;
   private boolean isFirstInit = true;
-  private boolean isFUOn = false;
   private int mSkipFrame = 5;
   private FURenderer mFURendererManager;
   private FaceUnityDataFactory mFaceUnityDataFactory;
   private SensorManager mSensorManager;
+
+  private void refreshUIByFloatWindowEvent() {
+    binding
+        .bottomBar
+        .getViewBinding()
+        .ivMicrophone
+        .setImageResource(
+            viewModel.isMuteLocalAudio()
+                ? R.drawable.icon_microphone_mute
+                : R.drawable.icon_microphone);
+    binding
+        .bottomBar
+        .getViewBinding()
+        .ivAudio
+        .setImageResource(
+            !viewModel.isSpeakerOn() ? R.drawable.icon_audio_mute : R.drawable.icon_audio);
+    binding
+        .bottomBar
+        .getViewBinding()
+        .ivOpenOrCloseCamera
+        .setImageResource(
+            !viewModel.isLocalCameraIsOpen()
+                ? R.drawable.icon_camera_close
+                : R.drawable.icon_camera_open);
+    handleInTheVideoCallUI();
+    switchVideosCanvas(viewModel.isSelfInSmallUi());
+    handleUi();
+  }
 
   private final FURendererListener mFURendererListener =
       new FURendererListener() {
@@ -165,7 +182,6 @@ public class InTheVideoCallFragment extends InTheBaseCallFragment implements Sen
       @Nullable ViewGroup container,
       @Nullable Bundle savedInstanceState) {
     rtcCall = activity.getRtcCall();
-    //    BeautyManager.getInstance().startBeauty();
     setupFaceUnity();
     return super.onCreateView(inflater, container, savedInstanceState);
   }
@@ -298,7 +314,6 @@ public class InTheVideoCallFragment extends InTheBaseCallFragment implements Sen
             new Observer<OtherUserInfo>() {
               @Override
               public void onChanged(OtherUserInfo otherUserInfo) {
-                otherUid = otherUserInfo.accId;
                 binding.tvNickname.setText(otherUserInfo.nickname);
                 ImageLoader.with(AppGlobals.getApplication())
                     .circleLoad(otherUserInfo.avatar, binding.ivAvatar);
@@ -333,7 +348,6 @@ public class InTheVideoCallFragment extends InTheBaseCallFragment implements Sen
             new Observer<Boolean>() {
               @Override
               public void onChanged(Boolean aBoolean) {
-                remoteCameraIsOpen = !aBoolean;
                 handleUi();
               }
             });
@@ -342,7 +356,7 @@ public class InTheVideoCallFragment extends InTheBaseCallFragment implements Sen
         .observe(
             viewLifecycleOwner,
             aLong -> {
-              rtcCall.setupRemoteView(binding.bigVideo, otherUid);
+              rtcCall.setupRemoteView(binding.bigVideo);
             });
 
     if (virtualCallViewModel != null) {
@@ -360,26 +374,23 @@ public class InTheVideoCallFragment extends InTheBaseCallFragment implements Sen
     }
   }
 
+  @Override
+  protected void handleFloatWindowEvent() {
+    refreshUIByFloatWindowEvent();
+  }
+
   private void handleUi() {
     handleSmallVideoUi();
     handleBigVideoUi();
   }
 
   private void handleBigVideoUi() {
-    LogUtil.i(
-        TAG,
-        "handleBigVideoUi localVideoIsSmall:"
-            + isSelfInSmallUi
-            + ",localCameraIsOpen:"
-            + localCameraIsOpen
-            + ",remoteCameraIsOpen:"
-            + remoteCameraIsOpen);
-    if (!isSelfInSmallUi) {
+    if (!viewModel.isSelfInSmallUi()) {
       //大屏是自己
-      showBigVideoView(localCameraIsOpen, true);
+      showBigVideoView(viewModel.isLocalCameraIsOpen(), true);
     } else {
       //大屏是对方
-      showBigVideoView(remoteCameraIsOpen, false);
+      showBigVideoView(viewModel.isRemoteCameraIsOpen(), false);
     }
   }
 
@@ -401,17 +412,9 @@ public class InTheVideoCallFragment extends InTheBaseCallFragment implements Sen
   }
 
   private void handleSmallVideoUi() {
-    LogUtil.i(
-        TAG,
-        "handleSmallVideoUi localVideoIsSmall:"
-            + isSelfInSmallUi
-            + ",localCameraIsOpen:"
-            + localCameraIsOpen
-            + ",remoteCameraIsOpen:"
-            + remoteCameraIsOpen);
-    if (isSelfInSmallUi) {
+    if (viewModel.isSelfInSmallUi()) {
       //小屏是自己
-      if (localCameraIsOpen) {
+      if (viewModel.isLocalCameraIsOpen()) {
         // 摄像头打开
         binding.smallVideo.setVisibility(View.VISIBLE);
         binding.tvSmallVideoDesc.setVisibility(View.GONE);
@@ -423,7 +426,7 @@ public class InTheVideoCallFragment extends InTheBaseCallFragment implements Sen
       }
     } else {
       //小屏是对方
-      if (remoteCameraIsOpen) {
+      if (viewModel.isRemoteCameraIsOpen()) {
         // 摄像头打开
         binding.smallVideo.setVisibility(View.VISIBLE);
         binding.tvSmallVideoDesc.setVisibility(View.GONE);
@@ -450,6 +453,7 @@ public class InTheVideoCallFragment extends InTheBaseCallFragment implements Sen
   }
 
   private void handleSecurityVideoMask(SecurityTipsModel securityTipsModel) {
+    boolean isSelfInSmallUi = viewModel.isSelfInSmallUi();
     if (securityTipsModel == null) {
       binding.smallVideoSecurityMask.setVisibility(View.GONE);
       binding.bigVideoSecurityMask.setVisibility(View.GONE);
@@ -491,11 +495,14 @@ public class InTheVideoCallFragment extends InTheBaseCallFragment implements Sen
         new View.OnClickListener() {
           @Override
           public void onClick(View view) {
-            if (TextUtils.isEmpty(otherUid) || activity.isVirtualCall()) {
+            if (viewModel.getOtherInfo() == null
+                || viewModel.getOtherInfo().getValue() == null
+                || TextUtils.isEmpty(viewModel.getOtherInfo().getValue().accId)
+                || activity.isVirtualCall()) {
               return;
             }
-            isSelfInSmallUi = !isSelfInSmallUi;
-            switchVideosCanvas(isSelfInSmallUi);
+            viewModel.updateSelfInSmallFlag(!viewModel.isSelfInSmallUi());
+            switchVideosCanvas(viewModel.isSelfInSmallUi());
             handleUi();
             handleSecurityVideoMask(securityTipsModel);
           }
@@ -532,6 +539,13 @@ public class InTheVideoCallFragment extends InTheBaseCallFragment implements Sen
         v -> {
           showGiftDialog();
         });
+    if (activity.isVirtualCall()) {
+      binding.floatWindow.setVisibility(View.GONE);
+    }
+    binding.floatWindow.setOnClickListener(
+        v -> {
+          activity.doShowFloatingWindow();
+        });
     binding.ivEar.setOnClickListener(
         new View.OnClickListener() {
           @Override
@@ -542,22 +556,25 @@ public class InTheVideoCallFragment extends InTheBaseCallFragment implements Sen
   }
 
   private void handleOpenOrCloseCamera() {
-    if (TextUtils.isEmpty(otherUid)) {
+    if (viewModel.getOtherInfo() == null
+        || viewModel.getOtherInfo().getValue() == null
+        || TextUtils.isEmpty(viewModel.getOtherInfo().getValue().accId)) {
       return;
     }
-    localCameraIsOpen = !localCameraIsOpen;
-    rtcCall.muteLocalVideo(!localCameraIsOpen);
+    viewModel.doMuteVideo(viewModel.isLocalCameraIsOpen());
     binding
         .bottomBar
         .getViewBinding()
         .ivOpenOrCloseCamera
         .setImageResource(
-            localCameraIsOpen ? R.drawable.icon_camera_open : R.drawable.icon_camera_close);
+            viewModel.isLocalCameraIsOpen()
+                ? R.drawable.icon_camera_open
+                : R.drawable.icon_camera_close);
     handleUi();
   }
 
   private void handleSwitchCamera() {
-    activity.getRtcCall().switchCamera();
+    CallUIOperationsMgr.INSTANCE.doSwitchCamera();
   }
 
   private void handleHangupEvent() {
@@ -576,20 +593,18 @@ public class InTheVideoCallFragment extends InTheBaseCallFragment implements Sen
   }
 
   private void handleMuteAudioEvent() {
-    boolean lastSpeakerOn = NERtcEx.getInstance().isSpeakerphoneOn();
-    boolean currentSpeakOn = !lastSpeakerOn;
-    NERtcEx.getInstance().setSpeakerphoneOn(currentSpeakOn);
+    viewModel.doConfigSpeaker(!viewModel.isSpeakerOn());
     binding
         .bottomBar
         .getViewBinding()
         .ivAudio
-        .setImageResource(currentSpeakOn ? R.drawable.icon_audio : R.drawable.icon_audio_mute);
+        .setImageResource(
+            viewModel.isSpeakerOn() ? R.drawable.icon_audio : R.drawable.icon_audio_mute);
   }
 
   private void handleMircoPhoneEvent() {
-    muteLocal = !muteLocal;
-    activity.getRtcCall().muteLocalAudio(muteLocal);
-    if (muteLocal) {
+    viewModel.doMuteAudio(!viewModel.isMuteLocalAudio());
+    if (viewModel.isMuteLocalAudio()) {
       binding
           .bottomBar
           .getViewBinding()
@@ -603,10 +618,10 @@ public class InTheVideoCallFragment extends InTheBaseCallFragment implements Sen
   private void switchVideosCanvas(boolean isSelfInSmallUi) {
     if (isSelfInSmallUi) {
       setupLocalView(binding.smallVideo);
-      rtcCall.setupRemoteView(binding.bigVideo, otherUid);
+      rtcCall.setupRemoteView(binding.bigVideo);
     } else {
       setupLocalView(binding.bigVideo);
-      rtcCall.setupRemoteView(binding.smallVideo, otherUid);
+      rtcCall.setupRemoteView(binding.smallVideo);
     }
   }
 
@@ -629,7 +644,6 @@ public class InTheVideoCallFragment extends InTheBaseCallFragment implements Sen
   @Override
   public void onDestroyView() {
     super.onDestroyView();
-    //    BeautyManager.getInstance().stopBeauty();
     destroyFU();
     binding = null;
     giftRender.release();

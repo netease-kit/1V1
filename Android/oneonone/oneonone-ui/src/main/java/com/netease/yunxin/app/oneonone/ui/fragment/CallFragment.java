@@ -19,7 +19,6 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
-import com.netease.lava.nertc.sdk.NERtcEx;
 import com.netease.nimlib.sdk.avsignalling.constant.ChannelType;
 import com.netease.nimlib.sdk.avsignalling.model.ChannelFullInfo;
 import com.netease.yunxin.app.oneonone.ui.R;
@@ -41,8 +40,6 @@ import com.netease.yunxin.kit.common.utils.NetworkUtils;
 import com.netease.yunxin.kit.common.utils.PermissionUtils;
 import com.netease.yunxin.nertc.ui.base.AVChatSoundPlayer;
 import com.netease.yunxin.nertc.ui.base.CallParam;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 public class CallFragment extends Fragment {
   private static final String TAG = "CallFragment";
@@ -51,8 +48,6 @@ public class CallFragment extends Fragment {
   private CallViewModel viewModel;
   private CallParam callParams;
   private boolean callFinished = true;
-  private String calledMobile;
-  private String callerUserName;
 
   @Override
   public void onAttach(@NonNull Context context) {
@@ -124,42 +119,23 @@ public class CallFragment extends Fragment {
     if (callParams.getCallExtraInfo() == null) {
       return;
     }
-    JSONObject callParamExtraInfo = null;
-    try {
-      callParamExtraInfo = new JSONObject(callParams.getCallExtraInfo());
-    } catch (JSONException e) {
-      ALog.e(TAG, "handleCall,json parse callParamExtraInfo error:" + e.getMessage());
-    }
     if (!callParams.isCalled()) {
       callFinished = false;
-      if (callParamExtraInfo != null) {
-        try {
-          calledMobile = callParamExtraInfo.getString(AppParams.CALLED_USER_MOBILE);
-        } catch (JSONException e) {
-          ALog.e(TAG, "handleCall,json parse calledMobile error:" + e.getMessage());
-        }
-        try {
-          callerUserName = callParamExtraInfo.getString(AppParams.CALLER_USER_NAME);
-        } catch (JSONException e) {
-          ALog.e(TAG, "handleCall,json parse callerUserName error:" + e.getMessage());
-        }
-      }
       if (activity.isVirtualCall()) {
         NERTCCallStateManager.setCallOutState();
         // 主叫逻辑,虚拟人呼叫，音频通话设置为听筒播放、视频通话设置为扬声器播放
         RtcUtil.setSpeakerphoneOn(
-            requireActivity(), callParams.getChannelType() != ChannelType.AUDIO.getValue());
-        AVChatSoundPlayer.INSTANCE.play(activity, AVChatSoundPlayer.RingerTypeEnum.RING);
+            requireActivity(), callParams.getCallType() != ChannelType.AUDIO.getValue());
+        AVChatSoundPlayer.play(activity, AVChatSoundPlayer.RingerTypeEnum.RING);
       } else {
         activity.rtcCall(
             new NECallback<ChannelFullInfo>() {
               @Override
               public void onSuccess(ChannelFullInfo channelFullInfo) {
                 callFinished = true;
-                AVChatSoundPlayer.INSTANCE.play(activity, AVChatSoundPlayer.RingerTypeEnum.RING);
+                AVChatSoundPlayer.play(activity, AVChatSoundPlayer.RingerTypeEnum.RING);
                 // 主叫逻辑,音频通话设置为听筒播放、视频通话设置为扬声器播放
-                NERtcEx.getInstance()
-                    .setSpeakerphoneOn(callParams.getChannelType() != ChannelType.AUDIO.getValue());
+                viewModel.doConfigSpeaker(callParams.getCallType() != ChannelType.AUDIO.getValue());
               }
 
               @Override
@@ -282,11 +258,11 @@ public class CallFragment extends Fragment {
         PermissionUtils.hasPermissions(getContext(), Manifest.permission.RECORD_AUDIO);
     boolean cameraGranted =
         PermissionUtils.hasPermissions(getContext(), Manifest.permission.CAMERA);
-    if (callParams.getChannelType() == ChannelType.AUDIO.getValue() && !microPhoneGranted) {
+    if (callParams.getCallType() == ChannelType.AUDIO.getValue() && !microPhoneGranted) {
       ToastX.showShortToast(getString(R.string.permission_microphone_missing_tips));
       ALog.e(TAG, "Unable to access the microphone. Enable microphone access and try again");
       return;
-    } else if (callParams.getChannelType() == ChannelType.VIDEO.getValue()) {
+    } else if (callParams.getCallType() == ChannelType.VIDEO.getValue()) {
       if (!microPhoneGranted && !cameraGranted) {
         ToastX.showShortToast(getString(R.string.permission_microphone_and_camera_missing_tips));
         ALog.e(
@@ -304,7 +280,6 @@ public class CallFragment extends Fragment {
       }
     }
     activity.rtcAccept();
-
     binding.ivInvitedAccept.setEnabled(false);
     binding.ivInvitedReject.setEnabled(false);
   }
@@ -312,8 +287,8 @@ public class CallFragment extends Fragment {
   private void releaseAndFinish(boolean finishCall) {
     LogUtil.i(
         TAG, "releaseAndFinish,finishCall:" + finishCall + ",isCalled:" + callParams.isCalled());
-    AVChatSoundPlayer.INSTANCE.stop(AVChatSoundPlayer.RingerTypeEnum.RING, activity);
-    AVChatSoundPlayer.INSTANCE.stop(AVChatSoundPlayer.RingerTypeEnum.CONNECTING, activity);
+    AVChatSoundPlayer.stop(activity, AVChatSoundPlayer.RingerTypeEnum.RING);
+    AVChatSoundPlayer.stop(activity, AVChatSoundPlayer.RingerTypeEnum.CONNECTING);
     if (finishCall) {
       if (callParams.isCalled()) {
         activity.rtcHangup(
@@ -335,11 +310,11 @@ public class CallFragment extends Fragment {
   }
 
   private void playRing(AVChatSoundPlayer.RingerTypeEnum ringerTypeEnum) {
-    AVChatSoundPlayer.INSTANCE.play(activity, ringerTypeEnum);
+    AVChatSoundPlayer.play(activity, ringerTypeEnum);
   }
 
   private void stopRing() {
-    AVChatSoundPlayer.INSTANCE.stop(activity);
+    AVChatSoundPlayer.stop(activity);
   }
 
   @Override

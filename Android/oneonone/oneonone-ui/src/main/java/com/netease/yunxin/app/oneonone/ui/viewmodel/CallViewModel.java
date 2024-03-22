@@ -5,12 +5,12 @@
 package com.netease.yunxin.app.oneonone.ui.viewmodel;
 
 import android.app.Application;
+import android.text.TextUtils;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
-import com.netease.lava.nertc.sdk.NERtcEx;
 import com.netease.nimlib.sdk.avsignalling.constant.ChannelType;
 import com.netease.yunxin.app.oneonone.ui.R;
 import com.netease.yunxin.app.oneonone.ui.constant.AppParams;
@@ -25,17 +25,23 @@ import com.netease.yunxin.app.oneonone.ui.utils.security.SecurityAuditModel;
 import com.netease.yunxin.app.oneonone.ui.utils.security.SecurityFoulUser;
 import com.netease.yunxin.app.oneonone.ui.utils.security.SecurityTipsModel;
 import com.netease.yunxin.app.oneonone.ui.utils.security.SecurityType;
+import com.netease.yunxin.kit.alog.ALog;
+import com.netease.yunxin.kit.call.p2p.NECallEngine;
+import com.netease.yunxin.kit.call.p2p.model.NECallEndInfo;
+import com.netease.yunxin.kit.call.p2p.model.NECallEngineDelegate;
+import com.netease.yunxin.kit.call.p2p.model.NECallEngineDelegateAbs;
+import com.netease.yunxin.kit.call.p2p.model.NECallInfo;
+import com.netease.yunxin.kit.call.p2p.model.NECallTypeChangeInfo;
+import com.netease.yunxin.kit.call.p2p.model.NEHangupReasonCode;
 import com.netease.yunxin.kit.chatkit.model.IMMessageInfo;
 import com.netease.yunxin.kit.chatkit.repo.ChatObserverRepo;
 import com.netease.yunxin.kit.common.network.Response;
 import com.netease.yunxin.kit.corekit.im.model.EventObserver;
-import com.netease.yunxin.kit.entertainment.common.utils.UserInfoManager;
-import com.netease.yunxin.nertc.nertcvideocall.model.NERTCVideoCall;
 import com.netease.yunxin.nertc.nertcvideocall.model.impl.NERtcCallbackExTemp;
 import com.netease.yunxin.nertc.nertcvideocall.model.impl.NERtcCallbackProxyMgr;
 import com.netease.yunxin.nertc.ui.base.AVChatSoundPlayer;
 import com.netease.yunxin.nertc.ui.base.CallParam;
-import com.netease.yunxin.nertc.ui.utils.SecondsTimer;
+import com.netease.yunxin.nertc.ui.p2p.CallUIOperationsMgr;
 import java.util.List;
 import kotlin.Unit;
 import kotlin.jvm.functions.Function1;
@@ -46,10 +52,9 @@ import retrofit2.Callback;
 
 public class CallViewModel extends AndroidViewModel {
   private static final String TAG = "CallViewModel";
-  private MutableLiveData<OtherUserInfo> otherUserInfo = new MutableLiveData<>();
+  private final MutableLiveData<OtherUserInfo> otherUserInfo = new MutableLiveData<>();
   private SecurityAuditManager securityAuditManager = new SecurityAuditManager();
-  private MutableLiveData<SecurityTipsModel> securityTipsModel;
-  private SecondsTimer inTheCallSecondTimer;
+  private final MutableLiveData<SecurityTipsModel> securityTipsModel = new MutableLiveData<>();;
   private final MutableLiveData<Long> inTheCallDuration = new MutableLiveData<>();
   private long selfRtcUid;
   private final MutableLiveData<Boolean> selfJoinChannelSuccessData = new MutableLiveData<>();
@@ -70,6 +75,8 @@ public class CallViewModel extends AndroidViewModel {
           super.onJoinChannel(i, l, l1, l2);
           selfRtcUid = l2;
           selfJoinChannelSuccessData.postValue(true);
+          doConfigSpeaker(callParam.getCallType() != ChannelType.AUDIO.getValue());
+          reportOneOnOneRtcRoomCreate(l);
         }
 
         @Override
@@ -79,100 +86,76 @@ public class CallViewModel extends AndroidViewModel {
         }
       };
 
-  private final NERtcCallDelegate neRtcCallDelegate =
-      new NERtcCallDelegate() {
-
+  private final NECallEngineDelegate neCallEngineDelegate =
+      new NECallEngineDelegateAbs() {
         @Override
-        public void onJoinChannel(String accId, long uid, String channelName, long rtcChannelId) {
-          super.onJoinChannel(accId, uid, channelName, rtcChannelId);
-          NERtcEx.getInstance()
-              .setSpeakerphoneOn(callParam.getChannelType() != ChannelType.AUDIO.getValue());
-          reportOneOnOneRtcRoomCreate(rtcChannelId);
-        }
-
-        @Override
-        public void onVideoMuted(String userId, boolean isMuted) {
-          super.onVideoMuted(userId, isMuted);
-          remoteVideoMute.postValue(isMuted);
-        }
-
-        @Override
-        public void onUserEnter(@Nullable String userId) {
-          super.onUserEnter(userId);
-          LogUtil.i(TAG, "onUserEnter,userId:" + userId);
+        public void onCallConnected(NECallInfo info) {
+          super.onCallConnected(info);
+          LogUtil.i(TAG, "onUserEnter,userId:" + info.otherUserInfo().accId);
           switchToInTheCall.postValue(true);
           // 对方断网重连会重新触发onUserEnter回调
-          startInTheCallTimer();
+          //          startInTheCallTimer();
         }
 
         @Override
-        public void onUserLeave(String userId) {
-          super.onUserLeave(userId);
-          if (!UserInfoManager.getSelfImAccid().equals(userId)) {
+        public void onCallTypeChange(NECallTypeChangeInfo info) {
+          super.onCallTypeChange(info);
+        }
+
+        @Override
+        public void onCallEnd(NECallEndInfo info) {
+          super.onCallEnd(info);
+          if (info.reasonCode == NEHangupReasonCode.CALLEE_CANCELED) {
+            if (callParam.isCalled()) {
+              toastData.postValue(getApplication().getString(R.string.cancel_by_other));
+            }
+          } else if (info.reasonCode == NEHangupReasonCode.CALLER_REJECTED) {
+            ALog.i(
+                TAG,
+                "reject , hangup extraString"
+                    + info.extraString); // NECallEngine.sharedInstance().hangup 携带的信息
+            if (!callParam.isCalled()) {
+              if (!TextUtils.isEmpty(info.extraString)) {
+                ALog.i(TAG, "show busy dialog");
+              } else {
+                toastData.postValue(getApplication().getString(R.string.reject_tips));
+                playRing.postValue(AVChatSoundPlayer.RingerTypeEnum.PEER_REJECT);
+              }
+            }
+          } else if (info.reasonCode == NEHangupReasonCode.TIME_OUT) {
+            if (callParam.isCalled()) {
+              toastData.postValue(getApplication().getString(R.string.called_timeout_tips));
+            } else {
+              toastData.postValue(getApplication().getString(R.string.caller_timeout_tips));
+            }
+          } else if (info.reasonCode == NEHangupReasonCode.BUSY) {
+            if (!callParam.isCalled()) {
+              playRing.postValue(AVChatSoundPlayer.RingerTypeEnum.PEER_BUSY);
+            }
+          } else if (info.reasonCode == NEHangupReasonCode.USER_RTC_LEAVE) {
             toastData.setValue(getApplication().getString(R.string.other_end_call));
-          }
-          callFinished.postValue(true);
-        }
-
-        @Override
-        public void onCallEnd(@Nullable String userId) {
-          //          super.onCallEnd(userId);
-          LogUtil.i(TAG, "onCallEnd,userId:" + userId);
-          cancelInTheCallTimer();
-          if (!UserInfoManager.getSelfImAccid().equals(userId)) {
+            callFinished.postValue(true);
+          } else if (info.reasonCode == NEHangupReasonCode.BE_HUNG_UP) {
             toastData.setValue(getApplication().getString(R.string.other_end_call));
+            callFinished.postValue(true);
           }
+
           callFinished.postValue(true);
         }
 
         @Override
-        public void onCallFinished(@Nullable int code, @Nullable String msg) {
-          super.onCallFinished(code, msg);
-          LogUtil.i(TAG, "onCallFinished,code:" + code + ",msg:" + msg);
-          callFinished.postValue(true);
+        public void onVideoMuted(String userId, boolean mute) {
+          super.onVideoMuted(userId, mute);
+          remoteVideoMute.postValue(mute);
         }
 
         @Override
-        public void onRejectByUserId(@Nullable String userId) {
-          if (!callParam.isCalled()) {
-            toastData.postValue(getApplication().getString(R.string.reject_tips));
-            playRing.postValue(AVChatSoundPlayer.RingerTypeEnum.PEER_REJECT);
-          }
-          super.onRejectByUserId(userId);
-          LogUtil.i(TAG, "onRejectByUserId,userId:" + userId);
-        }
-
-        @Override
-        public void onUserBusy(@Nullable String userId) {
-          if (!callParam.isCalled()) {
-            playRing.postValue(AVChatSoundPlayer.RingerTypeEnum.PEER_BUSY);
-          }
-          super.onUserBusy(userId);
-          LogUtil.i(TAG, "onUserBusy,userId:" + userId);
-        }
-
-        @Override
-        public void onCancelByUserId(@Nullable String userId) {
-          if (callParam.isCalled()) {
-            toastData.postValue(getApplication().getString(R.string.cancel_by_other));
-          }
-          super.onCancelByUserId(userId);
-          LogUtil.i(TAG, "onCancelByUserId,userId:" + userId);
-        }
-
-        @Override
-        public void timeOut() {
-          LogUtil.i(TAG, "timeOut");
-          if (callParam.isCalled()) {
-            toastData.postValue(getApplication().getString(R.string.called_timeout_tips));
-          } else {
-            toastData.postValue(getApplication().getString(R.string.caller_timeout_tips));
-          }
-          super.timeOut();
+        public void onAudioMuted(String userId, boolean mute) {
+          super.onAudioMuted(userId, mute);
         }
       };
 
-  private EventObserver<List<IMMessageInfo>> msgObserver =
+  private final EventObserver<List<IMMessageInfo>> msgObserver =
       new EventObserver<List<IMMessageInfo>>() {
 
         @Override
@@ -195,9 +178,21 @@ public class CallViewModel extends AndroidViewModel {
 
   public CallViewModel(@NonNull Application application) {
     super(application);
-    NERTCVideoCall.sharedInstance().addDelegate(neRtcCallDelegate);
+    NECallEngine.sharedInstance().addCallDelegate(neCallEngineDelegate);
     NERtcCallbackProxyMgr.getInstance().addCallback(rtcCallback);
     ChatObserverRepo.registerReceiveMessageObserve(msgObserver);
+    CallUIOperationsMgr.INSTANCE.configTimeTick(
+        new CallUIOperationsMgr.TimeTickConfig(
+            new Function1<Long, Unit>() {
+              @Override
+              public Unit invoke(Long aLong) {
+                ALog.i(TAG, "CallUIOperationsMgr aLong:" + aLong);
+                inTheCallDuration.postValue(aLong);
+                return null;
+              }
+            },
+            1000,
+            0));
   }
 
   public MutableLiveData<Boolean> getSwitchToInTheCall() {
@@ -243,11 +238,11 @@ public class CallViewModel extends AndroidViewModel {
       JSONObject jsonObject = new JSONObject(callParam.getCallExtraInfo());
       userInfo = new OtherUserInfo();
       userInfo.isCalled = callParam.isCalled();
-      userInfo.callType = callParam.getChannelType();
+      userInfo.callType = callParam.getCallType();
       if (callParam.isCalled()) {
         userInfo.nickname = jsonObject.optString(AppParams.CALLER_USER_NAME);
         userInfo.avatar = jsonObject.optString(AppParams.CALLER_USER_AVATAR);
-        if (callParam.getChannelType() == ChannelType.VIDEO.getValue()) {
+        if (callParam.getCallType() == ChannelType.VIDEO.getValue()) {
           userInfo.title = getApplication().getString(R.string.invited_video_title);
         } else {
           userInfo.title = getApplication().getString(R.string.invited_audio_title);
@@ -260,13 +255,12 @@ public class CallViewModel extends AndroidViewModel {
         userInfo.avatar = jsonObject.optString(AppParams.CALLED_USER_AVATAR);
         userInfo.title = getApplication().getString(R.string.connecting);
         userInfo.subtitle = getApplication().getString(R.string.invite_subtitle);
-        userInfo.accId = callParam.getCalledAccIdList().get(0);
+        userInfo.accId = callParam.getCalledAccId();
       }
     } catch (JSONException e) {
       LogUtil.e(TAG, "json parse error,e:" + e);
     }
     otherUserInfo.setValue(userInfo);
-    securityTipsModel = new MutableLiveData<>();
     securityAuditManager.startAudit(
         new SecurityAuditManager.SecurityAuditCallback() {
           @Override
@@ -337,35 +331,12 @@ public class CallViewModel extends AndroidViewModel {
   @Override
   protected void onCleared() {
     super.onCleared();
-    cancelInTheCallTimer();
-    NERTCVideoCall.sharedInstance().removeDelegate(neRtcCallDelegate);
+    NECallEngine.sharedInstance().removeCallDelegate(neCallEngineDelegate);
     NERtcCallbackProxyMgr.getInstance().removeCallback(rtcCallback);
     ChatObserverRepo.unregisterReceiveMessageObserve(msgObserver);
     securityAuditManager.stopAudit();
     securityAuditManager = null;
-  }
-
-  public void startInTheCallTimer() {
-    if (inTheCallSecondTimer == null) {
-      // 通话中只触发一次计时器
-      inTheCallSecondTimer = new SecondsTimer(0, 1000);
-      inTheCallSecondTimer.start(
-          new Function1<Long, Unit>() {
-            @Override
-            public Unit invoke(Long aLong) {
-              LogUtil.i(TAG, "startInTheCallTimer aLong:" + aLong);
-              inTheCallDuration.postValue(aLong);
-              return null;
-            }
-          });
-    }
-  }
-
-  public void cancelInTheCallTimer() {
-    if (inTheCallSecondTimer != null) {
-      inTheCallSecondTimer.cancel();
-      inTheCallSecondTimer = null;
-    }
+    ALog.i(TAG, "onCleared");
   }
 
   private void reportOneOnOneRtcRoomCreate(long rtcChannelId) {
@@ -385,5 +356,50 @@ public class CallViewModel extends AndroidViewModel {
 
   public MutableLiveData<Boolean> getSelfJoinChannelSuccessData() {
     return selfJoinChannelSuccessData;
+  }
+
+  public boolean isMuteLocalAudio() {
+    return CallUIOperationsMgr.INSTANCE.getCallInfoWithUIState().isLocalMuteAudio();
+  }
+
+  public boolean isLocalCameraIsOpen() {
+    return !CallUIOperationsMgr.INSTANCE.getCallInfoWithUIState().isLocalMuteVideo();
+  }
+
+  public boolean isRemoteCameraIsOpen() {
+    return !CallUIOperationsMgr.INSTANCE.getCallInfoWithUIState().isRemoteMuteVideo();
+  }
+
+  public boolean isSelfInSmallUi() {
+    return CallUIOperationsMgr.INSTANCE.getCallInfoWithUIState().isLocalSmallVideo();
+  }
+
+  public void doConfigSpeaker(boolean enableSpeaker) {
+    CallUIOperationsMgr.INSTANCE.doConfigSpeaker(enableSpeaker);
+  }
+
+  public boolean isSpeakerOn() {
+    return CallUIOperationsMgr.INSTANCE.isSpeakerOn();
+  }
+
+  public void doMuteAudio(boolean mute) {
+    CallUIOperationsMgr.INSTANCE.doMuteAudio(mute);
+  }
+
+  public void doMuteVideo(boolean mute) {
+    CallUIOperationsMgr.INSTANCE.doMuteVideo(mute);
+  }
+
+  public void updateSelfInSmallFlag(boolean isSelfInSmallUi) {
+    CallUIOperationsMgr.CallInfoWithUIState callInfoWithUIState =
+        CallUIOperationsMgr.INSTANCE.getCallInfoWithUIState();
+    CallUIOperationsMgr.INSTANCE.updateUIState(
+        callInfoWithUIState.isRemoteMuteVideo(),
+        callInfoWithUIState.isLocalMuteVideo(),
+        callInfoWithUIState.isLocalMuteAudio(),
+        callInfoWithUIState.isLocalMuteSpeaker(),
+        callInfoWithUIState.getCameraDeviceStatus(),
+        isSelfInSmallUi,
+        callInfoWithUIState.isVirtualBlur());
   }
 }

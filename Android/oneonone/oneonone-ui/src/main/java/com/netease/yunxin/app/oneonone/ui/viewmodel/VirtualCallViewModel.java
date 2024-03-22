@@ -93,7 +93,7 @@ public class VirtualCallViewModel extends AndroidViewModel {
   }
 
   public void setCallParam(CallParam callParam) {
-    channelType = callParam.getChannelType();
+    channelType = callParam.getCallType();
     try {
       JSONObject jsonObject = new JSONObject(callParam.getCallExtraInfo());
       String audioUrl = jsonObject.optString(AppParams.CALLED_AUDIO_URL);

@@ -23,6 +23,7 @@ import com.netease.yunxin.app.oneonone.ui.model.HomeItemModel;
 import com.netease.yunxin.app.oneonone.ui.model.ModelResponse;
 import com.netease.yunxin.app.oneonone.ui.model.UserModel;
 import com.netease.yunxin.app.oneonone.ui.utils.AppGlobals;
+import com.netease.yunxin.app.oneonone.ui.utils.CallKitUtil;
 import com.netease.yunxin.app.oneonone.ui.utils.ChatUtil;
 import com.netease.yunxin.app.oneonone.ui.utils.DisplayUtils;
 import com.netease.yunxin.app.oneonone.ui.utils.NavUtils;
@@ -111,7 +112,7 @@ public class HomeAdapter extends RecyclerView.Adapter {
                       @Override
                       public void onAccost(ContactUserDialog dialog) {
                         if (!NetworkUtils.isConnected()) {
-                          ToastX.showShortToast(context.getString(R.string.voiceroom_net_error));
+                          ToastX.showShortToast(context.getString(R.string.network_error));
                           return;
                         }
                         ChatUtil.sendTextMessage(
@@ -182,6 +183,10 @@ public class HomeAdapter extends RecyclerView.Adapter {
 
       if (OneOnOneUtils.isInVoiceRoom()) {
         showTipsDialog(activity.getString(R.string.one_on_one_other_you_are_in_the_chatroom));
+        return;
+      }
+      if (CallKitUtil.isInTheCall()) {
+        showTipsDialog(activity.getString(R.string.ec_in_the_call_tips));
         return;
       }
       HttpService.getInstance()

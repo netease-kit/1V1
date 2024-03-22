@@ -25,12 +25,12 @@ public class OneOnOneUtils {
     return false;
   }
 
-  public static void showTipsDialog(Context context) {
+  public static void showTipsDialog(Context context, String title) {
     if (context instanceof AppCompatActivity) {
       AppCompatActivity activity = (AppCompatActivity) context;
       CommonAlertDialog commonDialog = new CommonAlertDialog();
       commonDialog
-          .setTitleStr(activity.getString(R.string.one_on_one_other_you_are_in_the_chatroom))
+          .setTitleStr(title)
           .setPositiveStr(activity.getString(R.string.one_on_one_confirm))
           .setConfirmListener(() -> {})
           .show(activity.getSupportFragmentManager());
