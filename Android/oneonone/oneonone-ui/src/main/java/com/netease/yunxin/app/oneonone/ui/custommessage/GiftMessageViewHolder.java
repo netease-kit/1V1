@@ -50,7 +50,7 @@ public class GiftMessageViewHolder extends NormalChatBaseMessageViewHolder {
     if (attachment == null) {
       return;
     }
-    if (TextUtils.equals(UserInfoManager.getSelfImAccid(), attachment.getTargetUserUuid())) {
+    if (TextUtils.equals(UserInfoManager.getSelfUserUuid(), attachment.getTargetUserUuid())) {
       isRight = false;
     } else {
       isRight = true;

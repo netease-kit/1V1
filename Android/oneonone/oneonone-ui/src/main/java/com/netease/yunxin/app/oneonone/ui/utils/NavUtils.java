@@ -13,7 +13,10 @@ import com.netease.yunxin.app.oneonone.ui.constant.AppParams;
 import com.netease.yunxin.app.oneonone.ui.constant.CallConfig;
 import com.netease.yunxin.app.oneonone.ui.constant.CallType;
 import com.netease.yunxin.app.oneonone.ui.model.UserModel;
+import com.netease.yunxin.kit.alog.ALog;
+import com.netease.yunxin.kit.call.p2p.model.NECallPushConfig;
 import com.netease.yunxin.kit.common.ui.utils.ToastX;
+import com.netease.yunxin.kit.common.utils.XKitUtils;
 import com.netease.yunxin.kit.corekit.im.model.UserInfo;
 import com.netease.yunxin.kit.corekit.im.utils.RouterConstant;
 import com.netease.yunxin.kit.corekit.route.XKitRouter;
@@ -21,6 +24,7 @@ import com.netease.yunxin.kit.entertainment.common.activity.WebViewActivity;
 import com.netease.yunxin.kit.entertainment.common.utils.UserInfoManager;
 import com.netease.yunxin.nertc.ui.CallKitUI;
 import com.netease.yunxin.nertc.ui.base.CallParam;
+import java.util.HashMap;
 import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -73,10 +77,32 @@ public class NavUtils {
       ToastX.showShortToast("callkit has not init");
       return;
     }
+    String extra = extraInfo.toString();
     CallParam param =
-        CallParam.createSingleCallParam(
-            channelType, UserInfoManager.getSelfImAccid(), userModel.imAccid, extraInfo.toString());
+        new CallParam.Builder()
+            .callType(channelType)
+            .callExtraInfo(extra)
+            .calledAccId(userModel.imAccid)
+            .callerAccId(UserInfoManager.getSelfUserUuid())
+            .pushConfig(providePushConfig(extra))
+            .build();
     CallKitUI.startSingleCall(context, param);
+  }
+
+  public static NECallPushConfig providePushConfig(String extraInfo) {
+    String nickname = UserInfoManager.getSelfUserUuid();
+    JSONObject jsonObject = null;
+    try {
+      jsonObject = new JSONObject(extraInfo);
+      nickname = jsonObject.optString(AppParams.CALLER_USER_NAME);
+    } catch (JSONException e) {
+      e.printStackTrace();
+      ALog.e(TAG, "e:" + e);
+    }
+    HashMap<String, Object> pushPayload = new HashMap<>();
+    pushPayload.put("attachment", extraInfo);
+    return new NECallPushConfig(
+        true, CallKitUtil.getAppName(XKitUtils.getApplicationContext()), nickname, pushPayload);
   }
 
   public static void toCallAudioPage(Context context, UserModel userModel) {

@@ -79,10 +79,6 @@ dependencies {
     implementation("androidx.constraintlayout:constraintlayout:2.1.3")
     implementation("androidx.recyclerview:recyclerview:1.2.1")
     implementation("com.netease.yunxin.kit:alog:1.1.0")
-
-    implementation("com.netease.yunxin.kit.call:call-ui:2.0.1"){
-        exclude("com.netease.yunxin","nertc-base")
-    }
     implementation("com.squareup.okhttp3:logging-interceptor:4.7.2")
     implementation("com.squareup.okhttp3:okhttp:4.9.3")
     implementation("com.google.code.gson:gson:2.9.0")
@@ -99,7 +95,6 @@ dependencies {
     implementation(project(":entertainment:entertainment-common"))
     implementation(project(":beauty:beauty-faceunity"))
     //会话列表组件
-    api(project(":imkit:conversationkit-ui"))
     implementation("com.github.bumptech.glide:glide:4.13.1")
     annotationProcessor("com.github.bumptech.glide:compiler:4.13.1")
 

@@ -67,8 +67,13 @@ public abstract class InTheBaseCallFragment extends Fragment {
     subscribeUi();
     initEvent();
     initGiftAnimation(rootView);
+    if (activity.isFromFloatWindow()) {
+      handleFloatWindowEvent();
+    }
     return rootView;
   }
+
+  protected abstract void handleFloatWindowEvent();
 
   protected abstract View getRoot(@NonNull LayoutInflater inflater, @Nullable ViewGroup container);
 
@@ -85,7 +90,7 @@ public abstract class InTheBaseCallFragment extends Fragment {
                   giftRender.addGift(
                       GiftCache.getGift(giftAttachment.getGiftId()).getDynamicIconResId());
                   if (TextUtils.equals(
-                      UserInfoManager.getSelfImAccid(), giftAttachment.getTargetUserUuid())) {
+                      UserInfoManager.getSelfUserUuid(), giftAttachment.getTargetUserUuid())) {
                     ToastX.showShortToast(
                         R.string.app_receive_gift_tip,
                         giftAttachment.getGiftCount(),
@@ -118,7 +123,7 @@ public abstract class InTheBaseCallFragment extends Fragment {
     ReportUtils.report(requireContext(), TAG_REPORT, "1v1_tonghua_gift");
     GiftDialog giftDialog = new GiftDialog(requireActivity());
     giftDialog.show(
-        (giftId, giftCount, userUuids) ->
+        (giftId, giftCount) ->
             HttpService.getInstance()
                 .reward(
                     giftId,
@@ -134,7 +139,7 @@ public abstract class InTheBaseCallFragment extends Fragment {
                       @Override
                       public void onFailure(Call<ModelResponse<Boolean>> call, Throwable t) {
                         ALog.e(TAG, "reward failed error = " + t.getMessage());
-                        ToastX.showShortToast(R.string.app_network_error);
+                        ToastX.showShortToast(R.string.network_error);
                       }
                     }));
   }

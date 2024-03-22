@@ -237,7 +237,7 @@
 
     <string-array name="recommend_topic">
         <item>嗨！我们距离很近</item>
-        <item>缘分让我相遇</item>
+        <item>缘分让我们相遇</item>
         <item>喜欢你的人匆匆赶来了</item>
     </string-array>
 
@@ -260,4 +260,5 @@
     <string name="one_on_one_virtual_call_error">网络异常，请重新拨打</string>
     <string name="one_on_one_virtual_call_end">通话已结束哦~</string>
     <string name="one_on_one_virtual_tips">当前账号仅用于功能测试（限制10次）详情请咨询官网</string>
+    <string name="one_on_one_in_the_call_set_beauty_tips">您当前正在通话中,请稍后再设置美颜</string>
 </resources>

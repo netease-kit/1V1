@@ -15,7 +15,9 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.MutableLiveData;
 import com.netease.nimlib.sdk.avsignalling.constant.ChannelType;
+import com.netease.nimlib.sdk.msg.attachment.AudioAttachment;
 import com.netease.nimlib.sdk.msg.attachment.NetCallAttachment;
+import com.netease.nimlib.sdk.msg.attachment.VideoAttachment;
 import com.netease.nimlib.sdk.msg.constant.MsgTypeEnum;
 import com.netease.nimlib.sdk.msg.model.IMMessage;
 import com.netease.yunxin.app.oneonone.ui.R;
@@ -119,7 +121,7 @@ public class ChatUIConfigManager {
     UserInfo fromUser = messageBean.getMessageData().getFromUser();
     boolean isSelf =
         fromUser != null
-            && TextUtils.equals(fromUser.getAccount(), UserInfoManager.getSelfImAccid());
+            && TextUtils.equals(fromUser.getAccount(), UserInfoManager.getSelfUserUuid());
     if (MsgTypeEnum.text.getValue() == messageBean.getViewType()) {
       int size = 2;
       if (isSelf) {
@@ -189,6 +191,26 @@ public class ChatUIConfigManager {
                 }
               }
               return true;
+            } else if (messageInfo.getViewType() == MsgTypeEnum.video.getValue()) {
+              IMMessage message = messageInfo.getMessageData().getMessage();
+              if (message.getAttachment() instanceof VideoAttachment) {
+                if (isInVoiceRoomOrInCall(context)) {
+                  return true;
+                } else {
+                  return IMessageItemClickListener.super.onMessageClick(
+                      view, position, messageInfo);
+                }
+              }
+            } else if (messageInfo.getViewType() == MsgTypeEnum.audio.getValue()) {
+              IMMessage message = messageInfo.getMessageData().getMessage();
+              if (message.getAttachment() instanceof AudioAttachment) {
+                if (isInVoiceRoomOrInCall(context)) {
+                  return true;
+                } else {
+                  return IMessageItemClickListener.super.onMessageClick(
+                      view, position, messageInfo);
+                }
+              }
             }
             return IMessageItemClickListener.super.onMessageClick(view, position, messageInfo);
           }
@@ -248,6 +270,9 @@ public class ChatUIConfigManager {
               if (OneOnOneUtils.isInVoiceRoom()) {
                 ToastX.showShortToast(R.string.one_on_one_other_you_are_in_the_chatroom);
                 return true;
+              } else if (CallKitUtil.isInTheCall()) {
+                ToastX.showShortToast(R.string.ec_in_the_call_tips);
+                return true;
               } else {
                 return false;
               }
@@ -273,6 +298,9 @@ public class ChatUIConfigManager {
         showTipsDialog(
             (AppCompatActivity) context,
             context.getString(R.string.one_on_one_other_you_are_in_the_chatroom));
+      } else if (CallKitUtil.isInTheCall()) {
+        showTipsDialog(
+            (AppCompatActivity) context, context.getString(R.string.ec_in_the_call_tips));
       } else {
         if (userInfo == null) {
           HttpService.getInstance()
@@ -331,13 +359,22 @@ public class ChatUIConfigManager {
             });
   }
 
+  private boolean isInVoiceRoomOrInCall(Context context) {
+    if (OneOnOneUtils.isInVoiceRoom()) {
+      showTipsDialog(
+          (AppCompatActivity) context,
+          context.getString(R.string.one_on_one_other_you_are_in_the_chatroom));
+      return true;
+    } else if (CallKitUtil.isInTheCall()) {
+      showTipsDialog((AppCompatActivity) context, context.getString(R.string.ec_in_the_call_tips));
+      return true;
+    }
+    return false;
+  }
+
   private void handleAudioCallAction(Context context) {
     if (!ClickUtils.isFastClick()) {
-      if (OneOnOneUtils.isInVoiceRoom()) {
-        showTipsDialog(
-            (AppCompatActivity) context,
-            context.getString(R.string.one_on_one_other_you_are_in_the_chatroom));
-      } else {
+      if (!isInVoiceRoomOrInCall(context)) {
         if (userInfo == null) {
           HttpService.getInstance()
               .getUserInfo(
@@ -450,7 +487,7 @@ public class ChatUIConfigManager {
   private static void showTipsDialog(AppCompatActivity activity, String content) {
     CommonAlertDialog commonDialog = new CommonAlertDialog();
     commonDialog
-        .setTitleStr(content)
+        .setContentStr(content)
         .setPositiveStr(activity.getString(R.string.one_on_one_confirm))
         .setConfirmListener(() -> {})
         .show(activity.getSupportFragmentManager());
@@ -463,7 +500,7 @@ public class ChatUIConfigManager {
   private void showGiftDialog(Context context) {
     GiftDialog giftDialog = new GiftDialog((Activity) context);
     giftDialog.show(
-        (giftId, giftCount, userUuids) ->
+        (giftId, giftCount) ->
             HttpService.getInstance()
                 .reward(
                     giftId,

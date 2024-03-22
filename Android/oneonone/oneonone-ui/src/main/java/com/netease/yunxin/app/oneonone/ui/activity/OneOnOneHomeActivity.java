@@ -8,33 +8,62 @@ import android.app.Activity;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Looper;
+import android.os.Message;
+import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import com.netease.yunxin.app.oneonone.ui.R;
 import com.netease.yunxin.app.oneonone.ui.fragment.HomeFragment;
+import com.netease.yunxin.kit.call.p2p.NECallEngine;
+import com.netease.yunxin.kit.call.p2p.model.NECallEndInfo;
+import com.netease.yunxin.kit.call.p2p.model.NECallEngineDelegate;
+import com.netease.yunxin.kit.call.p2p.model.NECallEngineDelegateAbs;
+import com.netease.yunxin.kit.call.p2p.model.NEHangupReasonCode;
 import com.netease.yunxin.kit.entertainment.common.activity.BaseActivity;
 import com.netease.yunxin.kit.entertainment.common.utils.DialogUtil;
-import com.netease.yunxin.nertc.nertcvideocall.model.AbsNERtcCallingDelegate;
-import com.netease.yunxin.nertc.nertcvideocall.model.NERTCVideoCall;
+import java.lang.ref.WeakReference;
 
 /** 1v1业务入口页 */
 public class OneOnOneHomeActivity extends BaseActivity {
+  private static class MyHandler extends Handler {
+    private final WeakReference<OneOnOneHomeActivity> mActivity;
+
+    public MyHandler(OneOnOneHomeActivity activity) {
+      mActivity = new WeakReference<>(activity);
+    }
+
+    @Override
+    public void handleMessage(@NonNull Message msg) {
+      if (msg.what == SHOW_DIALOG_CODE
+          && mActivity.get() != null
+          && !mActivity.get().isFinishing()) {
+        mActivity.get().showBusyDialog();
+      }
+    }
+  }
+
+  private void showBusyDialog() {
+    DialogUtil.showAlertDialog(
+        OneOnOneHomeActivity.this, getString(R.string.one_on_one_other_is_busy));
+  }
+
+  private final MyHandler mHandler = new MyHandler(this);
+  private static final int SHOW_DIALOG_CODE = 100;
   private static final String TAG = "OneOnOneHomeActivity";
   private String extFilesDirPath;
-  private final AbsNERtcCallingDelegate neRtcCallingDelegate =
-      new AbsNERtcCallingDelegate() {
+  private final NECallEngineDelegate callEngineDelegate =
+      new NECallEngineDelegateAbs() {
+
         @Override
-        public void onUserBusy(String userId) {
-          super.onUserBusy(userId);
-          new Handler(Looper.getMainLooper())
-              .postDelayed(
-                  () ->
-                      DialogUtil.showAlertDialog(
-                          OneOnOneHomeActivity.this, getString(R.string.one_on_one_other_is_busy)),
-                  300);
+        public void onCallEnd(NECallEndInfo neCallEndInfo) {
+          if (neCallEndInfo.reasonCode == NEHangupReasonCode.BUSY
+              || (neCallEndInfo.reasonCode == NEHangupReasonCode.CALLER_REJECTED
+                  && !TextUtils.isEmpty(neCallEndInfo.extraString))) {
+            mHandler.sendEmptyMessageDelayed(SHOW_DIALOG_CODE, 300);
+          }
         }
       };
 
@@ -52,7 +81,7 @@ public class OneOnOneHomeActivity extends BaseActivity {
     //    BeautyManager.getInstance().init(getApplicationContext());
     extFilesDirPath = getExternalFilesDir(null).getAbsolutePath();
     setupBeautyAssets();
-    NERTCVideoCall.sharedInstance().addDelegate(neRtcCallingDelegate);
+    NECallEngine.sharedInstance().addCallDelegate(callEngineDelegate);
   }
 
   private void setupBeautyAssets() {
@@ -97,6 +126,6 @@ public class OneOnOneHomeActivity extends BaseActivity {
   @Override
   protected void onDestroy() {
     super.onDestroy();
-    NERTCVideoCall.sharedInstance().removeDelegate(neRtcCallingDelegate);
+    NECallEngine.sharedInstance().removeCallDelegate(callEngineDelegate);
   }
 }

@@ -15,6 +15,7 @@ import android.text.TextUtils;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewTreeObserver;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -35,12 +36,18 @@ import com.netease.yunxin.app.oneonone.ui.dialog.AudioInputDialog;
 import com.netease.yunxin.app.oneonone.ui.http.HttpService;
 import com.netease.yunxin.app.oneonone.ui.model.ModelResponse;
 import com.netease.yunxin.app.oneonone.ui.utils.AudioInputManager;
+import com.netease.yunxin.app.oneonone.ui.utils.CallKitUtil;
 import com.netease.yunxin.app.oneonone.ui.utils.ChatUIConfigManager;
 import com.netease.yunxin.app.oneonone.ui.utils.ChatUtil;
 import com.netease.yunxin.app.oneonone.ui.utils.OneOnOneUtils;
 import com.netease.yunxin.app.oneonone.ui.view.SettingPopupWindows;
 import com.netease.yunxin.app.oneonone.ui.viewmodel.CustomP2PViewModel;
 import com.netease.yunxin.kit.alog.ALog;
+import com.netease.yunxin.kit.call.p2p.NECallEngine;
+import com.netease.yunxin.kit.call.p2p.model.NECallEndInfo;
+import com.netease.yunxin.kit.call.p2p.model.NECallEngineDelegate;
+import com.netease.yunxin.kit.call.p2p.model.NECallEngineDelegateAbs;
+import com.netease.yunxin.kit.call.p2p.model.NEHangupReasonCode;
 import com.netease.yunxin.kit.chatkit.ui.normal.builder.P2PChatFragmentBuilder;
 import com.netease.yunxin.kit.chatkit.ui.normal.page.fragment.ChatP2PFragment;
 import com.netease.yunxin.kit.chatkit.ui.normal.view.MessageBottomLayout;
@@ -86,6 +93,20 @@ public class CustomChatP2PActivity extends BasePartyActivity {
   private final ChatUIConfigManager chatUIConfigManager = new ChatUIConfigManager();
   private final AudioInputManager audioInputManager = new AudioInputManager();
   private GiftRender giftRender;
+  private int audioIvNormalViewTop;
+  private final NECallEngineDelegate callEngineDelegate =
+      new NECallEngineDelegateAbs() {
+
+        @Override
+        public void onCallEnd(NECallEndInfo neCallEndInfo) {
+          if (neCallEndInfo.reasonCode == NEHangupReasonCode.BUSY
+              || (neCallEndInfo.reasonCode == NEHangupReasonCode.CALLER_REJECTED
+                  && !TextUtils.isEmpty(neCallEndInfo.extraString))) {
+            DialogUtil.showAlertDialog(
+                CustomChatP2PActivity.this, getString(R.string.one_on_one_other_is_busy));
+          }
+        }
+      };
   private final ActivityResultLauncher<String[]> permissionLauncher =
       registerForActivityResult(
           new ActivityResultContracts.RequestMultiplePermissions(),
@@ -125,6 +146,7 @@ public class CustomChatP2PActivity extends BasePartyActivity {
     initGiftAnimation();
     handleEvent();
     initObserver();
+    NECallEngine.sharedInstance().addCallDelegate(callEngineDelegate);
     ReportUtils.report(CustomChatP2PActivity.this, TAG_REPORT, "xiaoxi_enter");
   }
 
@@ -184,7 +206,7 @@ public class CustomChatP2PActivity extends BasePartyActivity {
                   giftRender.addGift(
                       GiftCache.getGift(giftAttachment.getGiftId()).getDynamicIconResId());
                   if (TextUtils.equals(
-                      UserInfoManager.getSelfImAccid(), giftAttachment.getTargetUserUuid())) {
+                      UserInfoManager.getSelfUserUuid(), giftAttachment.getTargetUserUuid())) {
                     ToastX.showShortToast(
                         R.string.app_receive_gift_tip,
                         giftAttachment.getGiftCount(),
@@ -289,6 +311,8 @@ public class CustomChatP2PActivity extends BasePartyActivity {
           if (event.getAction() == MotionEvent.ACTION_DOWN) {
             if (OneOnOneUtils.isInVoiceRoom()) {
               ToastX.showShortToast(R.string.one_on_one_other_you_are_in_the_chatroom);
+            } else if (CallKitUtil.isInTheCall()) {
+              ToastX.showShortToast(R.string.ec_in_the_call_tips);
             } else {
               showAudioInputDialog();
             }
@@ -339,7 +363,25 @@ public class CustomChatP2PActivity extends BasePartyActivity {
             mAudioTv.setVisibility(View.VISIBLE);
           }
         });
-
+    mAudioIv
+        .getViewTreeObserver()
+        .addOnGlobalLayoutListener(
+            new ViewTreeObserver.OnGlobalLayoutListener() {
+              @Override
+              public void onGlobalLayout() {
+                int[] location = new int[2];
+                mAudioIv.getLocationOnScreen(location);
+                if (audioIvNormalViewTop == 0) {
+                  audioIvNormalViewTop = location[1];
+                }
+                if (location[1] < audioIvNormalViewTop) {
+                  // 点击了更多选项，则隐藏按住说话按钮，改为默认的输入框
+                  if (mAudioTv.getVisibility() == View.VISIBLE) {
+                    mAudioTv.setVisibility(View.GONE);
+                  }
+                }
+              }
+            });
     mEmojiIv.setOnClickListener(v -> messageInputLayout.switchEmoji());
 
     mGiftIv.setOnClickListener(v -> showGiftDialog());
@@ -348,7 +390,7 @@ public class CustomChatP2PActivity extends BasePartyActivity {
   private void showGiftDialog() {
     GiftDialog giftDialog = new GiftDialog(CustomChatP2PActivity.this);
     giftDialog.show(
-        (giftId, giftCount, userUuids) ->
+        (giftId, giftCount) ->
             HttpService.getInstance()
                 .reward(
                     giftId,
@@ -408,6 +450,7 @@ public class CustomChatP2PActivity extends BasePartyActivity {
     if (giftRender != null) {
       giftRender.release();
     }
+    NECallEngine.sharedInstance().removeCallDelegate(callEngineDelegate);
     handler.removeCallbacksAndMessages(null);
     super.onDestroy();
   }

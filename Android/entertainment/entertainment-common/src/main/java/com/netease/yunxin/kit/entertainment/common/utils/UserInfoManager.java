@@ -13,7 +13,7 @@ import com.netease.yunxin.kit.entertainment.common.model.NemoAccount;
 
 public class UserInfoManager {
   private static final String TAG = "UserInfoManager";
-  private static String selfImAccid = "";
+  private static String selfUserUuid = "";
   private static String selfImToken = "";
   private static String selfImNickname = "";
   private static String selfImAvatar = "";
@@ -29,12 +29,8 @@ public class UserInfoManager {
     return selfPhoneNumber;
   }
 
-  public static String getSelfImAccid() {
-    return selfImAccid;
-  }
-
-  public static String getSelfAccessToken() {
-    return selfImToken;
+  public static String getSelfUserUuid() {
+    return selfUserUuid;
   }
 
   public static String getSelfNickname() {
@@ -51,27 +47,27 @@ public class UserInfoManager {
 
   // 设置用户信息
   public static void setUserInfo(
-      String userUuid,
-      String userToken,
-      String imToken,
-      String userName,
-      String icon,
-      String mobile) {
+     String userUuid,
+     String userToken,
+     String imToken,
+     String userName,
+     String icon,
+     String mobile) {
     ALog.i(
-        TAG,
-        "setIMUserInfo: userUuid:"
-            + userUuid
-            + " userToken:"
-            + userToken
-            + " imToken:"
-            + imToken
-            + " userName:"
-            + userName
-            + " icon:"
-            + icon
-            + " mobile:"
-            + mobile);
-    selfImAccid = userUuid;
+       TAG,
+       "setIMUserInfo: userUuid:"
+       + userUuid
+       + " userToken:"
+       + userToken
+       + " imToken:"
+       + imToken
+       + " userName:"
+       + userName
+       + " icon:"
+       + icon
+       + " mobile:"
+       + mobile);
+    selfUserUuid = userUuid;
     selfUserToken = userToken;
     selfImToken = imToken;
     selfImNickname = userName;
@@ -101,7 +97,7 @@ public class UserInfoManager {
   }
 
   public static void clearUserInfo() {
-    selfImAccid = "";
+    selfUserUuid = "";
     selfImToken = "";
     selfImNickname = "";
     selfImAvatar = "";

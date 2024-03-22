@@ -38,6 +38,11 @@ import com.netease.yunxin.app.oneonone.ui.utils.ChatUIConfigManager;
 import com.netease.yunxin.app.oneonone.ui.utils.ChatUtil;
 import com.netease.yunxin.app.oneonone.ui.utils.UserInfoUtil;
 import com.netease.yunxin.kit.alog.ALog;
+import com.netease.yunxin.kit.call.p2p.NECallEngine;
+import com.netease.yunxin.kit.call.p2p.model.NECallEndInfo;
+import com.netease.yunxin.kit.call.p2p.model.NECallEngineDelegate;
+import com.netease.yunxin.kit.call.p2p.model.NECallEngineDelegateAbs;
+import com.netease.yunxin.kit.call.p2p.model.NEHangupReasonCode;
 import com.netease.yunxin.kit.chatkit.model.IMMessageInfo;
 import com.netease.yunxin.kit.chatkit.repo.ChatObserverRepo;
 import com.netease.yunxin.kit.chatkit.repo.ChatRepo;
@@ -47,8 +52,6 @@ import com.netease.yunxin.kit.corekit.im.model.UserInfo;
 import com.netease.yunxin.kit.corekit.im.provider.FetchCallback;
 import com.netease.yunxin.kit.corekit.im.repo.SettingRepo;
 import com.netease.yunxin.kit.entertainment.common.utils.UserInfoManager;
-import com.netease.yunxin.nertc.nertcvideocall.model.AbsNERtcCallingDelegate;
-import com.netease.yunxin.nertc.nertcvideocall.model.NERTCVideoCall;
 import com.netease.yunxin.nertc.nertcvideocall.utils.GsonUtils;
 import java.util.ArrayList;
 import java.util.List;
@@ -140,12 +143,14 @@ public class CustomP2PViewModel extends AndroidViewModel {
         }
       };
 
-  private final AbsNERtcCallingDelegate neRtcCallingDelegate =
-      new AbsNERtcCallingDelegate() {
+  private final NECallEngineDelegate callEngineDelegate =
+      new NECallEngineDelegateAbs() {
         @Override
-        public void onUserBusy(String userId) {
-          super.onUserBusy(userId);
-          busyLiveData.setValue(true);
+        public void onCallEnd(NECallEndInfo info) {
+          super.onCallEnd(info);
+          if (info.reasonCode == NEHangupReasonCode.BUSY) {
+            busyLiveData.setValue(true);
+          }
         }
       };
 
@@ -163,7 +168,7 @@ public class CustomP2PViewModel extends AndroidViewModel {
     NIMClient.getService(UserServiceObserve.class)
         .observeUserInfoUpdate(userInfoUpdateObserver, true);
     ChatObserverRepo.registerCustomNotificationObserve(customNotificationObserver);
-    NERTCVideoCall.sharedInstance().addDelegate(neRtcCallingDelegate);
+    NECallEngine.sharedInstance().addCallDelegate(callEngineDelegate);
     fetchTargetUserName();
     getTargetUserInfo(sessionId);
     // 语音消息改为扬声器播放
@@ -247,7 +252,7 @@ public class CustomP2PViewModel extends AndroidViewModel {
             .append(",")
             .append(sessionId)
             .append(",")
-            .append(UserInfoManager.getSelfImAccid())
+            .append(UserInfoManager.getSelfUserUuid())
             .toString();
     boolean hasInsert = SPUtils.getInstance().getBoolean(key, false);
     if (hasInsert || ChatUtil.isSystemAccount(userInfo.getAccount())) {
@@ -297,7 +302,7 @@ public class CustomP2PViewModel extends AndroidViewModel {
         .observeUserInfoUpdate(userInfoUpdateObserver, false);
     ChatObserverRepo.unregisterCustomNotificationObserve(customNotificationObserver);
     registerReceiveMessageObserve(false);
-    NERTCVideoCall.sharedInstance().removeDelegate(neRtcCallingDelegate);
+    NECallEngine.sharedInstance().removeCallDelegate(callEngineDelegate);
   }
 
   private void listenOnlineEvent(boolean listen) {
