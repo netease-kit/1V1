@@ -42,7 +42,6 @@ public class LoginUtil {
                   return;
                 }
                 long rtcUid = response.body().data.getRtcUid();
-                initCallKit(rtcUid);
                 nemoAccount.rtcUid = rtcUid;
                 loginIM(nemoAccount, callback);
               }
@@ -105,6 +104,7 @@ public class LoginUtil {
                 nemoAccount.userName,
                 nemoAccount.icon,
                 nemoAccount.mobile);
+            initCallKit(nemoAccount.rtcUid);
             UserInfoManager.saveUserInfoToSp(nemoAccount);
             if (oneOnOneCallback != null) {
               oneOnOneCallback.onSuccess();
