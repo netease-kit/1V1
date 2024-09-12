@@ -30,7 +30,7 @@ open class FunConversationController: NEBaseConversationController {
     super.viewDidLoad()
     view.backgroundColor = .funConversationBackgroundColor
     navView.backgroundColor = .funConversationBackgroundColor
-    navView.bottomLine.isHidden = true
+    navView.titleBarBottomLine.isHidden = true
   }
 
   deinit {

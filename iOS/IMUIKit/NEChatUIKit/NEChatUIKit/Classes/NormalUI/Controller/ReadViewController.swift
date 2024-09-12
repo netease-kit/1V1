@@ -22,7 +22,7 @@ open class ReadViewController: NEBaseReadViewController {
 
   override public func commonUI() {
     super.commonUI()
-    customNavigationView.bottomLine.isHidden = false
+    customNavigationView.titleBarBottomLine.isHidden = false
     readButton.setTitleColor(UIColor.ne_darkText, for: .normal)
     line.backgroundColor = UIColor.ne_blueText
 

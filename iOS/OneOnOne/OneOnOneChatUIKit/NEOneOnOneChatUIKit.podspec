@@ -29,7 +29,7 @@ Pod::Spec.new do |s|
     s.dependency NECommonKit.name
     s.dependency SnapKit.name
     s.dependency NEOneOnOneUIKit.name
-    s.dependency NERtcCallKit.name
+    s.dependency NERtcCallKit.NOS_Special
     s.dependency LottieSwift.name
   else
     

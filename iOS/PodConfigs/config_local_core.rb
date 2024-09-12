@@ -9,7 +9,7 @@ module NECoreKit
   end
 
   def self.version
-    "9.6.3"
+    "9.6.5"
   end
 
   def self.path

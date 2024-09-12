@@ -28,7 +28,7 @@ open class FunChatViewController: ChatViewController, FunChatInputViewDelegate, 
 
     normalInputHeight = 90
     networkToolHeight = 48
-    customNavigationView.bottomLine.backgroundColor = .funChatNavigationBottomLineColor
+    customNavigationView.titleBarBottomLine.backgroundColor = .funChatNavigationBottomLineColor
   }
 
   public required init?(coder: NSCoder) {

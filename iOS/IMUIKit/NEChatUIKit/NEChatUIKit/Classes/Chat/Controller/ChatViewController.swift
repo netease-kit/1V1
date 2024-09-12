@@ -344,7 +344,7 @@ open class ChatViewController: ChatBaseViewController, UINavigationControllerDel
 
   open func commonUI() {
     title = viewmodel.session.sessionId
-    customNavigationView.bottomLine.isHidden = false
+    customNavigationView.titleBarBottomLine.isHidden = false
     view.addSubview(tableView)
     tableViewBottomConstraint = tableView.bottomAnchor.constraint(
       equalTo: view.bottomAnchor,
