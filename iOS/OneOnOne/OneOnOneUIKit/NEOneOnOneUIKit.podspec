@@ -25,11 +25,11 @@ Pod::Spec.new do |s|
     s.resource = 'Assets/**/*'
     s.dependency NEOneOnOneKit.name
     s.dependency SDWebImage.name
-    s.dependency NERtcCallUIKit.name
+    s.dependency NERtcCallUIKit.NOS_Special
     s.dependency NEUIKit.name
     s.dependency MJRefresh.name
     s.dependency LottieOC.name, LottieOC.version
-    s.dependency NERtcCallKit.name
+    s.dependency NERtcCallKit.NOS_Special
     s.dependency NECommonUIKit.name
     s.dependency SnapKit.name
     s.dependency NESocialUIKit.name

@@ -23,7 +23,7 @@ Pod::Spec.new do |s|
     
     s.source_files = 'Classes/**/*'
     s.dependency NECoreKit.name
-    s.dependency NERtcCallKit.name
+    s.dependency NERtcCallKit.NOS_Special
     s.dependency NERtcSDK.RtcBasic
     s.dependency NECoreIMKit.name
   else

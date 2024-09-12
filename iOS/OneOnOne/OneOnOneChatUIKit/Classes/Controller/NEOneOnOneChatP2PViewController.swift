@@ -58,7 +58,7 @@ public class NEOneOnOneChatP2PViewController: P2PChatViewController, NIMEventSub
         make.top.left.right.equalTo(inputTopExtendView)
         make.height.equalTo(85)
       }
-      customNavigationView.bottomLine.backgroundColor = .clear
+      customNavigationView.titleBarBottomLine.backgroundColor = .clear
       view.bringSubviewToFront(quickReplayView)
       quickReplayView.selectQuickReply = { [weak self] index in
         if let self = self {

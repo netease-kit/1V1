@@ -32,7 +32,7 @@ open class FunUserSettingViewController: NEBaseUserSettingViewController {
     super.setupUI()
     navigationController?.navigationBar.backgroundColor = .white
     customNavigationView.backgroundColor = .white
-    customNavigationView.bottomLine.isHidden = false
+    customNavigationView.titleBarBottomLine.isHidden = false
     userHeader.layer.cornerRadius = 4.0
     addBtn.setImage(coreLoader.loadImage("fun_setting_add"), for: .normal)
     contentTable.rowHeight = 56

@@ -9,7 +9,7 @@ module NERtcCallKit
   end
 
   def self.version
-    "2.1.0-alpha02"
+    "2.3.0"
   end
 
   def self.path
@@ -54,7 +54,7 @@ module NECallKitPstn
   end
 
   def self.version
-    "2.1.0"
+    "2.3.0"
   end
 
   def self.NOS
@@ -97,9 +97,13 @@ module NERtcCallUIKit
   def self.name
     "NERtcCallUIKit"
   end
+  
+  def self.NOS_Special
+    "NERtcCallUIKit/NOS_Special"
+  end
 
   def self.version
-    "2.1.0-alpha02"
+    "2.3.0"
   end
 
   def self.path

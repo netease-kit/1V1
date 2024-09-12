@@ -259,7 +259,6 @@ import NERtcCallUIKit
 
       callViewController!.remoteUser = remoteUser
       let callParam: NEUICallParam = .init()
-      callParam.currentUserAccid = NIMSDK.shared().loginManager.currentAccount()
       callParam.remoteUserAccid = sessionId
       callParam.remoteShowName = nickName ?? ""
       callParam.remoteAvatar = icon ?? ""
@@ -303,7 +302,6 @@ import NERtcCallUIKit
 //    }
 
     let callParam = NEUICallParam()
-    callParam.currentUserAccid = NIMSDK.shared().loginManager.currentAccount()
     callParam.remoteUserAccid = sessionId
     callParam.remoteShowName = nickName ?? ""
     callParam.remoteAvatar = icon ?? ""
