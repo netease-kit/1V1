@@ -7,6 +7,16 @@
 open class NEBaseUserSettingCell: CornerCell {
   public var model: UserSettingCellModel?
 
+  public var subCornerType: CornerType {
+    get { cornerType }
+    set {
+      if cornerType != newValue {
+        cornerType = newValue
+        setNeedsDisplay()
+      }
+    }
+  }
+
   public lazy var titleLabel: UILabel = {
     let label = UILabel()
     label.translatesAutoresizingMaskIntoConstraints = false
@@ -15,7 +25,7 @@ open class NEBaseUserSettingCell: CornerCell {
     return label
   }()
 
-  public lazy var arrow: UIImageView = {
+  public lazy var arrowImageView: UIImageView = {
     let imageView = UIImageView(image: coreLoader.loadImage("arrowRight"))
     imageView.translatesAutoresizingMaskIntoConstraints = false
     return imageView
@@ -31,21 +41,10 @@ open class NEBaseUserSettingCell: CornerCell {
     super.init(coder: coder)
   }
 
-  override public func awakeFromNib() {
-    super.awakeFromNib()
-    // Initialization code
-  }
-
-  override public func setSelected(_ selected: Bool, animated: Bool) {
-    super.setSelected(selected, animated: animated)
-
-    // Configure the view for the selected state
-  }
-
   open func configure(_ anyModel: Any) {
     if let m = anyModel as? UserSettingCellModel {
       model = m
-      cornerType = m.cornerType
+      subCornerType = m.cornerType
       titleLabel.text = m.cellName
     }
   }

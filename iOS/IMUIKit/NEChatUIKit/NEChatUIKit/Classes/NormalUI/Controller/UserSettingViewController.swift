@@ -3,16 +3,16 @@
 // Use of this source code is governed by a MIT license that can be
 // found in the LICENSE file.
 
+import NEChatKit
 import NECommonKit
 import NIMSDK
 import UIKit
 
 @objcMembers
 open class UserSettingViewController: NEBaseUserSettingViewController {
-  override public init(nibName nibNameOrNil: String?, bundle nibBundleOrNil: Bundle?) {
-    super.init(nibName: nibNameOrNil, bundle: nibBundleOrNil)
-    customNavigationView.backgroundColor = .white
-    navigationController?.navigationBar.backgroundColor = .white
+  override public init(userId: String) {
+    super.init(userId: userId)
+
     cellClassDic = [
       UserSettingType.SwitchType.rawValue: UserSettingSwitchCell.self,
       UserSettingType.SelectType.rawValue: UserSettingSelectCell.self,
@@ -20,15 +20,17 @@ open class UserSettingViewController: NEBaseUserSettingViewController {
   }
 
   public required init?(coder: NSCoder) {
-    fatalError("init(coder:) has not been implemented")
+    super.init(coder: coder)
   }
 
   override func setupUI() {
     super.setupUI()
-    userHeader.layer.cornerRadius = 21.0
+    navigationView.backgroundColor = .white
+    navigationController?.navigationBar.backgroundColor = .white
+    userHeaderView.layer.cornerRadius = IMKitConfigCenter.shared.enableTeam ? 21.0 : 30.0
   }
 
-  override func getPinMessageViewController(session: NIMSession) -> NEBasePinMessageViewController {
-    PinMessageViewController(session: session)
+  override func getPinMessageViewController(conversationId: String) -> NEBasePinMessageViewController {
+    PinMessageViewController(conversationId: conversationId)
   }
 }

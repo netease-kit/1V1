@@ -111,3 +111,4 @@ AI_Assistant = "AI Assistant";
 AI_Room_Listener = "AI Room Listener";
 
 Beauty_Error = "In room now, set beauty later";
+Busy_In_OneOnOne = "You are currently on a call, try again later";

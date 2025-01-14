@@ -2,7 +2,6 @@
 // Use of this source code is governed by a MIT license that can be
 // found in the LICENSE file.
 
-import Lottie
 import UIKit
 
 @objc
@@ -26,21 +25,20 @@ open class FunRecordAudioView: UIView {
 
   public var minRecordProgressWidth: CGFloat = 165.0
 
-  lazy var lottieView: LOTAnimationView = {
-    let lottie = LOTAnimationView()
+  lazy var lottieView: NELottieAnimationView = {
+    let lottie = NELottieAnimationView(name: "fun_vioce_data", bundle: coreLoader.bundle)
     lottie.translatesAutoresizingMaskIntoConstraints = false
-    lottie.setAnimation(named: "fun_vioce_data", bundle: coreLoader.bundle)
-    lottie.loopAnimation = true
+    lottie.loopMode = .loop
     lottie.contentMode = .scaleToFill
     lottie.translatesAutoresizingMaskIntoConstraints = false
     return lottie
   }()
 
   lazy var lottieContentView: UIView = {
-    let content = UIView()
-    content.translatesAutoresizingMaskIntoConstraints = false
-    content.backgroundColor = UIColor.clear
-    return content
+    let contentView = UIView()
+    contentView.translatesAutoresizingMaskIntoConstraints = false
+    contentView.backgroundColor = UIColor.clear
+    return contentView
   }()
 
   public var triangleView: UIView = {
@@ -70,13 +68,13 @@ open class FunRecordAudioView: UIView {
   }()
 
   public let recordCloseImage: UIImageView = {
-    let close = UIImageView()
-    close.contentMode = .center
-    close.translatesAutoresizingMaskIntoConstraints = false
-    close.image = coreLoader.loadImage("fun_chat_record_close_dark")
-    close.highlightedImage = coreLoader.loadImage("fun_chat_record_close_light")
-    close.isHighlighted = false
-    return close
+    let imageView = UIImageView()
+    imageView.contentMode = .center
+    imageView.translatesAutoresizingMaskIntoConstraints = false
+    imageView.image = coreLoader.loadImage("fun_chat_record_close_dark")
+    imageView.highlightedImage = coreLoader.loadImage("fun_chat_record_close_light")
+    imageView.isHighlighted = false
+    return imageView
   }()
 
   public let releaseToSendLabel: UILabel = {
@@ -114,7 +112,7 @@ open class FunRecordAudioView: UIView {
 
   private var progressWidthConstraint: NSLayoutConstraint?
 
-  override init(frame: CGRect) {
+  override public init(frame: CGRect) {
     super.init(frame: frame)
     setupUI()
   }
@@ -219,7 +217,7 @@ open class FunRecordAudioView: UIView {
     return windowWidth / 375.0 * 128.0
   }
 
-  public func changeToCancelStyle() {
+  open func changeToCancelStyle() {
     if releaseToSendLabel.isHidden == true {
       return
     }
@@ -231,7 +229,7 @@ open class FunRecordAudioView: UIView {
     triangleView.backgroundColor = UIColor.funRecordAudioProgressCancelColor
   }
 
-  public func changeToNormalStyle() {
+  open func changeToNormalStyle() {
     if releaseToSendLabel.isHidden == false {
       return
     }
@@ -243,7 +241,7 @@ open class FunRecordAudioView: UIView {
     triangleView.backgroundColor = UIColor.funRecordAudioProgressNormalColor
   }
 
-  public func isRecordNormalStyle() -> Bool {
+  open func isRecordNormalStyle() -> Bool {
     if releaseToSendLabel.isHidden == false {
       return true
     }

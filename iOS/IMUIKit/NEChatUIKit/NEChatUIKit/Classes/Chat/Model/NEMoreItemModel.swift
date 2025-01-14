@@ -5,7 +5,8 @@
 
 import UIKit
 
-public enum NEMoreActionType: Int {
+@objc
+public enum NEMoreActionType: NSInteger {
   case takePicture = 1
   case location
   case rtc
@@ -13,12 +14,13 @@ public enum NEMoreActionType: Int {
   case file
   case remind
   case photo
+  case translate
   case other = 100
 }
 
 @objc
 @objcMembers
-public class NEMoreItemModel: NSObject {
+open class NEMoreItemModel: NSObject {
   // 单元图标
   public var image: UIImage?
 
@@ -28,11 +30,8 @@ public class NEMoreItemModel: NSObject {
   // 对应的单元类型
   public var type: NEMoreActionType?
 
-  // 代理类
-  public weak var customDelegate: AnyObject?
-
   // 动态事件
-  public var action: Selector?
+  public var action: ((ChatViewController, NEMoreItemModel?) -> Void)?
 
   // 自定义图标
   public var customImage: UIImage?

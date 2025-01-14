@@ -14,8 +14,6 @@ import UIKit
 
 let tag = "NEOneOnOneChatP2PViewController"
 public class NEOneOnOneChatP2PViewController: P2PChatViewController, NIMEventSubscribeManagerDelegate, UIPopoverPresentationControllerDelegate, NEOneOnOneGiftViewDelegate, NEOneOnOneListener {
-//    NIMChatManagerDelegate
-
   var thanksForGiven: ((String) -> Void)?
   var _audioInputingView: NEOneOnOneAudioInputingView?
   // 是否加入房间中,防止重复点击.
@@ -34,74 +32,96 @@ public class NEOneOnOneChatP2PViewController: P2PChatViewController, NIMEventSub
 
   var remoteUserInfo: NEOneOnOneAccountInfo?
   /// 顶部视图
-  override public func viewWillAppear(_ animated: Bool) {
-    super.viewWillAppear(animated)
-  }
-
-  override public func viewWillDisappear(_ animated: Bool) {
-    navigationController?.navigationBar.isHidden = false
+  override public func viewDidAppear(_ animated: Bool) {
+    super.viewDidAppear(animated)
+    navigationController?.setNavigationBarHidden(true, animated: true)
   }
 
   override public func viewDidLoad() {
     NotificationCenter.default.post(Notification(name: Notification.Name("messageEnter")))
 
     navigationItem.rightBarButtonItem?.customView?.backgroundColor = UIColor.green
-    NEKitChatConfig.shared.ui.selfMessageBg = .clear
-    NEKitChatConfig.shared.ui.rightBubbleBg = ne_chatUI_imageName(imageName: "right_back_icon")
-    NEKitChatConfig.shared.ui.receiveMessageBg = .clear
-    NEKitChatConfig.shared.ui.leftBubbleBg = ne_chatUI_imageName(imageName: "left_back_icon")
 
-    if viewmodel.session.sessionId != "yunxinassistaccid_1" {
-      inputTopExtendHeight = 95
-      inputTopExtendView.addSubview(quickReplayView)
+    ChatUIConfig.shared.messageProperties.selfMessageBg = .clear
+    ChatUIConfig.shared.messageProperties.rightBubbleBg = ne_chatUI_imageName(imageName: "right_back_icon")
+    ChatUIConfig.shared.messageProperties.receiveMessageBg = .clear
+    ChatUIConfig.shared.messageProperties.leftBubbleBg = ne_chatUI_imageName(imageName: "left_back_icon")
+            
+    if viewModel.conversationId != "yunxinassistaccid_1" {
+      bodyBottomViewHeight = 95
+      bodyBottomView.addSubview(quickReplayView)
       quickReplayView.snp.makeConstraints { make in
-        make.top.left.right.equalTo(inputTopExtendView)
+        make.top.left.right.equalTo(bodyBottomView)
         make.height.equalTo(85)
       }
-      customNavigationView.titleBarBottomLine.backgroundColor = .clear
+      navigationView.titleBarBottomLine.backgroundColor = .clear
       view.bringSubviewToFront(quickReplayView)
       quickReplayView.selectQuickReply = { [weak self] index in
         if let self = self {
           print("selectQuickReply:\(index)")
           if index < self.quickReplayView.oneOnOneQuickReplyArray.count {
-            self.viewmodel.sendTextMessage(text: self.quickReplayView.oneOnOneQuickReplyArray[index]) { error in
+            self.viewModel.sendTextMessage(text: self.quickReplayView.oneOnOneQuickReplyArray[index]) { message, error in
             }
           }
         }
       }
       quickReplayView.rebortClicked = { [weak self] in
-        if let session = self?.viewmodel.session {
+        if let conversationId = self?.viewModel.conversationId {
           let ai = NEOneOnOneAIViewController()
           ai.copyCompletion = { content in
             DispatchQueue.main.async {
-              self?.menuView.textView.text = content
-              self?.menuView.textView.becomeFirstResponder()
+              self?.chatInputView.textView.text = content
+              self?.chatInputView.textView.becomeFirstResponder()
               ai.dismissAIViewController()
             }
           }
-          if let messages = NIMSDK.shared().conversationManager.messages(in: session, message: nil, limit: 30) {
-            let recvMessages = messages.filter { message in
-              (message.from == session.sessionId) && (message.messageType == .text)
+
+//          if let messages = NIMSDK.shared().conversationManager.messages(in: session, message: nil, limit: 30) {
+//            let recvMessages = messages.filter { message in
+//              (message.from == session.sessionId) && (message.messageType == .text)
+//            }
+//            if let lastMessage = recvMessages.last?.text {
+//              ai.lastMessage = lastMessage
+//            }
+//          }
+//
+
+          let option = V2NIMMessageListOption()
+          option.limit = 30
+          option.conversationId = conversationId
+
+          NIMSDK.shared().v2MessageService.getMessageList(option) { messages in
+            let recvMessages = messages.filter { msg in
+              (msg.isSelf == false) && (msg.messageType == .MESSAGE_TYPE_TEXT)
             }
             if let lastMessage = recvMessages.last?.text {
               ai.lastMessage = lastMessage
             }
+            self?.present(ai, animated: true)
+          } failure: { error in
           }
-          self?.present(ai, animated: true)
         }
       }
     }
-    registerCellDic[String(OneOnOneChatCustomMessageType.ACCOST_MESSAGE_TIPS_TYPE)] = NEOneOnOneTextSalutuionCell.self
-    registerCellDic[String(OneOnOneChatCustomMessageType.PRIVACY_RISK_MESSAGE_TYPE)] = NEOneOnOneTextThirdPrivacyCell.self
-    registerCellDic[String(OneOnOneChatCustomMessageType.TRY_AUDIO_CALL_MESSAGE_TYPE)] = NEOneOnOneAudioSalutuionCell.self
-    registerCellDic[String(OneOnOneChatCustomMessageType.TRY_VIDEO_CALL_MESSAGE_TYPE)] = NEOneOnOneVideoSalutuionCell.self
-    registerCellDic[String(OneOnOneChatCustomMessageType.COMMON_RISK_MESSAGE_TYPE)] = NEOneOnOneTextNonComplianceCell.self
-    registerCellDic[String(SEND_GIFT_TYPE_SEND)] = NEOneOnOneRewardRightCell.self
-    registerCellDic[String(SEND_GIFT_TYPE_RECV)] = NEOneOnOneRewardLeftCell.self
-    registerCellDic[String(OneOnOneChatCustomMessageType.OFFICIAL_GIFT_TYPE)] = NEOneOnOneOfficialCell.self
+    cellRegisterDic[String(OneOnOneChatCustomMessageType.ACCOST_MESSAGE_TIPS_TYPE)] = NEOneOnOneTextSalutuionCell.self
+    cellRegisterDic[String(OneOnOneChatCustomMessageType.PRIVACY_RISK_MESSAGE_TYPE)] = NEOneOnOneTextThirdPrivacyCell.self
+    cellRegisterDic[String(OneOnOneChatCustomMessageType.TRY_AUDIO_CALL_MESSAGE_TYPE)] = NEOneOnOneAudioSalutuionCell.self
+    cellRegisterDic[String(OneOnOneChatCustomMessageType.TRY_VIDEO_CALL_MESSAGE_TYPE)] = NEOneOnOneVideoSalutuionCell.self
+    cellRegisterDic[String(OneOnOneChatCustomMessageType.COMMON_RISK_MESSAGE_TYPE)] = NEOneOnOneTextNonComplianceCell.self
+    cellRegisterDic[String(SEND_GIFT_TYPE_SEND)] = NEOneOnOneRewardRightCell.self
+    cellRegisterDic[String(SEND_GIFT_TYPE_RECV)] = NEOneOnOneRewardLeftCell.self
+    cellRegisterDic[String(OneOnOneChatCustomMessageType.OFFICIAL_GIFT_TYPE)] = NEOneOnOneOfficialCell.self
 
+    NEChatUIKitClient.instance.regsiterCustomCell([String(OneOnOneChatCustomMessageType.ACCOST_MESSAGE_TIPS_TYPE): NEOneOnOneTextSalutuionCell.self])
+    NEChatUIKitClient.instance.regsiterCustomCell([String(OneOnOneChatCustomMessageType.PRIVACY_RISK_MESSAGE_TYPE): NEOneOnOneTextThirdPrivacyCell.self])
+    NEChatUIKitClient.instance.regsiterCustomCell([String(OneOnOneChatCustomMessageType.TRY_AUDIO_CALL_MESSAGE_TYPE): NEOneOnOneAudioSalutuionCell.self])
+    NEChatUIKitClient.instance.regsiterCustomCell([String(OneOnOneChatCustomMessageType.TRY_VIDEO_CALL_MESSAGE_TYPE): NEOneOnOneVideoSalutuionCell.self])
+    NEChatUIKitClient.instance.regsiterCustomCell([String(OneOnOneChatCustomMessageType.COMMON_RISK_MESSAGE_TYPE): NEOneOnOneTextNonComplianceCell.self])
+    NEChatUIKitClient.instance.regsiterCustomCell([String(OneOnOneChatCustomMessageType.OFFICIAL_GIFT_TYPE): NEOneOnOneOfficialCell.self])
+    NEChatUIKitClient.instance.regsiterCustomCell([String(SEND_GIFT_TYPE_SEND): NEOneOnOneRewardRightCell.self])
+    NEChatUIKitClient.instance.regsiterCustomCell([String(SEND_GIFT_TYPE_RECV): NEOneOnOneRewardLeftCell.self])
+      
     super.viewDidLoad()
-    ne_UINavigationItem.navigationBarHidden = true
     tableView.backgroundColor = UIColor.clear
 
     let imageView = UIImageView()
@@ -110,7 +130,7 @@ public class NEOneOnOneChatP2PViewController: P2PChatViewController, NIMEventSub
     imageView.snp.makeConstraints { make in
       make.left.right.top.bottom.equalTo(self.view)
     }
-    view.insertSubview(imageView, belowSubview: customNavigationView)
+    view.insertSubview(imageView, belowSubview: navigationView)
 
     NotificationCenter.default.addObserver(self, selector: #selector(receiveInvite), name: NSNotification.Name("receiveInvite"), object: nil)
 
@@ -118,11 +138,11 @@ public class NEOneOnOneChatP2PViewController: P2PChatViewController, NIMEventSub
     NotificationCenter.default.addObserver(self, selector: #selector(startVideoCallAction), name: NSNotification.Name(VideoCallAction), object: nil)
 
     // 聊天页输入框左右间距自定义
-    menuView.textviewLeftConstraint?.constant = 72
-    menuView.textviewRightConstraint?.constant = -72
+    chatInputView.textviewLeftConstraint?.constant = 72
+    chatInputView.textviewRightConstraint?.constant = -72
     /// 设置内边距
-    let inerInset = menuView.textView.textContainerInset
-    menuView.textView.textContainerInset = UIEdgeInsets(top: inerInset.top, left: inerInset.left, bottom: inerInset.bottom, right: 40)
+    let inerInset = chatInputView.textView.textContainerInset
+    chatInputView.textView.textContainerInset = UIEdgeInsets(top: inerInset.top, left: inerInset.left, bottom: inerInset.bottom, right: 40)
 
     // 自定义底部工具条(未点击更多状态)
     customBottomBar()
@@ -130,10 +150,10 @@ public class NEOneOnOneChatP2PViewController: P2PChatViewController, NIMEventSub
     /// 自定义聊天框周围视图
     customTextViewAroundView()
     // 更多按钮特殊处理
-    menuView.stackView.addArrangedSubview(moreButton)
+    chatInputView.stackView.addArrangedSubview(moreButton)
 
-    if viewmodel.session.sessionId != "yunxinassistaccid_1" {
-      customNavigationView.isHidden = true
+    if viewModel.conversationId != "yunxinassistaccid_1" {
+      navigationView.isHidden = true
       /// 订阅对方在线状态
       NIMSDK.shared().subscribeManager.subscribeEvent(subscribeRequest) { error, failedPublishers in
         print("订阅是否成功 ---- \(String(describing: error))")
@@ -152,11 +172,11 @@ public class NEOneOnOneChatP2PViewController: P2PChatViewController, NIMEventSub
       view.addSubview(giftAnimation)
     } else {
       /// 隐藏输入框
-      customNavigationView.moreButton.isHidden = true
-      customNavigationView.backgroundColor = .clear
+      navigationView.moreButton.isHidden = true
+      navigationView.backgroundColor = .clear
       navigationItem.rightBarButtonItem = nil
-      inputViewTopConstraint?.constant = 0
-      tableViewBottomConstraint?.constant = 0
+      bodyBottomViewHeightAnchor?.constant = 0
+      bottomViewTopAnchor?.constant = 0
     }
     updateOnlineState()
 
@@ -169,10 +189,44 @@ public class NEOneOnOneChatP2PViewController: P2PChatViewController, NIMEventSub
         self?._audioInputingView = nil
       }
     }
+    
+    // 反垃圾结果
+    ChatKitClient.shared.sendMessageCallback = { [weak self] viewController, result, error, progress in
+      if let antispamResult = result?.antispamResult {
+        let jsonData = antispamResult.data(using: .utf8)!
+        do {
+          if let dictionary = try JSONSerialization.jsonObject(with: jsonData, options: []) as? [String: Any] {
+            if dictionary.keys.contains("suggestion"), let suggestion = dictionary["suggestion"] as? Int {
+              if suggestion != 0 {
+                // 不通过
+                if let extString = dictionary["ext"] as? String,
+                   let extObjectData = extString.data(using: .utf8),
+                   let extObject = try? JSONSerialization.jsonObject(with: extObjectData, options: []) as? [String: Any],
+                   let antispam = extObject["antispam"] as? [String: Any],
+                   let labels = antispam["labels"] as? [[String: Any]],
+                   let subLabels = labels.first?["subLabels"] as? [[String: Any]],
+                   let details = subLabels.first?["details"] as? [String: Any],
+                   let keywords = details["keywords"] as? [[String: Any]],
+                   let keyword = keywords.first?["word"] as? String {
+                  if keyword.count > 0 {
+                      self?.sendSalutionMsg(type: 3, antiSpamMessage: result?.message)
+                    return
+                  }
+                }
+                  self?.sendSalutionMsg(type: 4, antiSpamMessage: result?.message)
+  
+              } else {}
+            }
+          }
+        } catch {
+          print(error.localizedDescription)
+        }
+      }
+    }
   }
 
   func updateOnlineState() {
-    NEOneOnOneKit.getInstance().getAccountInfo(viewmodel.session.sessionId) { [weak self] code, msg, accountInfo in
+    NEOneOnOneKit.getInstance().getAccountInfo(viewModel.conversationId) { [weak self] code, msg, accountInfo in
       if code != 0 {
         // 请求失败
       } else {
@@ -220,10 +274,11 @@ public class NEOneOnOneChatP2PViewController: P2PChatViewController, NIMEventSub
             if item.name == "user" {
               if let itemDetail = item.value,
                  itemDetail.count > 0 {
-                let session = NIMSession(itemDetail, type: .P2P)
+                let conversationId = V2NIMConversationIdUtil.p2pConversationId(itemDetail)
+
                 Router.shared.use(
                   PushP2pChatVCRouter,
-                  parameters: ["nav": self?.navigationController as Any, "session": session as Any],
+                  parameters: ["nav": self?.navigationController as Any, "conversationId": conversationId as Any],
                   closure: nil
                 )
               }
@@ -237,8 +292,8 @@ public class NEOneOnOneChatP2PViewController: P2PChatViewController, NIMEventSub
   }
 
   override public func didTapMessage(_ cell: UITableViewCell?, _ model: MessageContentModel?, _ replyIndex: Int? = nil) {
-    if model?.type == .rtcCallRecord, let object = model?.message?.messageObject as? NIMRtcCallRecordObject {
-      if object.callType == .audio {
+    if model?.type == .rtcCallRecord, let object = model?.message?.attachment as? V2NIMMessageCallAttachment {
+      if object.type == 1 {
         dealWithAction(true)
         return
       } else {
@@ -246,19 +301,22 @@ public class NEOneOnOneChatP2PViewController: P2PChatViewController, NIMEventSub
         return
       }
     }
+    if model?.type == .audio || model?.type == .video,
+       let canContinueActon = NEOneOnOneUIManager.sharedInstance().canContinueAction,
+       !canContinueActon() {
+      return
+    }
     super.didTapMessage(cell, model, replyIndex)
   }
 
   override public func viewTap(tap: UITapGestureRecognizer) {
-    if let opeView = operationView,
-       view.subviews.contains(opeView) {
-      opeView.removeFromSuperview()
-
+    if view.subviews.contains(operationView) {
+      operationView.removeFromSuperview()
     } else {
-      if menuView.textView.isFirstResponder {
-        menuView.textView.resignFirstResponder()
+      if chatInputView.textView.isFirstResponder {
+        chatInputView.textView.resignFirstResponder()
       } else {
-        if viewmodel.session.sessionId != "yunxinassistaccid_1" {
+        if viewModel.conversationId != "yunxinassistaccid_1" {
           /// 云信小助手不展示键盘
           layoutInputView(offset: 0)
         }
@@ -267,13 +325,14 @@ public class NEOneOnOneChatP2PViewController: P2PChatViewController, NIMEventSub
   }
 
   override public func loadDataFinish() {
-    if viewmodel.session.sessionId == "yunxinassistaccid_1" {
+    super.loadDataFinish()
+    if viewModel.conversationId == "yunxinassistaccid_1" {
       return
     }
     // 获取随机数
     let randomNum = Int(arc4random_uniform(2))
     // 获取本地存储数据
-    let localKey = "\(NIMSDK.shared().loginManager.currentAccount())-\(viewmodel.session.sessionId)"
+    let localKey = "\(NIMSDK.shared().loginManager.currentAccount())-\(viewModel.conversationId)"
     let hasSendSalution = UserDefaults.standard.bool(forKey: localKey)
     if !hasSendSalution {
       // 未发送
@@ -311,13 +370,13 @@ public class NEOneOnOneChatP2PViewController: P2PChatViewController, NIMEventSub
 
   // 顶部视图
   lazy var headerView: NEOneOnOneHeaderView = {
-    let showTips = viewmodel.session.sessionId.contains("virtually_user") && !NEOneOnOneKit.getInstance().isOversea
+    let showTips = viewModel.conversationId.contains("virtually_user") && !NEOneOnOneKit.getInstance().isOversea
     var height = NEConstant.navigationHeight + 1
     if showTips {
       // tips高度36，间距14
       height += 50
     }
-    navigationBarBottomExtendHeightConstant?.constant = showTips ? 50 : 0
+    bodyTopViewHeightAnchor?.constant = showTips ? 50 : 0
     let headerView = NEOneOnOneHeaderView(frame: CGRect(x: 0, y: NEConstant.statusBarHeight, width: view.bounds.width, height: height), showTips: showTips)
 //    let headerView = NEOneOnOneHeaderView(frame: CGRect(x: 0, y: 0, width: self.view.bounds.self.width, height: 88))
     return headerView
@@ -327,7 +386,7 @@ public class NEOneOnOneChatP2PViewController: P2PChatViewController, NIMEventSub
   var audioInputingView: NEOneOnOneAudioInputingView {
     if _audioInputingView == nil {
       _audioInputingView = NEOneOnOneAudioInputingView(frame: UIScreen.main.bounds)
-      let audioInputingButton = NEOneOnOneSpeakButton(frame: CGRect(x: menuView.textView.frame.origin.x + menuView.frame.origin.x, y: menuView.textView.frame.origin.y + menuView.frame.origin.y, width: menuView.textView.frame.size.width, height: menuView.textView.frame.height))
+      let audioInputingButton = NEOneOnOneSpeakButton(frame: CGRect(x: chatInputView.textView.frame.origin.x + chatInputView.frame.origin.x, y: chatInputView.textView.frame.origin.y + chatInputView.frame.origin.y, width: chatInputView.textView.frame.size.width, height: chatInputView.textView.frame.height))
       _audioInputingView?.addSubview(audioInputingButton)
     }
     _audioInputingView?.completeBlock = { [weak self] in
@@ -356,7 +415,7 @@ public class NEOneOnOneChatP2PViewController: P2PChatViewController, NIMEventSub
     request.type = 1
     request.expiry = 60 * 60 * 24
     request.syncEnabled = true
-    request.publishers = [viewmodel.session.sessionId]
+    request.publishers = [viewModel.conversationId]
     return request
   }()
 
@@ -465,14 +524,10 @@ public class NEOneOnOneChatP2PViewController: P2PChatViewController, NIMEventSub
     print("权限判断通过")
 
     // 判断是否在小窗：弹出Toast
-    if NEOneOnOneUIKitEngine.sharedInstance().canCall() != nil {
-      let message = NEOneOnOneUIKitEngine.sharedInstance().canCall()
-
-      if let message = message, message.count > 0 {
-        /// 不能操作
-        NEOneOnOneToast.show(ne_localized("您当前处于语聊房中，请结束后再试"))
-        return
-      }
+    if let canContinueAction = NEOneOnOneUIManager.sharedInstance().canContinueAction,
+       !canContinueAction() {
+      /// 不能操作
+      return
     }
 
     switch gesture.state {
@@ -530,7 +585,7 @@ public class NEOneOnOneChatP2PViewController: P2PChatViewController, NIMEventSub
       return
     }
     // 展示礼物动画
-    NEOneOnOneKit.getInstance().reward(giftId: gift.giftId, giftCount: count, target: viewmodel.session.sessionId) { [weak self] code, send, obj in
+    NEOneOnOneKit.getInstance().reward(giftId: gift.giftId, giftCount: count, target: viewModel.conversationId) { [weak self] code, send, obj in
       if code == 0 {
         self?.playGiftWithName(name: "anim_gift_0\(gift.giftId)")
       }
@@ -551,7 +606,7 @@ public class NEOneOnOneChatP2PViewController: P2PChatViewController, NIMEventSub
 
   @objc func clickEmojiButton() {
     layoutInputView(offset: bottomExanpndHeight)
-    menuView.addEmojiView()
+    chatInputView.addEmojiView()
 //    layoutInputView(offset: 0)
     moreButton.isSelected = false
     emojiButton.isSelected = true
@@ -560,29 +615,29 @@ public class NEOneOnOneChatP2PViewController: P2PChatViewController, NIMEventSub
 
   // 文字切换语音 以及表情 礼物视图
   func customTextViewAroundView() {
-    menuView.addSubview(audioExchangeButton)
+    chatInputView.addSubview(audioExchangeButton)
     audioExchangeButton.snp.makeConstraints { make in
-      make.right.equalTo(menuView.textView.snp.left).offset(-20)
+      make.right.equalTo(chatInputView.textView.snp.left).offset(-20)
       make.height.width.equalTo(32)
-      make.centerY.equalTo(menuView.textView.snp.centerY)
+      make.centerY.equalTo(chatInputView.textView.snp.centerY)
     }
 
-    menuView.addSubview(emojiButton)
+    chatInputView.addSubview(emojiButton)
     emojiButton.snp.makeConstraints { make in
-      make.right.equalTo(menuView.textView.snp.right).offset(-12)
+      make.right.equalTo(chatInputView.textView.snp.right).offset(-12)
       make.height.width.equalTo(24)
-      make.centerY.equalTo(menuView.textView.snp.centerY)
+      make.centerY.equalTo(chatInputView.textView.snp.centerY)
     }
-    menuView.addSubview(giftButton)
+    chatInputView.addSubview(giftButton)
     giftButton.snp.makeConstraints { make in
-      make.left.equalTo(menuView.textView.snp.right).offset(20)
+      make.left.equalTo(chatInputView.textView.snp.right).offset(20)
       make.height.width.equalTo(32)
-      make.centerY.equalTo(menuView.textView.snp.centerY)
+      make.centerY.equalTo(chatInputView.textView.snp.centerY)
     }
 
-    menuView.addSubview(audioInputButton)
+    chatInputView.addSubview(audioInputButton)
     audioInputButton.snp.makeConstraints { make in
-      make.left.right.top.bottom.equalTo(menuView.textView)
+      make.left.right.top.bottom.equalTo(chatInputView.textView)
     }
     view.bringSubviewToFront(audioInputButton)
     audioInputButton.isHidden = !audioExchangeButton.isSelected
@@ -597,7 +652,7 @@ public class NEOneOnOneChatP2PViewController: P2PChatViewController, NIMEventSub
       guard let self = self else { return }
       self.view.endEditing(true)
       let popView = NEOneOnOnePopView(frame: UIScreen.main.bounds)
-      popView.isInBlack = NIMSDK.shared().userManager.isUser(inBlackList: self.viewmodel.session.sessionId)
+      popView.isInBlack = NIMSDK.shared().userManager.isUser(inBlackList: self.viewModel.conversationId)
       popView.sourceRect = CGRect(x: self.headerView.frame.origin.x + self.headerView.settingButton.frame.origin.x, y: self.headerView.frame.origin.y + self.headerView.settingButton.frame.origin.y, width: self.headerView.settingButton.frame.size.width, height: self.headerView.settingButton.frame.size.height)
       self.view.addSubview(popView)
       popView.reportAction = { [weak self] in
@@ -621,7 +676,7 @@ public class NEOneOnOneChatP2PViewController: P2PChatViewController, NIMEventSub
         }
       }
       popView.blockAction = { [weak self] in
-        if let sessionId = self?.viewmodel.session.sessionId {
+        if let sessionId = self?.viewModel.conversationId {
           if NIMSDK.shared().userManager.isUser(inBlackList: sessionId) {
             NIMSDK.shared().userManager.remove(fromBlackBlackList: sessionId) { error in
               if let _ = error {
@@ -665,8 +720,8 @@ public class NEOneOnOneChatP2PViewController: P2PChatViewController, NIMEventSub
             "platform": "iOS",
             "manufacturer": "Apple",
             "app_key": NIMSDK.shared().appKey() ?? "",
-            "phone": viewmodel.session.sessionId,
-            "nickname": viewmodel.session.sessionId,
+            "phone": viewModel.conversationId,
+            "nickname": viewModel.conversationId,
             "client": "allInOne",
             "model": "model",
             "time": Int(Date().timeIntervalSince1970 * 1000),
@@ -698,10 +753,10 @@ public class NEOneOnOneChatP2PViewController: P2PChatViewController, NIMEventSub
 
   // 自定义底部视图
   func customBottomBar() {
-    let subviews = menuView.stackView.subviews
-    subviews.forEach { view in
+    let subviews = chatInputView.stackView.subviews
+    for view in subviews {
       view.removeFromSuperview()
-      menuView.stackView.removeArrangedSubview(view)
+      chatInputView.stackView.removeArrangedSubview(view)
     }
 
     let normalImages = ["bottom_image_icon", "bottom_audio_icon", "bottom_camera_icon", "bottom_hot_topic_icon"]
@@ -714,7 +769,7 @@ public class NEOneOnOneChatP2PViewController: P2PChatViewController, NIMEventSub
       bottomButton.isSelected = false
       bottomButton.addTarget(self, action: #selector(buttonEvent), for: .touchUpInside)
       bottomButton.accessibilityIdentifier = "id.chatMessageActionItemBtn"
-      menuView.stackView.addArrangedSubview(bottomButton)
+      chatInputView.stackView.addArrangedSubview(bottomButton)
     }
   }
 
@@ -751,7 +806,7 @@ public class NEOneOnOneChatP2PViewController: P2PChatViewController, NIMEventSub
         if let self = self {
           print("选择了第\(index)话题")
           if index < self.hotTopicArray.count {
-            self.viewmodel.sendTextMessage(text: self.hotTopicArray[index]) { error in
+            self.viewModel.sendTextMessage(text: self.hotTopicArray[index]) { message, error in
             }
           }
         }
@@ -765,7 +820,7 @@ public class NEOneOnOneChatP2PViewController: P2PChatViewController, NIMEventSub
           clickAudioExchangeButton()
         }
         layoutInputView(offset: bottomExanpndHeight)
-        menuView.addMoreActionView()
+        chatInputView.addMoreActionView()
         view.endEditing(true)
       }
     }
@@ -790,13 +845,9 @@ public class NEOneOnOneChatP2PViewController: P2PChatViewController, NIMEventSub
   }
 
   // 发送打招呼消息：本地消息
-  func sendSalutionMsg(type: Int, antiSpamMessage: NIMMessage?) {
-    let message = NIMMessage()
-    if let antiSpamMessage = antiSpamMessage {
-      message.timestamp = antiSpamMessage.timestamp + 1
-    }
-    let object = NIMCustomObject()
-    let attachment = CustomAttachment()
+  func sendSalutionMsg(type: Int, antiSpamMessage: V2NIMMessage?) {
+//    let message = V2NIMMessage()
+    let attachment = CustomAttachment(customJsonSrting: "")
     // 本地消息不回走到 CustomAttachment的解析，所以需要手动 cellHeight 以及 customType ，否则不会刷新。发送消息不需要
     attachment.cellHeight = 50 + 20
     switch type {
@@ -821,19 +872,25 @@ public class NEOneOnOneChatP2PViewController: P2PChatViewController, NIMEventSub
       attachment.customType = OneOnOneChatCustomMessageType.ACCOST_MESSAGE_TIPS_TYPE
       attachment.cellHeight = 30 + 20
     }
-    object.attachment = attachment
-    message.messageObject = object
-    let setting = NIMMessageSetting()
-    setting.shouldBeCounted = false
-    message.setting = setting
-    viewmodel.repo.saveMessageToDB(message, viewmodel.session) { error in
-      print("send custom message error : ", error?.localizedDescription as Any)
-      // self.viewmodel.willSend(message)
+
+    let message = MessageUtils.customMessage(text: "", rawAttachment: attachment.encode())
+    if let antiSpamMessage = antiSpamMessage {
+      message.createTime = antiSpamMessage.createTime + 1
+    }
+
+    viewModel.chatRepo.insertMessageToLocal(message: message, conversationId: viewModel.conversationId) {[weak self] meaasge, error in
+       print("send custom message error : ", error?.localizedDescription as Any)
+        // 当前聊天页面插入的提示消息
+        self?.viewModel.modelFromMessage(message: message) { model in
+          if let index = self?.viewModel.insertToMessages(model) {
+            self?.viewModel.delegate?.sending(message, IndexPath(row: index, section: 0))
+          }
+        }
     }
   }
-
+  
   public func onReceiveGift(gift: NEOneOnOneOneGift) {
-    if gift.senderUserUuid != viewmodel.session.sessionId {
+    if gift.senderUserUuid != viewModel.conversationId {
       return
     }
     playGiftWithName(name: "anim_gift_0\(gift.giftId)")
@@ -850,8 +907,8 @@ public class NEOneOnOneChatP2PViewController: P2PChatViewController, NIMEventSub
   }
 
   override public func recallMessage() {
-    if let message = viewmodel.operationModel?.message {
-      if let yidun = message.yidunAntiSpamRes, yidun.count > 0 {
+    if let message = viewModel.operationModel?.message {
+      if let yidun = message.antispamConfig, let result = yidun.antispamCheating, result.count > 0 {
         NEOneOnOneToast.show(ne_localized("敏感消息，撤回失败"))
         return
       }
@@ -862,21 +919,17 @@ public class NEOneOnOneChatP2PViewController: P2PChatViewController, NIMEventSub
   override public func didSelectMoreCell(cell: NEInputMoreCell) {
     if let type = cell.cellData?.type, type == .takePicture {
       // 判断是否在小窗：弹出Toast
-      if NEOneOnOneUIKitEngine.sharedInstance().canCall() != nil {
-        let message = NEOneOnOneUIKitEngine.sharedInstance().canCall()
-
-        if let message = message, message.count > 0 {
-          /// 不能操作
-          NEOneOnOneToast.show(ne_localized("您当前处于语聊房中，请结束后再试"))
-          return
-        }
+      if let canContinueAction = NEOneOnOneUIManager.sharedInstance().canContinueAction,
+         !canContinueAction() {
+        /// 不能操作
+        return
       }
     }
     super.didSelectMoreCell(cell: cell)
   }
 
-  override public func layoutInputView(offset: CGFloat) {
-    super.layoutInputView(offset: offset)
+  override public func layoutInputView(offset: CGFloat, _ scrollToBottom: Bool = false) {
+    super.layoutInputView(offset: offset, scrollToBottom)
     if offset == 0 {
       // 更多按钮旋转
       moreButton.isSelected = false
@@ -898,16 +951,13 @@ public class NEOneOnOneChatP2PViewController: P2PChatViewController, NIMEventSub
     moreButton.isSelected = false
   }
 
-  override public func getSessionInfo(session: NIMSession) {
-    super.getSessionInfo(session: session)
-    NIMSDK.shared().userManager.fetchUserInfos([viewmodel.session.sessionId]) { users, error in
-      DispatchQueue.main.async { [weak self] in
-        /// 修改顶部视图
-        let user = User(user: users?.first)
-        self?.headerView.navigationItemView.userNameLabel.text = user.showName()
-//        self.navigationItemView.userNameLabel.text = user.showName()
-      }
+  override public func getSessionInfo(sessionId: String, _ completion: @escaping () -> Void) {
+    super.getSessionInfo(sessionId: sessionId, completion)
+
+    viewModel.contactRepo.getUserWithFriend(accountIds: [viewModel.sessionId]) { [weak self] users, error in
+      self?.headerView.navigationItemView.userNameLabel.text = users?.first?.showName()
     }
+
 //    let text = ne_localized("请输入信息")
 //    let attribute = NSMutableAttributedString(string: text)
 //    let style = NSMutableParagraphStyle()
@@ -916,7 +966,7 @@ public class NEOneOnOneChatP2PViewController: P2PChatViewController, NIMEventSub
 //    attribute.addAttribute(.font, value: UIFont.systemFont(ofSize: 16), range: NSMakeRange(0, text.utf16.count))
 //    attribute.addAttribute(.foregroundColor, value: UIColor.gray, range: NSMakeRange(0, text.utf16.count))
 //    attribute.addAttribute(.paragraphStyle, value: style, range: NSMakeRange(0, text.utf16.count))
-//    menuView.textView.attributedPlaceholder = attribute
+//    chatInputView.textView.attributedPlaceholder = attribute
   }
 
   override public func remoteUserEditing() {
@@ -950,9 +1000,9 @@ public class NEOneOnOneChatP2PViewController: P2PChatViewController, NIMEventSub
 
   override public func setOperationItems(items: inout [OperationItem], model: MessageContentModel?) {
     if let message = model?.message,
-       message.messageType == .custom,
-       let messageObject = message.messageObject as? NIMCustomObject,
-       let attachment = messageObject.attachment as? CustomAttachment {
+       message.messageType == .MESSAGE_TYPE_CUSTOM,
+       let jsonString = message.attachment?.raw {
+      let attachment = CustomAttachment(customJsonSrting: jsonString)
       if attachment.type == OneOnOneChatCustomMessageType.SEND_GIFT_TYPE ||
         attachment.type == OneOnOneChatCustomMessageType.OFFICIAL_GIFT_TYPE {
         items = [
@@ -960,7 +1010,7 @@ public class NEOneOnOneChatP2PViewController: P2PChatViewController, NIMEventSub
         ]
       }
     } else if let message = model?.message,
-              message.messageType == .text {
+              message.messageType == .MESSAGE_TYPE_TEXT {
       // 文本消息
       var addItems: [OperationItem] = []
       for item in items {
@@ -970,7 +1020,7 @@ public class NEOneOnOneChatP2PViewController: P2PChatViewController, NIMEventSub
       }
       items = addItems
     } else if let message = model?.message,
-              message.messageType == .audio {
+              message.messageType == .MESSAGE_TYPE_AUDIO {
       // 音频消息
       var addItems: [OperationItem] = []
       for item in items {
@@ -981,7 +1031,7 @@ public class NEOneOnOneChatP2PViewController: P2PChatViewController, NIMEventSub
       items = addItems
 
     } else if let message = model?.message,
-              message.messageType == .image {
+              message.messageType == .MESSAGE_TYPE_IMAGE {
       // 音频消息
       var addItems: [OperationItem] = []
       for item in items {
@@ -991,7 +1041,7 @@ public class NEOneOnOneChatP2PViewController: P2PChatViewController, NIMEventSub
       }
       items = addItems
     } else if let message = model?.message,
-              message.messageType == .video {
+              message.messageType == .MESSAGE_TYPE_VIDEO {
       // 视频消息
       var addItems: [OperationItem] = []
       for item in items {
@@ -1001,7 +1051,7 @@ public class NEOneOnOneChatP2PViewController: P2PChatViewController, NIMEventSub
       }
       items = addItems
     } else if let message = model?.message,
-              message.messageType == .location {
+              message.messageType == .MESSAGE_TYPE_LOCATION {
       // 定位消息
       var addItems: [OperationItem] = []
       for item in items {
@@ -1024,9 +1074,12 @@ public class NEOneOnOneChatP2PViewController: P2PChatViewController, NIMEventSub
   // 具体处理
 
   func dealWithAction(_ isAudio: Bool) {
-    let user = viewmodel.getUserInfo(userId: viewmodel.session.sessionId)
-
-    NEOneOnOneUIKitCallEngine.getInstance.dealWithAction(self, sessionId: viewmodel.session.sessionId, isAudio: isAudio, isVirtualRoom: remoteUserInfo?.oc_callType == 1, nickName: user?.userInfo?.nickName, icon: remoteUserInfo?.icon, audioUrl: remoteUserInfo?.audioUrl, videoUrl: remoteUserInfo?.videoUrl)
+    viewModel.contactRepo.getUserListFromCloud(accountIds: [viewModel.sessionId]) { [weak self] users, error in
+      let user = users?.first
+      if let weakself = self {
+        NEOneOnOneUIKitCallEngine.getInstance.dealWithAction(weakself, sessionId: weakself.viewModel.sessionId, isAudio: isAudio, isVirtualRoom: weakself.remoteUserInfo?.oc_callType == 1, nickName: user?.user?.name, icon: weakself.remoteUserInfo?.icon, audioUrl: weakself.remoteUserInfo?.audioUrl, videoUrl: weakself.remoteUserInfo?.videoUrl)
+      }
+    }
   }
 
   deinit {
@@ -1034,7 +1087,7 @@ public class NEOneOnOneChatP2PViewController: P2PChatViewController, NIMEventSub
     /// 取消订阅
     NIMSDK.shared().subscribeManager.unSubscribeEvent(subscribeRequest)
     NIMSDK.shared().mediaManager.remove(self)
-    viewmodel.delegate = nil
+    viewModel.delegate = nil
   }
 
   // MARK: NIMEventSubscribeManagerDelegate
@@ -1068,48 +1121,13 @@ public class NEOneOnOneChatP2PViewController: P2PChatViewController, NIMEventSub
     }
   }
 
-  override public func willSend(_ message: NIMMessage) {
-    super.willSend(message)
-    // 构造反垃圾对象
-    let antiSpamOption = NIMAntiSpamOption()
-    antiSpamOption.yidunEnabled = true
-    message.antiSpamOption = antiSpamOption
+  override public func sending(_ message: V2NIMMessage, _ index: IndexPath) {
+    super.sending(message, index)
+    message.antispamConfig?.antispamEnabled = true
   }
 
-  override public func send(_ message: NIMMessage, didCompleteWithError error: Error?) {
-    super.send(message, didCompleteWithError: error)
-    if let yidunAntiSpamExt = message.yidunAntiSpamRes {
-      // 易盾审核
-      let jsonData = yidunAntiSpamExt.data(using: .utf8)!
-      do {
-        if let dictionary = try JSONSerialization.jsonObject(with: jsonData, options: []) as? [String: Any] {
-          if dictionary.keys.contains("suggestion"), let suggestion = dictionary["suggestion"] as? Int {
-            if suggestion != 0 {
-              // 不通过
-              if let extString = dictionary["ext"] as? String,
-                 let extObjectData = extString.data(using: .utf8),
-                 let extObject = try? JSONSerialization.jsonObject(with: extObjectData, options: []) as? [String: Any],
-                 let antispam = extObject["antispam"] as? [String: Any],
-                 let labels = antispam["labels"] as? [[String: Any]],
-                 let subLabels = labels.first?["subLabels"] as? [[String: Any]],
-                 let details = subLabels.first?["details"] as? [String: Any],
-                 let keywords = details["keywords"] as? [[String: Any]],
-                 let keyword = keywords.first?["word"] as? String {
-                if keyword.count > 0 {
-                  sendSalutionMsg(type: 3, antiSpamMessage: message)
-                  return
-                }
-              }
-
-              sendSalutionMsg(type: 4, antiSpamMessage: message)
-
-            } else {}
-          }
-        }
-      } catch {
-        print(error.localizedDescription)
-      }
-    }
+  override public func sendSuccess(_ message: V2NIMMessage, _ index: IndexPath) {
+    super.sendSuccess(message, index)
   }
 }
 

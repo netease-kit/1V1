@@ -261,11 +261,7 @@
     case button_close_camera:
       if (self.itemExpand) {
         self.itemExpand(item_video_close, close);
-        if (close) {
-          self.localVideoBlackView.hidden = NO;
-        } else {
-          self.localVideoBlackView.hidden = YES;
-        }
+        [self showLocalBlackView:close];
       }
       break;
     case button_speaker:
@@ -348,7 +344,6 @@
   if (!_nameLabel) {
     _nameLabel = [[UILabel alloc] init];
     _nameLabel.font = [UIFont fontWithName:@"PingFangSC-Medium" size:18];
-
     _nameLabel.textColor = [UIColor ne_colorWithHex:0xFFFFFF];
     _nameLabel.backgroundColor = [UIColor clearColor];
     _nameLabel.textAlignment = NSTextAlignmentLeft;

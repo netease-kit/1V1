@@ -8,9 +8,10 @@
 #import <Masonry/Masonry.h>
 #import <NEOneOnOneKit/NEOneOnOneKit-Swift.h>
 #import <NEOneOnOneUIKit/NEOneOnOneUIKit-Swift.h>
-#import <NERtcCallKit/NERtcCallKit.h>
+#import <NERtcCallKit/NECallEngine.h>
 #import <NEUIKit/NEUIKit.h>
 #import <NIMSDK/NIMSDK.h>
+#import "NECallEngine+Party.h"
 #import "NEOneOnOneBottomPresentView.h"
 #import "NEOneOnOneCallViewController.h"
 #import "NEOneOnOneEmptyListView.h"
@@ -20,12 +21,11 @@
 #import "NEOneOnOneToast.h"
 #import "NEOneOnOneUI.h"
 #import "NEOneOnOneUIDeviceSizeInfo.h"
-#import "NEOneOnOneUIKitEngine.h"
 #import "NEOneOnOneUIKitMacro.h"
 #import "NEOneOnOneUIKitUtils.h"
 #import "NEOneOnOneUILiveListCell.h"
 #import "NEOneOnOneUserBusyView.h"
-#import "NERtcCallKit+Party.h"
+#import "NEOneonOneUImanager.h"
 
 @interface NEOneOnOneRoomListViewController () <UICollectionViewDelegate,
                                                 UICollectionViewDataSource,
@@ -52,8 +52,8 @@
 
 - (void)viewWillAppear:(BOOL)animated {
   [super viewWillAppear:animated];
+  [self.navigationController setNavigationBarHidden:NO animated:YES];
 }
-
 - (void)viewDidLoad {
   [super viewDidLoad];
   if (@available(iOS 13.0, *)) {
@@ -63,7 +63,7 @@
 
     NSMutableDictionary *textAttribute = [NSMutableDictionary dictionary];
     textAttribute[NSForegroundColorAttributeName] = [UIColor ne_colorWithHex:0x222222];  // 标题颜色
-    textAttribute[NSFontAttributeName] = [UIFont systemFontOfSize:17];  // 标题大小
+    textAttribute[NSFontAttributeName] = [UIFont systemFontOfSize:17];                   // 标题大小
     [appearance setTitleTextAttributes:textAttribute];
 
     // 去除底部黑线
@@ -95,19 +95,6 @@
   [self getNewData];
   [self bindViewModel];
   [self setupSubviews];
-  __weak typeof(self) weakSelf = self;
-  [[NERtcCallKit sharedInstance]
-      setPushConfigHandler:^(NERtcCallKitPushConfig *config, NERtcCallKitContext *context) {
-        if (weakSelf.isAudio) {
-          config.pushContent =
-              [NSString stringWithFormat:@"%@ %@", [NEOneOnOneKit getInstance].localMember.nickName,
-                                         NELocalizedString(@"邀请您语音聊天")];
-        } else {
-          config.pushContent =
-              [NSString stringWithFormat:@"%@ %@", [NEOneOnOneKit getInstance].localMember.nickName,
-                                         NELocalizedString(@"邀请您视频聊天")];
-        }
-      }];
   [[NSNotificationCenter defaultCenter] addObserver:self
                                            selector:@selector(busyViewShouHide:)
                                                name:NEOneOnOneCallViewControllerAppear
@@ -126,6 +113,13 @@
   [self.busyView removeFromSuperview];
 }
 - (void)getNewData {
+  NetworkStatus status = [self.reachability currentReachabilityStatus];
+  if (status == NotReachable) {
+    [self.collectionView.mj_header endRefreshing];
+    [self.collectionView.mj_footer endRefreshing];
+    [NEOneOnOneToast showToast:NELocalizedString(@"网络异常，请稍后重试")];
+    return;
+  }
   [self.roomListViewModel requestNewDataWithLiveType:NEOneOnOneLiveRoomTypeMultiAudio];
 }
 - (void)bindViewModel {
@@ -179,7 +173,7 @@
 
   __weak typeof(self) weakSelf = self;
   MJRefreshGifHeader *mjHeader = [MJRefreshGifHeader headerWithRefreshingBlock:^{
-    [weakSelf.roomListViewModel requestNewDataWithLiveType:NEOneOnOneLiveRoomTypeMultiAudio];
+    [weakSelf getNewData];
   }];
   [mjHeader setTitle:NELocalizedString(@"下拉更新") forState:MJRefreshStateIdle];
   [mjHeader setTitle:NELocalizedString(@"下拉更新") forState:MJRefreshStatePulling];
@@ -189,6 +183,13 @@
   self.collectionView.mj_header = mjHeader;
 
   self.collectionView.mj_footer = [MJRefreshBackNormalFooter footerWithRefreshingBlock:^{
+    NetworkStatus status = [weakSelf.reachability currentReachabilityStatus];
+    if (status == NotReachable) {
+      [self.collectionView.mj_header endRefreshing];
+      [self.collectionView.mj_footer endRefreshing];
+      [NEOneOnOneToast showToast:NELocalizedString(@"网络异常，请稍后重试")];
+      return;
+    }
     if (weakSelf.roomListViewModel.isEnd) {
       [NEOneOnOneToast showToast:NELocalizedString(@"无更多内容")];
       [weakSelf.collectionView.mj_footer endRefreshing];
@@ -348,26 +349,12 @@
   self.isEnterRoom = YES;
   // 判断自身是否忙碌
   // 用户不在RTC房间中
-  if ([NEOneOnOneUIKitEngine sharedInstance].canCall) {
-    NSString *message = [NEOneOnOneUIKitEngine sharedInstance].canCall();
-    if (message.length > 0) {
-      /// 不能拨号
-      /// 弹出提示框
-      ///
-#pragma mark TODO
-      /// 需要确认是否要迁移到 all In One 中
-      /// 1v1的业务逻辑
-      /// all in one 才会存在
-      [NEOneOnOneUIKitUtils presentAlertViewController:self
-                                                titile:message
-                                           cancelTitle:@""
-                                          confirmTitle:NELocalizedString(@"确定")
-                                       confirmComplete:nil];
-      // 取消已点击通话数据
-      self.isEnterRoom = NO;
-    } else {
-      [self startCallKitJudgeUserBusy:isAudio];
-    }
+  if (NEOneOnOneUIManager.sharedInstance.canContinueAction &&
+      !NEOneOnOneUIManager.sharedInstance.canContinueAction()) {
+    /// 不能拨号
+    /// 弹出提示框
+    // 取消已点击通话数据
+    self.isEnterRoom = NO;
   } else {
     // 外部未实现,则认为不需要处理，用户处于闲置中
     [self startCallKitJudgeUserBusy:isAudio];

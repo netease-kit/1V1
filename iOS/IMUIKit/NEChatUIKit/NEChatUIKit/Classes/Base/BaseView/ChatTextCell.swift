@@ -6,7 +6,7 @@
 import UIKit
 
 @objcMembers
-public class ChatTextCell: ChatStateCell {
+open class ChatTextCell: ChatStateCell {
   public var titleLabel: UILabel = .init()
   public var detailLabel: UILabel = .init()
   public var line = UIView()
@@ -15,9 +15,12 @@ public class ChatTextCell: ChatStateCell {
 
   var detailRightMargin: NSLayoutConstraint?
 
-  override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
+  override public init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
     super.init(style: style, reuseIdentifier: reuseIdentifier)
+  }
 
+  override open func setupUI() {
+    super.setupUI()
     titleLabel.font = UIFont.systemFont(ofSize: 16)
     titleLabel.translatesAutoresizingMaskIntoConstraints = false
     titleLabel.textColor = .ne_darkText
@@ -63,7 +66,7 @@ public class ChatTextCell: ChatStateCell {
     ])
   }
 
-  required init?(coder: NSCoder) {
-    fatalError("init(coder:) has not been implemented")
+  public required init?(coder: NSCoder) {
+    super.init(coder: coder)
   }
 }

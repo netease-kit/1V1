@@ -3,23 +3,30 @@
 // Use of this source code is governed by a MIT license that can be
 // found in the LICENSE file.
 
+import NECommonKit
 import UIKit
 
 @objcMembers
 open class FunConversationSearchCell: NEBaseConversationSearchCell {
-  override open func setupSubviews() {
-    super.setupSubviews()
-    headImge.layer.cornerRadius = 4.0
-
-    headImge.updateLayoutConstraint(firstItem: headImge, seconedItem: nil, attribute: .width, constant: 40)
-    headImge.updateLayoutConstraint(firstItem: headImge, seconedItem: nil, attribute: .height, constant: 40)
-
+  /// 分隔线视图
+  lazy var bottomLine: UIView = {
     let bottomLine = UIView()
     bottomLine.translatesAutoresizingMaskIntoConstraints = false
     bottomLine.backgroundColor = .funConversationLineBorderColor
+    return bottomLine
+  }()
+
+  /// UI 初始化
+  override open func setupSubviews() {
+    super.setupSubviews()
+    headImageView.layer.cornerRadius = 4.0
+
+    headImageView.updateLayoutConstraint(firstItem: headImageView, seconedItem: nil, attribute: .width, constant: 40)
+    headImageView.updateLayoutConstraint(firstItem: headImageView, seconedItem: nil, attribute: .height, constant: 40)
+
     contentView.addSubview(bottomLine)
     NSLayoutConstraint.activate([
-      bottomLine.leftAnchor.constraint(equalTo: headImge.leftAnchor),
+      bottomLine.leftAnchor.constraint(equalTo: headImageView.leftAnchor),
       bottomLine.rightAnchor.constraint(equalTo: contentView.rightAnchor),
       bottomLine.heightAnchor.constraint(equalToConstant: 1),
       bottomLine.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
@@ -27,6 +34,6 @@ open class FunConversationSearchCell: NEBaseConversationSearchCell {
   }
 
   override func getRangeTextColor() -> UIColor {
-    UIColor.funConversationThemeColor
+    UIColor.ne_funTheme
   }
 }

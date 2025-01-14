@@ -4,42 +4,60 @@
 // found in the LICENSE file.
 
 import Foundation
+import NECommonKit
 import NIMSDK
-public class NEMessageUtil {
+
+open class NEMessageUtil {
   /// last message
   /// - Parameter message: message
   /// - Returns: result
-  public class func messageContent(message: NIMMessage) -> String {
-    var text = ""
-    switch message.messageType {
-    case .text:
-      if let messageText = message.text {
-        text = messageText
+  open class func messageContent(_ messageType: V2NIMMessageType,
+                                 _ text: String?,
+                                 _ attachment: V2NIMMessageAttachment?) -> String {
+    switch messageType {
+    case .MESSAGE_TYPE_TEXT:
+      return text ?? ""
+    case .MESSAGE_TYPE_TIP:
+      return localizable("tip")
+    case .MESSAGE_TYPE_AUDIO:
+      return localizable("voice")
+    case .MESSAGE_TYPE_IMAGE:
+      return localizable("picture")
+    case .MESSAGE_TYPE_VIDEO:
+      return localizable("video")
+    case .MESSAGE_TYPE_LOCATION:
+      return localizable("location") + " \(text ?? "")"
+    case .MESSAGE_TYPE_NOTIFICATION:
+      return localizable("notification")
+    case .MESSAGE_TYPE_FILE:
+      return localizable("file")
+    case .MESSAGE_TYPE_CUSTOM:
+      return contentOfCustomMessage(attachment)
+    case .MESSAGE_TYPE_CALL:
+      if let attachment = attachment as? V2NIMMessageCallAttachment {
+        return attachment.type == 1 ? localizable("internet_phone") : localizable("video_chat")
       }
-    case .audio:
-      text = localizable("voice")
-    case .image:
-      text = localizable("picture")
-    case .video:
-      text = localizable("video")
-    case .location:
-      text = localizable("location")
-    case .notification:
-      text = localizable("notification")
-    case .file:
-      text = localizable("file")
-    case .tip:
-      if let messageText = message.text {
-        text = messageText
-      }
-    case .rtcCallRecord:
-      let record = message.messageObject as? NIMRtcCallRecordObject
-      text = (record?.callType == .audio) ? localizable("internet_phone") :
-        localizable("video_chat")
     default:
-      text = localizable("unknown")
+      return localizable("unknown")
     }
+    return localizable("unknown")
+  }
 
-    return text
+  /// 返回自定义消息的外显文案
+  static func contentOfCustomMessage(_ attachment: V2NIMMessageAttachment?) -> String {
+    if let customType = NECustomUtils.typeOfCustomMessage(attachment) {
+      if customType == customMultiForwardType {
+        return localizable("chat_history")
+      }
+      if customType == customRichTextType {
+        if let data = NECustomUtils.dataOfCustomMessage(attachment),
+           let title = data["title"] as? String {
+          return title
+        }
+      }
+
+      return localizable("custom")
+    }
+    return localizable("unknown")
   }
 }

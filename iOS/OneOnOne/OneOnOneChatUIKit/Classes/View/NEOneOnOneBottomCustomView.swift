@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import Foundation
+
 public class NEOneOnOneQuickReply: UIView, UICollectionViewDataSource, UICollectionViewDelegate {
   public var oneOnOneQuickReplyArray: [String] = [ne_localized("嗨！我们距离很近"), ne_localized("缘分让我们相遇"), ne_localized("喜欢你的人匆匆赶来了")] {
     didSet {

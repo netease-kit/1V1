@@ -92,7 +92,7 @@ High_Connect_Content3 = "1、应用保活功能：（仅限Android端）\n打开
 
 Busy_In_VoiceRoom =  "您当前处于语聊房中，请先结束后再试";
 Busy_In_Listen_Together =  "您当前处于一起听中，请先结束后再试";
-
+Busy_In_OneOnOne = "当前正在通话中，请稍后再试";
 
 User_Agreement = "用户协议与隐私政策";
 User_Agreement_Content1 = "感谢您使用云信派对APP，我们非常重视您的个人信息和隐私保护。为了更好地保障您的个人权益，在您使用我们的产品前，请务必阅读《";

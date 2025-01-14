@@ -2,8 +2,8 @@
 // Use of this source code is governed by a MIT license that can be
 // found in the LICENSE file.
 
-import UIKit
 import SnapKit
+import UIKit
 
 class NPTAboutViewController: UIViewController {
   let titles = ["Privacy_Agreement".localized, "Terms_Of_Service".localized, "Version".localized]

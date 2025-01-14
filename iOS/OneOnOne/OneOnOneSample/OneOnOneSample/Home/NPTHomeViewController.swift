@@ -2,11 +2,11 @@
 // Use of this source code is governed by a MIT license that can be
 // found in the LICENSE file.
 
-import UIKit
-import SnapKit
 import LottieSwift
-import NEOneOnOneUIKit
 import NECoreKit
+import NEOneOnOneUIKit
+import SnapKit
+import UIKit
 
 class NPTHomeCell: UITableViewCell {
   override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {

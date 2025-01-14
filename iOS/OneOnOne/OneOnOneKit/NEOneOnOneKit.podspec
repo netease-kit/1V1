@@ -25,7 +25,7 @@ Pod::Spec.new do |s|
     s.dependency NECoreKit.name
     s.dependency NERtcCallKit.NOS_Special
     s.dependency NERtcSDK.RtcBasic
-    s.dependency NECoreIMKit.name
+    s.dependency NECoreIM2Kit.name
   else
     
   end

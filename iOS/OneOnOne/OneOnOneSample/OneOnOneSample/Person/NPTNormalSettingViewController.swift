@@ -2,10 +2,10 @@
 // Use of this source code is governed by a MIT license that can be
 // found in the LICENSE file.
 
-import UIKit
-import SnapKit
-import WebKit
 import NEOneOnOneKit
+import SnapKit
+import UIKit
+import WebKit
 
 class NPTNormalSettingViewController: UIViewController {
   let titles = ["Black_List".localized, "About_Us".localized]

@@ -83,8 +83,12 @@ public extension NEOneOnOneKit {
   }
 
   /// 是否在1V1房间中
-  func isInOneInOne() -> Bool {
-    !(NERtcCallKit.sharedInstance().callStatus == .idle)
+  func isInOneOnOne() -> Bool {
+    if let callId = NECallEngine.sharedInstance().getCallInfo()?.callId,
+       callId.count > 0 {
+      return true
+    }
+    return false
   }
 
   // 创建房间后上报

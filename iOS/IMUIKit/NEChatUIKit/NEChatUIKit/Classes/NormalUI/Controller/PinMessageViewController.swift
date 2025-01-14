@@ -7,27 +7,25 @@ import UIKit
 
 @objcMembers
 open class PinMessageViewController: NEBasePinMessageViewController {
-  override public func viewDidLoad() {
+  override open func viewDidLoad() {
     super.viewDidLoad()
     view.backgroundColor = .ne_lightBackgroundColor
-    customNavigationView.backgroundColor = .ne_lightBackgroundColor
+    navigationView.backgroundColor = .ne_lightBackgroundColor
     navigationController?.navigationBar.backgroundColor = .ne_lightBackgroundColor
   }
 
-  override open func getRegisterCellDic() -> [Int: NEBasePinMessageCell.Type] {
-    let cellClassDic = [
-      NIMMessageType.text.rawValue: PinMessageTextCell.self,
-      NIMMessageType.image.rawValue: PinMessageImageCell.self,
-      NIMMessageType.audio.rawValue: PinMessageAudioCell.self,
-      NIMMessageType.video.rawValue: PinMessageVideoCell.self,
-      NIMMessageType.location.rawValue: PinMessageLocationCell.self,
-      NIMMessageType.file.rawValue: PinMessageFileCell.self,
-      PinMessageDefaultType: PinMessageDefaultCell.self,
-    ]
-    return cellClassDic
+  override open func getRegisterCellDic() -> [String: NEBasePinMessageCell.Type] {
+    ChatMessageHelper.getPinCellRegisterDic(isFun: false)
   }
 
+  /// 获取转发确认弹窗 - 协同版
   override open func getForwardAlertController() -> NEBaseForwardAlertViewController {
     ForwardAlertViewController()
+  }
+
+  override open func getMultiForwardViewController(_ messageAttachmentUrl: String?,
+                                                   _ messageAttachmentFilePath: String,
+                                                   _ messageAttachmentMD5: String?) -> MultiForwardViewController {
+    NormalMultiForwardViewController(messageAttachmentUrl, messageAttachmentFilePath, messageAttachmentMD5)
   }
 }

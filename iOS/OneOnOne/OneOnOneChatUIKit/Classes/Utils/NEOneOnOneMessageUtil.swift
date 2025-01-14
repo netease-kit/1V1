@@ -9,47 +9,45 @@ public class NEOneOnOneMessageUtil {
   /// last message
   /// - Parameter message: message
   /// - Returns: result
-  public class func messageContent(message: NIMMessage) -> NSAttributedString {
+  public class func messageContent(message: V2NIMLastMessage) -> NSAttributedString {
     var text = NSAttributedString()
     switch message.messageType {
-    case .text:
+    case .MESSAGE_TYPE_TEXT:
       if let messageText = message.text {
         text = NSAttributedString(string: messageText)
       }
-    case .audio:
+    case .MESSAGE_TYPE_AUDIO:
       text = NSAttributedString(string: ne_localized("voice"))
-    case .image:
+    case .MESSAGE_TYPE_IMAGE:
       text = NSAttributedString(string: ne_localized("picture"))
-    case .video:
+    case .MESSAGE_TYPE_VIDEO:
       text = NSAttributedString(string: ne_localized("video"))
-    case .location:
+    case .MESSAGE_TYPE_LOCATION:
       text = NSAttributedString(string: ne_localized("location"))
-    case .notification:
+    case .MESSAGE_TYPE_NOTIFICATION:
       text = NSAttributedString(string: ne_localized("notification"))
-    case .file:
+    case .MESSAGE_TYPE_FILE:
       text = NSAttributedString(string: ne_localized("file"))
-    case .tip:
+    case .MESSAGE_TYPE_TIP:
       if let messageText = message.text {
         text = NSAttributedString(string: messageText)
       }
-    case .rtcCallRecord:
-      let record = message.messageObject as? NIMRtcCallRecordObject
-      let t = (record?.callType == .audio) ? ne_localized("internet_phone") :
+    case .MESSAGE_TYPE_CALL:
+      let record = message.attachment as? V2NIMMessageCallAttachment
+      let t = (record?.type == 1) ? ne_localized("internet_phone") :
         ne_localized("video_chat")
       text = NSAttributedString(string: t)
-    case .custom:
+    case .MESSAGE_TYPE_CUSTOM:
       text = NSAttributedString(string: ne_localized("custom"))
-      if let messageObject = message.messageObject as? NIMCustomObject,
-         let attach = messageObject.attachment as? CustomAttachment {
+
+      if let messageObject = message.attachment?.raw {
+        let attach = CustomAttachment(customJsonSrting: messageObject)
         switch attach.type {
         case OneOnOneChatCustomMessageType.SEND_GIFT_TYPE:
-          if message.isOutgoingMsg {
+          if message.messageRefer.senderId == NIMSDK.shared().v2LoginService.getLoginUser() {
             text = NSAttributedString(string: ne_localized("gift_message_send"))
           } else {
             let t = NSMutableAttributedString(string: ne_localized("gift_message_recv"))
-            if message.status != .read {
-              t.addAttribute(.foregroundColor, value: UIColor.red, range: NSRange(location: 0, length: t.length))
-            }
             text = t
           }
         case OneOnOneChatCustomMessageType.OFFICIAL_GIFT_TYPE:

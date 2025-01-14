@@ -8,8 +8,9 @@
 #import <NEOneOnOneKit/NEOneOnOneKit-Swift.h>
 #import <NEOneOnOneKit/NEOneOnOneLog.h>
 #import <NEOneOnOneUIKit/NEOneOnOneUIKit-Swift.h>
-#import <NERtcCallKit/NERtcCallKit.h>
+#import <NERtcCallKit/NECallEngine.h>
 #import <NEUIKit/NEUIKit.h>
+#import "NECallEngine+Party.h"
 #import "NEOneOnOneCallViewController+RtcCall.h"
 #import "NEOneOnOneCustomTimer.h"
 #import "NEOneOnOneGiftView.h"
@@ -18,7 +19,6 @@
 #import "NEOneOnOneToast.h"
 #import "NEOneOnOneUI.h"
 #import "NEOneOnOneUIKitUtils.h"
-#import "NERtcCallKit+Party.h"
 @interface NEOneOnOneCallViewController () <NEOneOnOneGiftViewDelegate,
                                             AVCaptureVideoDataOutputSampleBufferDelegate,
                                             NEOneOnOneAuthListener,
@@ -43,6 +43,12 @@
 @property(nonatomic, strong) NEOneOnOneConnectingView *connectingView;
 @property(nonatomic, strong) NEOneOnOneVideoConnectedView *videoConnectedView;
 @property(nonatomic, strong) UIButton *giftButton;
+// 小窗按钮
+@property(nonatomic, strong) UIButton *smallWindowButton;
+// 是否进行了大小窗切换
+@property(nonatomic, assign) BOOL videoConverted;
+// 远端是否屏蔽了视频
+@property(nonatomic, assign) BOOL remoteVideoMute;
 
 /////音频播放地址
 //@property(nonatomic,strong) NSString *audioPlayUrl;
@@ -65,6 +71,7 @@
                                            selector:@selector(appWillEnterForeground)
                                                name:UIApplicationWillEnterForegroundNotification
                                              object:nil];
+  [self.navigationController setNavigationBarHidden:YES animated:YES];
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
@@ -104,7 +111,7 @@
     // 另外虚拟房间才会设置，因为设置category导致在后台对端接听后无声音的问题；虚拟房间进行设置，销毁进行恢复
     [NEOneOnOnePlayerUtil.getInstance setOriginalCategray:AVAudioSession.sharedInstance.category];
   } else {
-    [[NERtcCallKit sharedInstance] addDelegate:self];
+    [[NECallEngine sharedInstance] addCallDelegate:self];
   }
   [AVAudioSession.sharedInstance setActive:YES error:&active_err];
   if (active_err || setCategory_err) {
@@ -121,12 +128,10 @@
   [self addNetworkObserver];
   self.timerDict = [NSMutableDictionary dictionary];
   self.timeQueue = dispatch_queue_create("com.oneOnOne.timer", DISPATCH_QUEUE_SERIAL);
-  //    self.navigationController.navigationBar.hidden = YES;
-  self.ne_UINavigationItem.navigationBarHidden = YES;
   [self.view addSubview:self.connectingView];
   [[NEOneOnOneKit getInstance] addOneOnOneListener:self];
   [[NEOneOnOneKit getInstance] addAuthListener:self];
-  [NERtcCallKit sharedInstance].engineDelegate = self;
+  [NECallEngine sharedInstance].engineDelegate = self;
   __weak typeof(self) weakSelf = self;
   self.connectingView.itemEvent = ^(Item item) {
     __strong typeof(weakSelf) self = weakSelf;
@@ -136,20 +141,23 @@
           [self endRoom];
           return;
         }
-        [[NERtcCallKit sharedInstance] cancel:^(NSError *_Nullable error) {
-          __strong typeof(weakSelf) self = weakSelf;
-          if (error) {
-            [NEOneOnOneLog errorLog:tag desc:error.localizedDescription];
-            NSLog(@"cancel - error -- %@", error.description);
-            if (error.code == 20016) {
-              // 对方已接通的code，所以不能取消
-            } else {
-              [self endRoom];
-            }
-          } else {
-            [self endRoom];
-          }
-        }];
+        NEHangupParam *param = [[NEHangupParam alloc] init];
+        [[NECallEngine sharedInstance] hangup:param
+                                   completion:^(NSError *_Nullable error) {
+                                     __strong typeof(weakSelf) self = weakSelf;
+                                     if (error) {
+                                       [NEOneOnOneLog errorLog:tag desc:error.localizedDescription];
+                                       NSLog(@"cancel - error -- %@", error.description);
+                                       if (error.code == 20016) {
+                                         // 对方已接通的code，所以不能取消
+                                       } else {
+                                         [self endRoom];
+                                       }
+                                     } else {
+                                       [self endRoom];
+                                     }
+                                   }];
+
         NetworkStatus status = [self.reachability currentReachabilityStatus];
         if (status == NotReachable) {
           [self endRoom];
@@ -160,13 +168,15 @@
       break;
       case item_reject: {
         self.hasEndRoom = @"end";
-        [[NERtcCallKit sharedInstance] reject:^(NSError *_Nullable error) {
-          if (error) {
-            NSLog(@"reject - error -- %@", error.description);
-          }
-          __strong typeof(weakSelf) self = weakSelf;
-          [self endRoom];
-        }];
+        NEHangupParam *param = [[NEHangupParam alloc] init];
+        [[NECallEngine sharedInstance] hangup:param
+                                   completion:^(NSError *_Nullable error) {
+                                     if (error) {
+                                       NSLog(@"reject - error -- %@", error.description);
+                                     }
+                                     __strong typeof(weakSelf) self = weakSelf;
+                                     [self endRoom];
+                                   }];
         NetworkStatus status = [self.reachability currentReachabilityStatus];
         if (status == NotReachable) {
           [self endRoom];
@@ -261,21 +271,19 @@
                                  status:audio_call_connecting];
         }
 
-        [[NERtcCallKit sharedInstance] accept:^(NSError *_Nullable error) {
-          __strong typeof(weakSelf) self = weakSelf;
-          if (error) {
-            if (error.code == 10404) {
-              /// NERTCCallKit 内部问题，后期会优化
-              [self endRoom];
-            } else {
-              // 避免其他error未及时返回，导致页面接听按钮无效果
-              self.isEntering = NO;
-            }
-            NSLog(@"error -- %@", error.description);
-          }
-          NSLog(@"本地状态值 --- %lu", (unsigned long)self.enterStatus);
-        }];
-
+        NEHangupParam *param = [[NEHangupParam alloc] init];
+        [[NECallEngine sharedInstance]
+            accept:^(NSError *_Nullable error, NECallInfo *_Nullable callInfo) {
+              __strong typeof(weakSelf) self = weakSelf;
+              if (error) {
+                // 避免其他error未及时返回，导致页面接听按钮无效果
+                self.isEntering = NO;
+                [self endRoom];
+                [NEOneOnOneToast showToast:NELocalizedString(@"网络异常，请稍后重试")];
+                NSLog(@"error -- %@", error.description);
+              }
+              NSLog(@"本地状态值 --- %lu", (unsigned long)self.enterStatus);
+            }];
       }
 
       break;
@@ -292,18 +300,22 @@
         }
 
         self.hasEndRoom = @"end";
-        [[NERtcCallKit sharedInstance] hangup:^(NSError *_Nullable error) {
-          if (error) {
-            NSLog(@"audio hangup - error -- %@", error.description);
-          } else {
-            BOOL isAudio = (self.enterStatus == audio_call || self.enterStatus == audio_invited);
-            if (isAudio) {
-              [NEOneOnOneToast showToast:NELocalizedString(@"结束通话")];
-            } else {
-              [NEOneOnOneToast showToast:NELocalizedString(@"结束视频")];
-            }
-          }
-        }];
+        NEHangupParam *param = [[NEHangupParam alloc] init];
+        [[NECallEngine sharedInstance] hangup:param
+                                   completion:^(NSError *_Nullable error) {
+                                     if (error) {
+                                       NSLog(@"audio hangup - error -- %@", error.description);
+                                     } else {
+                                       BOOL isAudio = (self.enterStatus == audio_call ||
+                                                       self.enterStatus == audio_invited);
+                                       if (isAudio) {
+                                         [NEOneOnOneToast showToast:NELocalizedString(@"结束通话")];
+                                       } else {
+                                         [NEOneOnOneToast showToast:NELocalizedString(@"结束视频")];
+                                       }
+                                     }
+                                   }];
+        // 此处主动调用还是需要,(正常情况下oncallEnd回调会回来)因为断网情况下，需要快速响应
         [self endRoom];
       }
 
@@ -321,7 +333,7 @@
         if ([self isVirtualRoom]) {
           return;
         }
-        [[NERtcCallKit sharedInstance] muteLocalAudio:close];
+        [[NECallEngine sharedInstance] muteLocalAudio:close];
       }
 
       break;
@@ -330,12 +342,13 @@
           [NEOneOnOnePlayerUtil.getInstance changePlayerModelSpeaker:!close];
           return;
         }
-        NSError *error;
-        [[NERtcCallKit sharedInstance] setLoudSpeakerMode:!close error:&error];
-        if (error) {
-          [NEOneOnOneLog
-              infoLog:tag
-                 desc:[NSString stringWithFormat:@"%@:setLoudSpeakerMode", error.description]];
+        if ([NEOneOnOnePlayerUtil.getInstance isHeadSetPlugging]) {
+          return;
+        }
+        int ret = [NERtcEngine.sharedEngine setLoudspeakerMode:!close];
+        if (ret != 0) {
+          [NEOneOnOneLog infoLog:tag
+                            desc:[NSString stringWithFormat:@"%d:setLoudSpeakerMode", ret]];
         }
       }
 
@@ -382,14 +395,16 @@
           return;
         }
         self.hasEndRoom = @"end";
-        [[NERtcCallKit sharedInstance] hangup:^(NSError *_Nullable error) {
-          if (error) {
-            NSLog(@"video hangup - error -- %@", error.description);
-          } else {
-            [NEOneOnOneToast showToast:NELocalizedString(@"结束视频")];
-            [self endRoom];
-          }
-        }];
+        NEHangupParam *param = [[NEHangupParam alloc] init];
+        [[NECallEngine sharedInstance] hangup:param
+                                   completion:^(NSError *_Nullable error) {
+                                     if (error) {
+                                       NSLog(@"video hangup - error -- %@", error.description);
+                                     } else {
+                                       [NEOneOnOneToast showToast:NELocalizedString(@"结束视频")];
+                                     }
+                                   }];
+        // 此处主动调用还是需要,(正常情况下oncallEnd回调会回来)因为断网情况下，需要快速响应
         [self endRoom];
       } break;
 
@@ -397,7 +412,7 @@
         if ([self isVirtualRoom]) {
           return;
         }
-        [[NERtcCallKit sharedInstance] muteLocalAudio:close];
+        [[NECallEngine sharedInstance] muteLocalAudio:close];
       }
 
       break;
@@ -406,12 +421,14 @@
           [NEOneOnOnePlayerUtil.getInstance changePlayerModelSpeaker:!close];
           return;
         }
-        NSError *error;
-        [[NERtcCallKit sharedInstance] setLoudSpeakerMode:!close error:&error];
-        if (error) {
-          [NEOneOnOneLog
-              infoLog:tag
-                 desc:[NSString stringWithFormat:@"%@:setLoudSpeakerMode", error.description]];
+        if ([NEOneOnOnePlayerUtil.getInstance isHeadSetPlugging]) {
+          return;
+        }
+
+        int ret = [NERtcEngine.sharedEngine setLoudspeakerMode:!close];
+        if (ret != 0) {
+          [NEOneOnOneLog infoLog:tag
+                            desc:[NSString stringWithFormat:@"%d:setLoudSpeakerMode", ret]];
         }
       } break;
       case item_switch_camera: {
@@ -419,17 +436,16 @@
           [self switchCamera];
           return;
         }
-        [[NERtcCallKit sharedInstance] switchCamera];
+        [[NECallEngine sharedInstance] switchCamera];
       }
 
       break;
 
       case item_video_close: {
-        //                [[NERtcCallKit sharedInstance] enableLocalVideo:!close];
         if ([self isVirtualRoom]) {
           return;
         }
-        [[NERtcCallKit sharedInstance] muteLocalVideo:close];
+        [[NECallEngine sharedInstance] muteLocalVideo:close];
       }
 
       break;
@@ -438,6 +454,8 @@
         if ([self isVirtualRoom]) {
           return;
         }
+        // 数据记录
+        self.videoConverted = close;
         [self refreshVideoView:close];
       } break;
       default:
@@ -460,6 +478,15 @@
       [self userAccept];
       [self playMedia];
     });
+  } else {
+    // 添加小窗功能
+    [self.view addSubview:self.smallWindowButton];
+    [self.smallWindowButton mas_makeConstraints:^(MASConstraintMaker *make) {
+      make.right.equalTo(self.view).offset(-15);
+      make.width.height.equalTo(@40);
+      make.bottom.equalTo(self.giftButton.mas_top).offset(-16);
+    }];
+    [self setupSmallWindown];
   }
 }
 
@@ -475,12 +502,9 @@
       }
 
       /// 呼叫中的音乐也需要为听筒模式，所以在此处设置，不在接通后设置
-      NSError *error;
-      [[NERtcCallKit sharedInstance] setLoudSpeakerMode:NO error:&error];
-      if (error) {
-        [NEOneOnOneLog
-            infoLog:tag
-               desc:[NSString stringWithFormat:@"%@:setLoudSpeakerMode", error.description]];
+      int ret = [NERtcEngine.sharedEngine setLoudspeakerMode:NO];
+      if (ret != 0) {
+        [NEOneOnOneLog infoLog:tag desc:[NSString stringWithFormat:@"%d:setLoudSpeakerMode", ret]];
       }
     } break;
     case video_call: {
@@ -494,12 +518,9 @@
                          remoteName:self.callParam.remoteShowName
                              status:audio_invide_start];
       /// 呼叫中的音乐也需要为听筒模式，所以在此处设置，不在接通后设置
-      NSError *error;
-      [[NERtcCallKit sharedInstance] setLoudSpeakerMode:NO error:&error];
-      if (error) {
-        [NEOneOnOneLog
-            infoLog:tag
-               desc:[NSString stringWithFormat:@"%@:setLoudSpeakerMode", error.description]];
+      int ret = [NERtcEngine.sharedEngine setLoudspeakerMode:NO];
+      if (ret != 0) {
+        [NEOneOnOneLog infoLog:tag desc:[NSString stringWithFormat:@"%d:setLoudSpeakerMode", ret]];
       }
     } break;
 
@@ -540,6 +561,19 @@
   }
   return _giftButton;
 }
+- (UIButton *)smallWindowButton {
+  if (!_smallWindowButton) {
+    _smallWindowButton = [[UIButton alloc] init];
+    [_smallWindowButton setImage:[NEOneOnOneUI ne_imageName:@"small_window"]
+                        forState:UIControlStateNormal];
+    [_smallWindowButton addTarget:self
+                           action:@selector(smallWindowEvent)
+                 forControlEvents:UIControlEventTouchUpInside];
+    _smallWindowButton.hidden = YES;
+    _smallWindowButton.accessibilityIdentifier = @"id.smallWindow";
+  }
+  return _smallWindowButton;
+}
 
 - (void)chosenGift {
   [NSNotificationCenter.defaultCenter
@@ -547,6 +581,18 @@
   [NEOneOnOneGiftViewController showWithViewController:self delegate:self];
 }
 
+- (void)smallWindowEvent {
+  // 开启小窗
+  [self changeToSmall];
+  self.coverView.hidden = !self.remoteVideoMute;
+}
+
+// 恢复的时候需要刷新
+- (void)changeToNormal {
+  self.coverView.hidden = YES;
+  [super changeToNormal];
+  [self refreshVideoView:self.videoConverted];
+}
 - (void)giftView:(NEOneOnOneGiftViewController *)giftView
         sendGift:(NEOneOnOneGiftItem *)gift
            count:(NSInteger)count {
@@ -589,9 +635,11 @@
     default:
       break;
   }
-  [NEOneOnOneToast
-      showToast:[NSString stringWithFormat:@"%@ %zd %@", NELocalizedString(@"你收到"),
-                                           gift.giftCount, NELocalizedString(giftName)]];
+  if (!self.isSmallWindow) {
+    [NEOneOnOneToast
+        showToast:[NSString stringWithFormat:@"%@ %zd %@", NELocalizedString(@"你收到"),
+                                             gift.giftCount, NELocalizedString(giftName)]];
+  }
 }
 
 #pragma mark - gift animation
@@ -626,6 +674,7 @@
       self.connectingView.hidden = NO;
       self.videoConnectedView.hidden = YES;
       self.giftButton.hidden = NO;
+      self.smallWindowButton.hidden = NO;
       [self.connectingView updateUI:self.callParam.remoteAvatar
                          remoteName:self.callParam.remoteShowName
                              status:audio_call_connecting];
@@ -760,6 +809,7 @@
     self.connectingView.hidden = YES;
     self.videoConnectedView.hidden = NO;
     self.giftButton.hidden = NO;
+    self.smallWindowButton.hidden = NO;
     [self.videoConnectedView updateUI:self.callParam.remoteAvatar
                            remoteName:self.callParam.remoteShowName];
   });
@@ -788,18 +838,17 @@
 - (void)refreshVideoView:(BOOL)convert {
   dispatch_async(dispatch_get_main_queue(), ^{
     if ([self isVirtualRoom]) {
-      [[NERtcCallKit sharedInstance] setupLocalView:convert
+      [[NECallEngine sharedInstance] setupLocalView:convert
                                                         ? self.videoConnectedView.remoteVideoView
                                                         : self.videoConnectedView.localVideoView];
     } else {
-      [[NERtcCallKit sharedInstance] setupLocalView:convert
+      [[NECallEngine sharedInstance] setupLocalView:convert
                                                         ? self.videoConnectedView.remoteVideoView
                                                         : self.videoConnectedView.localVideoView];
       NSLog(@"self.status == NERtcCallStatusInCall enableLocalVideo:YES");
-      [[NERtcCallKit sharedInstance]
-          setupRemoteView:convert ? self.videoConnectedView.localVideoView
-                                  : self.videoConnectedView.remoteVideoView
-                  forUser:self.callParam.remoteUserAccid];
+      [[NECallEngine sharedInstance] setupRemoteView:convert
+                                                         ? self.videoConnectedView.localVideoView
+                                                         : self.videoConnectedView.remoteVideoView];
     }
   });
 }
@@ -811,15 +860,21 @@
     [self.videoConnectedView showLocalBlackView:mute];
   } else {
     [self.videoConnectedView showRemoteBlackView:mute];
+    self.remoteVideoMute = mute;
   }
 }
 
 - (void)timeUp {
   self.timerCount += 1;
   if (self.enterStatus == audio_call || self.enterStatus == audio_invited) {
-    [self.connectingView updateTimer:[self getMMSSFromSS:self.timerCount]];
+    NSString *timeString = [self getMMSSFromSS:self.timerCount];
+    [self.connectingView updateTimer:timeString];
+    dispatch_async(dispatch_get_main_queue(), ^{
+      self.audioSmallViewTimerLabel.text = timeString;
+    });
   } else if (self.enterStatus == video_call || self.enterStatus == video_invited) {
-    [self.videoConnectedView updateTimer:[self getMMSSFromSS:self.timerCount]];
+    NSString *timeString = [self getMMSSFromSS:self.timerCount];
+    [self.videoConnectedView updateTimer:timeString];
   }
 }
 
@@ -932,7 +987,7 @@
   [self destroyNetworkObserver];
   //  [[NSNotificationCenter defaultCenter] postNotificationName:@"kCallKitDismissNoti" object:nil];
   /// 状态机置为空闲
-  [[NERtcCallKit sharedInstance] changeStatusIdle];
+  [[NECallEngine sharedInstance] changeStatusIdle];
 }
 
 #pragma mark NEOneOnOnePlayerProtocol

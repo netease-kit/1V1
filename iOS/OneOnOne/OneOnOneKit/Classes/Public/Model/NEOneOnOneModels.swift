@@ -4,8 +4,8 @@
 
 import Foundation
 
-@objc
 /// 通话类型
+@objc
 public enum NEOneOnOneRtcCallType: Int {
   /// 音频
   case audio = 1
@@ -13,9 +13,9 @@ public enum NEOneOnOneRtcCallType: Int {
   case video
 }
 
+/// 在忙类型
 @objc
 
-/// 在忙类型
 public enum NEOneOnOneRejectReason: Int {
   /// 在语聊房
   case reject_by_voiceRoom = 3000
@@ -48,8 +48,8 @@ public class NEOneOnOneUser: NSObject, Codable {
   }
 }
 
-@objcMembers
 /// 自定义消息
+@objcMembers
 public class NEOneOnOneCustomMessage: NSObject {
   /// 类型
   public var type: Int = -1
@@ -64,8 +64,8 @@ public class NEOneOnOneCustomMessage: NSObject {
   }
 }
 
-@objcMembers
 /// 自定义消息
+@objcMembers
 public class NEOneOnOneCustomMessageData: NSObject {
   /// 频道号
   public var channelId: Int64 = -1

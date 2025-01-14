@@ -11,13 +11,13 @@ open class SearchSessionHeaderView: SearchSessionBaseView {
   override open func setupUI() {
     super.setupUI()
     NSLayoutConstraint.activate([
-      title.topAnchor.constraint(equalTo: contentView.topAnchor),
-      title.leftAnchor.constraint(equalTo: contentView.leftAnchor, constant: 20),
+      titleLabel.topAnchor.constraint(equalTo: contentView.topAnchor),
+      titleLabel.leftAnchor.constraint(equalTo: contentView.leftAnchor, constant: 20),
     ])
 
     NSLayoutConstraint.activate([
       bottomLine.rightAnchor.constraint(equalTo: contentView.rightAnchor, constant: -20),
-      bottomLine.leftAnchor.constraint(equalTo: title.leftAnchor),
+      bottomLine.leftAnchor.constraint(equalTo: titleLabel.leftAnchor),
       bottomLine.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
       bottomLine.heightAnchor.constraint(equalToConstant: 1),
     ])
@@ -29,23 +29,28 @@ open class ConversationSearchController: NEBaseConversationSearchController {
   override public init(nibName nibNameOrNil: String?, bundle nibBundleOrNil: Bundle?) {
     super.init(nibName: nibNameOrNil, bundle: nibBundleOrNil)
     tag = "ConversationSearchController"
-    customNavigationView.backgroundColor = .white
-    navigationController?.navigationBar.backgroundColor = .white
   }
 
   public required init?(coder: NSCoder) {
-    fatalError("init(coder:) has not been implemented")
+    super.init(coder: coder)
+  }
+
+  override open func viewWillAppear(_ animated: Bool) {
+    super.viewWillAppear(animated)
+    searchTextFieldTopAnchor?.constant = topConstant + 20
   }
 
   override open func setupSubviews() {
     super.setupSubviews()
+    title = commonLocalizable("search")
+    navigationController?.navigationBar.backgroundColor = .white
+    navigationView.backgroundColor = .white
+    navigationView.moreButton.isHidden = true
 
     searchTextField.placeholder = localizable("search_keyword")
+    searchTextFieldTopAnchor = searchTextField.topAnchor.constraint(equalTo: view.topAnchor, constant: topConstant + 20)
+    searchTextFieldTopAnchor?.isActive = true
     NSLayoutConstraint.activate([
-      searchTextField.topAnchor.constraint(
-        equalTo: view.topAnchor,
-        constant: NEConstant.navigationHeight + NEConstant.statusBarHeight + 20
-      ),
       searchTextField.leftAnchor.constraint(equalTo: view.leftAnchor, constant: 20),
       searchTextField.rightAnchor.constraint(equalTo: view.rightAnchor, constant: -20),
       searchTextField.heightAnchor.constraint(equalToConstant: 32),

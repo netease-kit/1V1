@@ -20,7 +20,11 @@ module NIMSDK
   end
 
   def self.version
-    "9.12.0"
+    "9.17.0"
+  end
+
+  def self.version10
+    "10.6.0"
   end
 
   def self.FCS
@@ -35,39 +39,51 @@ module NERtcSDK
   end
 
   def self.version
-    "5.4.8"
+    "5.6.50"
   end
 
   def self.RtcBasic
-    "NERtcSDK/RtcBasic"
+    "#{NERtcSDK.name}/RtcBasic"
   end
 
   def self.Nenn
-    "NERtcSDK/Nenn"
+    "#{NERtcSDK.name}/Nenn"
   end
 
   def self.Beauty
-    "NERtcSDK/Beauty"
+    "#{NERtcSDK.name}/Beauty"
   end
 
   def self.FaceDetect
-    "NERtcSDK/FaceDetect"
+    "#{NERtcSDK.name}/FaceDetect"
   end
 
   def self.Segment
-    "NERtcSDK/Segment"
+    "#{NERtcSDK.name}/Segment"
   end
 
   def self.AiDenoise
-    "NERtcSDK/AiDenoise"
+    "#{NERtcSDK.name}/AiDenoise"
   end
 
   def self.AiHowling
-    "NERtcSDK/AiHowling"
+    "#{NERtcSDK.name}/AiHowling"
   end
 
   def self.ScreenShare
-    "NERtcSDK/ScreenShare"
+    "#{NERtcSDK.name}/ScreenShare"
+  end
+  def self.FaceEnhance
+    "#{NERtcSDK.name}/FaceEnhance"
+  end
+  def self.VideoDenoise
+    "#{NERtcSDK.name}/VideoDenoise"
+  end
+  def self.SuperResolution
+    "#{NERtcSDK.name}/SuperResolution"
+  end
+  def self.SpatialSound
+    "#{NERtcSDK.name}/SpatialSound"
   end
 end
 
@@ -108,7 +124,7 @@ module BlocksKit
   end
 
   def self.path
-    "third_party/BlocksKit/BlocksKit.podspec"
+    "Party/third_party/BlocksKit/BlocksKit.podspec"
   end
 
   def self.install(pod)
@@ -123,7 +139,7 @@ module IHProgressHUD
   end
 
   def self.path
-    "third_party/IHProgressHUD/IHProgressHUD.podspec"
+    "Party/third_party/IHProgressHUD/IHProgressHUD.podspec"
   end
 
   def self.install(pod)
@@ -146,6 +162,21 @@ module LottieOC
   end
 end
 
+# ---------- Lottie ----------
+module Lottie
+  def self.name
+    "lottie-ios"
+  end
+
+  def self.version
+    "4.4.0"
+  end
+
+  def self.install(pod)
+    pod.pod Lottie.name, Lottie.version
+  end
+end
+
 # ---------- LottieSwift ----------
 module LottieSwift
   def self.name
@@ -153,7 +184,7 @@ module LottieSwift
   end
 
   def self.path
-    "third_party/lottie/LottieSwift.podspec"
+    "Party/third_party/lottie/LottieSwift.podspec"
   end
 
   def self.install(pod)
@@ -213,7 +244,7 @@ module YYText
   end
 
   def self.path
-    "third_party/YYText/YYText.podspec"
+    "Party/third_party/YYText/YYText.podspec"
   end
 
   def self.install(pod)
@@ -243,7 +274,7 @@ module FaceUnity
   end
 
   def self.path
-    "third_party/FaceUnity/FaceUnity.podspec"
+    "Party/third_party/FaceUnity/FaceUnity.podspec"
   end
 
   def self.install(pod)
@@ -278,5 +309,35 @@ module YXAlog
 
   def self.install(pod)
     pod.pod YXAlog.name, YXAlog.version
+  end
+end
+
+# ---------- SudMGPWrapper ----------
+module SudMGPWrapper
+  def self.name
+    "SudMGPWrapper"
+  end
+
+  def self.version
+    "1.3.5"
+  end
+
+  def self.install(pod)
+    pod.pod SudMGPWrapper.name, SudMGPWrapper.version
+  end
+end
+
+# ---------- libyuv ----------
+module Libyuv
+  def self.name
+    "libyuv-iOS"
+  end
+
+  def self.version
+    "1.0.2"
+  end
+
+  def self.install(pod)
+    pod.pod Libyuv.name, Libyuv.version
   end
 end

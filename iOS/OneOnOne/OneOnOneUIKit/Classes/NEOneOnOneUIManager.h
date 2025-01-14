@@ -42,6 +42,11 @@ typedef NS_ENUM(NSInteger, NEOneOnOneClientEvent) {
 
 @property(nonatomic, strong) NEOneOnOneKitConfig *config;
 
+// 是否已经在房间内，携带忙碌信息
+@property(nonatomic, copy, nullable) BOOL (^canContinueAction)(void);
+// 是否拦截
+@property(nonatomic, copy) BOOL (^interceptor)(void);
+
 + (NEOneOnOneUIManager *)sharedInstance;
 
 - (void)initializeWithConfig:(NEOneOnOneKitConfig *)config
@@ -57,11 +62,12 @@ typedef NS_ENUM(NSInteger, NEOneOnOneClientEvent) {
 
 - (void)logoutWithCallback:(void (^)(NSInteger, NSString *_Nullable, id _Nullable))callback;
 
-/// 房间创建界面
-- (UINavigationController *)createViewController;
+/// 是否在1v1房间中
+- (BOOL)isInOneOnOne;
 
-/// 房间列表页
-- (UINavigationController *)roomListViewController;
+/// 状态机处理
+- (void)setRTCIdle;
+- (void)setRTCCaling;
 
 @end
 

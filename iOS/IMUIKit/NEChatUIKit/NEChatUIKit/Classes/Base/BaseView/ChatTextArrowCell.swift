@@ -6,13 +6,13 @@
 import UIKit
 
 @objcMembers
-public class ChatTextArrowCell: ChatTextCell {
-  override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
+open class ChatTextArrowCell: ChatTextCell {
+  override public init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
     super.init(style: style, reuseIdentifier: reuseIdentifier)
     rightStyle = .indicate
   }
 
-  required init?(coder: NSCoder) {
-    fatalError("init(coder:) has not been implemented")
+  public required init?(coder: NSCoder) {
+    super.init(coder: coder)
   }
 }

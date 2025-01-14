@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import Foundation
+
 @objc
 protocol NEOneOnOneReciveCustomMessageCallback {
   func onReceiveCustomMessage(_data: [String: Any]?)

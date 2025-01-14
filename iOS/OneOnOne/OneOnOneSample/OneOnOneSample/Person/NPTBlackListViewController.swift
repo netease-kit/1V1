@@ -2,9 +2,9 @@
 // Use of this source code is governed by a MIT license that can be
 // found in the LICENSE file.
 
-import UIKit
 import NIMSDK
 import SnapKit
+import UIKit
 
 protocol NPTBlackListCellDelegate: NSObjectProtocol {
   func removeButtonClick(user: NIMUser?)

@@ -450,8 +450,7 @@ class NEOneOnOneAssistantTopicView: UIView, UICollectionViewDelegate, UICollecti
   }
 
   func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-    if let cell = collectionView.dequeueReusableCell(withReuseIdentifier: NEOneOnOneAssistantCell.description(), for: indexPath) as? NEOneOnOneAssistantCell
-    {
+    if let cell = collectionView.dequeueReusableCell(withReuseIdentifier: NEOneOnOneAssistantCell.description(), for: indexPath) as? NEOneOnOneAssistantCell {
       let itemData = sourceData[indexPath.row] as NEOneOnOneAIGCTopicExtention
       cell.itemButton.setTitle(itemData.topic?.desc, for: .normal)
       cell.itemButton.layer.borderColor = UIColor(hexString: itemData.boardColor!).cgColor
