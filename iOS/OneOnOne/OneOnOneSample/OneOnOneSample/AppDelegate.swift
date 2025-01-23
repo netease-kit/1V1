@@ -12,6 +12,7 @@ import NEMapKit
 import NECoreKit
 import FaceUnity
 import NELoginSample
+import NECommonUIKit
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterDelegate {
@@ -36,23 +37,34 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
     let homeViewController: NPTHomeViewController = NPTHomeViewController()
     homeViewController.privateLatter = { sessionId in
       // 跳转
-//        tab.selectedIndex = 1
-        if let tab = self.window?.rootViewController as? UITabBarController,
-           let nav = tab.viewControllers?[0] as? UINavigationController{
-                  let session = NIMSession(sessionId, type: .P2P)
-                  Router.shared.use(
+      //        tab.selectedIndex = 1
+      if let tab = self.window?.rootViewController as? UITabBarController,
+         let nav = tab.viewControllers?[0] as? UINavigationController{
+          let conversationId = V2NIMConversationIdUtil.p2pConversationId(sessionId)
+       
+        Router.shared.use(
                     PushP2pChatVCRouter,
-                    parameters: ["nav": nav as Any, "session": session as Any],
+                    parameters: ["nav": nav as Any, "conversationId": conversationId as Any],
                     closure: nil
                   )
-        }
+      }
     }
+
     let home = NEUIBackNavigationController(rootViewController: homeViewController)
     
     home.tabBarItem.title = "Recreation".localized
     home.tabBarItem.image = UIImage(named: "home")
     
-    let person = NEUIBackNavigationController(rootViewController: NPTPersonViewController())
+      let personViewController = NPTPersonViewController()
+      personViewController.canContinueAction = { ()->Bool in
+          if NEOneOnOneUIManager.sharedInstance().isInOneOnOne(){
+                //是否在1v1通话中
+              return false
+          }
+        return true
+      }
+      
+    let person = NEUIBackNavigationController(rootViewController: personViewController)
     person.tabBarItem.title = "Personal_Center".localized
     person.tabBarItem.image = UIImage(named: "person")
     
@@ -72,6 +84,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
     //    setupHawk()
       
       baseLogin()
+      NEOneOnOneUIKitCallEngine.getInstance.baseOnWindow = self.window
     return true
   }
     
@@ -263,14 +276,17 @@ extension AppDelegate {
               DispatchQueue.main.async {
                   self.registerAPNS()
               }
-            // 启动添加监听
-            NEOneOnOneUIKitEngine.sharedInstance().addObserve()
             // 是否可以拨打
-            NEOneOnOneUIKitEngine.sharedInstance().canCall = {() -> String? in
-              return nil
-            }
+              NEOneOnOneUIManager.sharedInstance().canContinueAction = {() -> Bool in
+                  if NEOneOnOneUIManager.sharedInstance().isInOneOnOne(){
+                        //是否在1v1通话中
+                      NEAlertViewController.presentAlertViewController("", messageContent: "Busy_In_OneOnOne".localized, cancelTitle:nil, confirmTitle: "Yes".localized)
+                      return false
+                  }
+                  return true
+              }
 
-              NEOneOnOneUIKitCallEngine.getInstance.interceptor = { () -> Bool in
+              NEOneOnOneUIManager.sharedInstance().interceptor = { () -> Bool in
                 //收到邀请了
               NotificationCenter.default.post(name: NSNotification.Name("receiveInvite"), object: nil, userInfo:nil)
               return false
@@ -278,6 +294,7 @@ extension AppDelegate {
               DispatchQueue.main.async {
                 // 刷新头像与昵称
                 IHProgressHUD.dismiss()
+                  NEOneOnOneUIManager.sharedInstance().delegate = self
                 NotificationCenter.default.post(name: NSNotification.Name("Logined"), object: nil, userInfo: ["nickname": userName, "avatar": icon ])
                 // 初始化美颜模块
                 FUDemoManager.share()
@@ -348,7 +365,6 @@ extension AppDelegate:NEOneOnOneUIDelegate{
     func onOne(_ event: NEOneOnOneClientEvent) {
         switch event {
         case .kicOut,.forbidden:
-          NEOneOnOneUIKitEngine.sharedInstance().removeObserve()
           IHProgressHUD.showError(withStatus: "Kick_Out".localized)
           DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
               if let tab = UIApplication.shared.keyWindow?.rootViewController as? UITabBarController,

@@ -3,9 +3,10 @@
 // found in the LICENSE file.
 
 import Foundation
+
 /// 透传消息解析
-@objcMembers
 /// 自定义消息
+@objcMembers
 class _NEOneOnOneCustomMessage: NSObject, Codable {
   /// 类型
   var type: Int = -1
@@ -13,8 +14,8 @@ class _NEOneOnOneCustomMessage: NSObject, Codable {
   var data: _NEOneOnOneCustomMessageData?
 }
 
-@objcMembers
 /// 自定义消息
+@objcMembers
 class _NEOneOnOneCustomMessageData: NSObject, Codable {
   /// 频道号
   var channelId: Int64 = -1

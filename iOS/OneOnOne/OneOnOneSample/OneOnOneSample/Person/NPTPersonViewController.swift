@@ -2,12 +2,12 @@
 // Use of this source code is governed by a MIT license that can be
 // found in the LICENSE file.
 
-import UIKit
-import SnapKit
-import NERoomKit
 import IHProgressHUD
-import SDWebImage
 import NEOneOnOneKit
+import NERoomKit
+import SDWebImage
+import SnapKit
+import UIKit
 
 class NPTSettingItem: NSObject {
   var icon: UIImage?
@@ -28,6 +28,8 @@ class NPTPersonViewController: UIViewController {
   // 两个回调的结果同时满足
   var probeCompleted = (quality: false, result: false)
   var probeContent: (quality: String?, result: String?)
+
+  public var canContinueAction: (() -> Bool)?
 
   override func viewDidLoad() {
     super.viewDidLoad()
@@ -166,6 +168,12 @@ extension NPTPersonViewController: UITableViewDelegate {
     let icon = icons[indexPath.row]
     switch icon {
     case "setting_beauty":
+      if let canContinueAction = canContinueAction,
+         !canContinueAction() {
+        IHProgressHUD.showError(withStatus: "Beauty_Error".localized)
+        return
+      }
+
       let vc = NPTBeautySettingsViewController()
       vc.hidesBottomBarWhenPushed = true
       navigationController?.pushViewController(vc, animated: true)

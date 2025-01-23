@@ -15,13 +15,6 @@ NS_ASSUME_NONNULL_BEGIN
 /**持续时间*/
 + (long long)getDurationStartTime:(NSString *)startTime endTime:(NSString *)endTime;
 
-// 提示框
-+ (void)presentAlertViewController:(UIViewController *)target
-                            titile:(NSString *)title
-                       cancelTitle:(NSString *)cancelTitle
-                      confirmTitle:(NSString *)confirmTitle
-                   confirmComplete:(void (^)(void))complete;
-
 // 权限判断，是否被拒/被关闭
 + (BOOL)permisionDenied:(AVAuthorizationStatus)AVstatus;
 

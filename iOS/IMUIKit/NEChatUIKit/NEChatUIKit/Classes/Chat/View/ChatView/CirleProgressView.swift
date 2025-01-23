@@ -6,7 +6,7 @@
 import UIKit
 
 @objcMembers
-public class CirleProgressView: UIView {
+open class CirleProgressView: UIView {
 //    0~1
   public var progress: Float = 0 {
     didSet {
@@ -37,10 +37,9 @@ public class CirleProgressView: UIView {
 //        drawCircle(progress: progress)
 //    }
 
-  override init(frame: CGRect) {
+  override public init(frame: CGRect) {
     super.init(frame: frame)
     backgroundColor = .clear
-    accessibilityIdentifier = "id.status"
     imageView.frame = bounds
     imageView.contentMode = .center
     addSubview(imageView)
@@ -53,19 +52,19 @@ public class CirleProgressView: UIView {
       clockwise: false
     )
     borderLayer.path = borderPath.cgPath
-    borderLayer.strokeColor = UIColor.ne_blueText.cgColor
+    borderLayer.strokeColor = UIColor.ne_normalTheme.cgColor
     borderLayer.fillColor = UIColor.clear.cgColor
     borderLayer.lineWidth = 2
     borderLayer.frame = bounds
     layer.addSublayer(borderLayer)
 
     sectorLayer.frame = bounds
-    sectorLayer.fillColor = UIColor.ne_blueText.cgColor
+    sectorLayer.fillColor = UIColor.ne_normalTheme.cgColor
     layer.addSublayer(sectorLayer)
   }
 
-  required init?(coder: NSCoder) {
-    fatalError("init(coder:) has not been implemented")
+  public required init?(coder: NSCoder) {
+    super.init(coder: coder)
   }
 
   private func drawCircle(progress: Float) {

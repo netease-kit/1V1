@@ -2,8 +2,8 @@
 // Use of this source code is governed by a MIT license that can be
 // found in the LICENSE file.
 
-import SystemConfiguration
 import Foundation
+import SystemConfiguration
 
 public enum NPTReachabilityError: Error {
   case failedToCreateWithAddress(sockaddr, Int32)

@@ -5,7 +5,7 @@
 import Foundation
 import NERtcCallKit
 
-extension NEOneOnOneKit: NERtcCallKitDelegate {
+extension NEOneOnOneKit: NECallEngineDelegate {
 //  public func onInvited(_ invitor: String, userIDs: [String], isFromGroup: Bool, groupID: String?, type: NERtcCallType, attachment: String?) {
 //    /// 获取本段判断
 //    if let interceptor = interceptor {
@@ -27,7 +27,6 @@ extension NEOneOnOneKit: NERtcCallKitDelegate {
 //  }
 
   public func onRtcInitEnd() {
-    NERtcEngine.shared().setChannelProfile(.liveBroadcasting)
     NERtcEngine.shared().setAudioProfile(.standard, scenario: .speech)
     let videoConfig = NERtcVideoEncodeConfiguration()
     videoConfig.height = 640

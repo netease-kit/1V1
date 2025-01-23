@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import Foundation
+import NEChatKit
 import NEChatUIKit
 import NIMSDK
 
@@ -11,9 +12,9 @@ public class NEOneOnOneChatRegisterEngine: NSObject {
   /// 单例初始化
   /// - Returns: 单例对象
   public static func getInstance() -> NEOneOnOneChatRegisterEngine {
-    // 自定义解析器注册
-    NIMCustomObject.registerCustomDecoder(CustomAttachmentDecoder())
-    IMKitClient.instance.repo.setShowReadStatus(true)
+    // 后续使用 IM V2 这个先注释
+    NEChatKit.SettingRepo.shared.setShowReadStatus(true)
+
     /// 更多
     for moreModel in NEChatUIKitClient.instance.moreAction {
       if moreModel.type == .file || moreModel.type == .rtc {
@@ -47,11 +48,11 @@ public class NEOneOnOneChatRegisterEngine: NSObject {
     Router.shared.register(PushP2pChatVCRouter) { param in
       print("param:\(param)")
       let nav = param["nav"] as? UINavigationController
-      guard let session = param["session"] as? NIMSession else {
+      guard let conversationId = param["conversationId"] as? String else {
         return
       }
-      let anchor = param["anchor"] as? NIMMessage
-      let p2pChatVC = NEOneOnOneChatP2PViewController(session: session, anchor: anchor)
+      let anchor = param["anchor"] as? V2NIMMessage
+      let p2pChatVC = NEOneOnOneChatP2PViewController(conversationId: conversationId, anchor: anchor)
       p2pChatVC.hidesBottomBarWhenPushed = true
       for (i, vc) in (nav?.viewControllers ?? []).enumerated() {
         if vc.isMember(of: NEOneOnOneChatP2PViewController.self) {

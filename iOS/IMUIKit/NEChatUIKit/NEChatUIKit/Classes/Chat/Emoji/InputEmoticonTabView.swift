@@ -3,25 +3,37 @@
 // Use of this source code is governed by a MIT license that can be
 // found in the LICENSE file.
 
-import NECoreIMKit
+import NECoreIM2Kit
 import UIKit
+
 @objc public protocol InputEmoticonTabViewDelegate: NSObjectProtocol {
   @objc optional func tabView(_ tabView: InputEmoticonTabView?, didSelectTabIndex index: Int)
 }
 
-public class InputEmoticonTabView: UIControl {
-  public weak var delegate: InputEmoticonTabViewDelegate?
+open class InputEmoticonTabView: UIControl {
+  open weak var delegate: InputEmoticonTabViewDelegate?
   private var tabs = [UIButton]()
   private var seps = [UIView]()
   private var className = "InputEmoticonTabView"
+
+  public lazy var sendButton: UIButton = {
+    let button = UIButton()
+    button.translatesAutoresizingMaskIntoConstraints = false
+    button.setTitle(coreLoader.localizable("send"), for: .normal)
+    button.titleLabel?.textColor = .white
+    button.backgroundColor = UIColor.ne_normalTheme
+    button.titleLabel?.font = DefaultTextFont(14)
+    button.accessibilityIdentifier = "id.emojiSend"
+    return button
+  }()
 
   override public init(frame: CGRect) {
     super.init(frame: frame)
     setUpSubViews()
   }
 
-  required init?(coder: NSCoder) {
-    fatalError("init(coder:) has not been implemented")
+  public required init?(coder: NSCoder) {
+    super.init(coder: coder)
   }
 
   func setUpSubViews() {
@@ -35,38 +47,38 @@ public class InputEmoticonTabView: UIControl {
     ])
   }
 
-  public func selectTabIndex(_ index: Int) {
+  open func selectTabIndex(_ index: Int) {
     for i in 0 ..< tabs.count {
-      let btn = tabs[i]
-      btn.isSelected = i == index
+      let button = tabs[i]
+      button.isSelected = i == index
     }
   }
 
-  public func loadCatalogs(_ emoticonCatalogs: [NIMInputEmoticonCatalog]?) {
-    tabs.forEach { btn in
-      btn.removeFromSuperview()
+  open func loadCatalogs(_ emoticonCatalogs: [NIMInputEmoticonCatalog]?) {
+    for button in tabs {
+      button.removeFromSuperview()
     }
-    seps.forEach { view in
+    for view in seps {
       view.removeFromSuperview()
     }
     tabs.removeAll()
     seps.removeAll()
 
     guard let catalogs = emoticonCatalogs else {
-      NELog.errorLog(className, desc: "❌emoticonCatalogs is nil")
+      NEALog.errorLog(className, desc: "emoticonCatalogs is nil")
       return
     }
-    catalogs.forEach { catelog in
+    for catelog in catalogs {
       let button = UIButton()
       button.addTarget(self, action: #selector(onTouchTab), for: .touchUpInside)
       button.sizeToFit()
-      self.addSubview(button)
+      addSubview(button)
       tabs.append(button)
 
       let sep = UIView(frame: CGRect(x: 0, y: 0, width: 0.5, height: 35))
       sep.backgroundColor = UIColor.ne_borderColor
       seps.append(sep)
-      self.addSubview(sep)
+      addSubview(sep)
     }
   }
 
@@ -76,17 +88,4 @@ public class InputEmoticonTabView: UIControl {
       delegate?.tabView?(self, didSelectTabIndex: index)
     }
   }
-
-  // MARK: lazy method
-
-  public lazy var sendButton: UIButton = {
-    let button = UIButton()
-    button.translatesAutoresizingMaskIntoConstraints = false
-    button.setTitle(chatLocalizable("send"), for: .normal)
-    button.titleLabel?.textColor = .white
-    button.backgroundColor = UIColor.ne_blueText
-    button.titleLabel?.font = DefaultTextFont(14)
-    button.accessibilityIdentifier = "id.emojiSend"
-    return button
-  }()
 }

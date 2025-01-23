@@ -12,6 +12,7 @@ open class FunChatMessageLocationCell: FunChatMessageBaseCell {
     label.translatesAutoresizingMaskIntoConstraints = false
     label.textColor = UIColor.ne_darkText
     label.font = UIFont.systemFont(ofSize: 16.0)
+    label.accessibilityIdentifier = "id.locationItemTitle"
     return label
   }()
 
@@ -20,6 +21,7 @@ open class FunChatMessageLocationCell: FunChatMessageBaseCell {
     label.translatesAutoresizingMaskIntoConstraints = false
     label.textColor = UIColor.ne_lightText
     label.font = UIFont.systemFont(ofSize: 12.0)
+    label.accessibilityIdentifier = "id.locationItemAddress"
     return label
   }()
 
@@ -34,6 +36,15 @@ open class FunChatMessageLocationCell: FunChatMessageBaseCell {
   }()
 
   public var mapViewLeft: UIView?
+
+  public var mapImageViewLeft: UIImageView = {
+    let imageView = UIImageView()
+    imageView.translatesAutoresizingMaskIntoConstraints = false
+    imageView.contentMode = .scaleAspectFill
+    imageView.clipsToBounds = true
+    return imageView
+  }()
+
   let backgroundViewLeft = UIView()
 
   // Right
@@ -42,6 +53,7 @@ open class FunChatMessageLocationCell: FunChatMessageBaseCell {
     label.translatesAutoresizingMaskIntoConstraints = false
     label.textColor = UIColor.ne_darkText
     label.font = UIFont.systemFont(ofSize: 16.0)
+    label.accessibilityIdentifier = "id.locationItemTitle"
     return label
   }()
 
@@ -50,6 +62,7 @@ open class FunChatMessageLocationCell: FunChatMessageBaseCell {
     label.translatesAutoresizingMaskIntoConstraints = false
     label.textColor = UIColor.ne_lightText
     label.font = UIFont.systemFont(ofSize: 12.0)
+    label.accessibilityIdentifier = "id.locationItemAddress"
     return label
   }()
 
@@ -64,23 +77,41 @@ open class FunChatMessageLocationCell: FunChatMessageBaseCell {
   }()
 
   public var mapViewRight: UIView?
+
+  public var mapImageViewRight: UIImageView = {
+    let imageView = UIImageView()
+    imageView.translatesAutoresizingMaskIntoConstraints = false
+    imageView.contentMode = .scaleAspectFill
+    imageView.clipsToBounds = true
+    return imageView
+  }()
+
   let backgroundViewRight = UIView()
+
+  lazy var pointImageRight: UIImageView = {
+    let imageView = UIImageView()
+    imageView.translatesAutoresizingMaskIntoConstraints = false
+    imageView.image = coreLoader.loadImage("location_point")
+    return imageView
+  }()
+
+  lazy var pointImageLeft: UIImageView = {
+    let imageView = UIImageView()
+    imageView.translatesAutoresizingMaskIntoConstraints = false
+    imageView.image = coreLoader.loadImage("location_point")
+    return imageView
+  }()
 
   override public init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
     super.init(style: style, reuseIdentifier: reuseIdentifier)
-    commonUI()
   }
 
   public required init?(coder: NSCoder) {
-    fatalError("init(coder:) has not been implemented")
+    super.init(coder: coder)
   }
 
-  open func commonUI() {
-    commonUIRight()
-    commonUILeft()
-  }
-
-  open func commonUILeft() {
+  override open func commonUILeft() {
+    super.commonUILeft()
     backgroundViewLeft.backgroundColor = UIColor.white
     contentView.addSubview(backgroundViewLeft)
     bubbleImageLeft.isHidden = true
@@ -89,6 +120,7 @@ open class FunChatMessageLocationCell: FunChatMessageBaseCell {
     backgroundViewLeft.layer.cornerRadius = 4
     backgroundViewLeft.layer.borderWidth = 1
     backgroundViewLeft.layer.borderColor = UIColor.ne_outlineColor.cgColor
+    backgroundViewLeft.accessibilityIdentifier = "id.mapView"
 
     let messageLongPress = UILongPressGestureRecognizer(
       target: self,
@@ -104,6 +136,7 @@ open class FunChatMessageLocationCell: FunChatMessageBaseCell {
     ])
 
     let messageTap = UITapGestureRecognizer(target: self, action: #selector(tapMessage))
+    messageTap.cancelsTouchesInView = false
     backgroundViewLeft.addGestureRecognizer(messageTap)
 
     backgroundViewLeft.addSubview(titleLabelLeft)
@@ -120,36 +153,30 @@ open class FunChatMessageLocationCell: FunChatMessageBaseCell {
       subTitleLabelLeft.topAnchor.constraint(equalTo: titleLabelLeft.bottomAnchor, constant: 4),
     ])
 
-    if let map = NEChatKitClient.instance.delegate?.getCellMapView?() as? UIView {
-      mapViewLeft = map
-      backgroundViewLeft.addSubview(map)
-      map.translatesAutoresizingMaskIntoConstraints = false
-      NSLayoutConstraint.activate([
-        map.leftAnchor.constraint(equalTo: backgroundViewLeft.leftAnchor),
-        map.bottomAnchor.constraint(equalTo: backgroundViewLeft.bottomAnchor),
-        map.rightAnchor.constraint(equalTo: backgroundViewLeft.rightAnchor),
-        map.topAnchor.constraint(equalTo: subTitleLabelLeft.bottomAnchor, constant: 4),
-      ])
+    backgroundViewLeft.addSubview(mapImageViewLeft)
+    NSLayoutConstraint.activate([
+      mapImageViewLeft.leftAnchor.constraint(equalTo: backgroundViewLeft.leftAnchor),
+      mapImageViewLeft.bottomAnchor.constraint(equalTo: backgroundViewLeft.bottomAnchor),
+      mapImageViewLeft.rightAnchor.constraint(equalTo: backgroundViewLeft.rightAnchor),
+      mapImageViewLeft.heightAnchor.constraint(equalToConstant: 86),
+    ])
 
-      let pointImage = UIImageView()
-      pointImage.translatesAutoresizingMaskIntoConstraints = false
-      pointImage.image = coreLoader.loadImage("location_point")
-      map.addSubview(pointImage)
-      NSLayoutConstraint.activate([
-        pointImage.centerXAnchor.constraint(equalTo: map.centerXAnchor),
-        pointImage.bottomAnchor.constraint(equalTo: map.bottomAnchor, constant: -30),
-      ])
-    } else {
-      backgroundViewLeft.addSubview(emptyLabelLeft)
-      NSLayoutConstraint.activate([
-        emptyLabelLeft.leftAnchor.constraint(equalTo: backgroundViewLeft.leftAnchor),
-        emptyLabelLeft.rightAnchor.constraint(equalTo: backgroundViewLeft.rightAnchor),
-        emptyLabelLeft.bottomAnchor.constraint(equalTo: backgroundViewLeft.bottomAnchor, constant: -40),
-      ])
-    }
+    mapImageViewLeft.addSubview(pointImageLeft)
+    NSLayoutConstraint.activate([
+      pointImageLeft.centerXAnchor.constraint(equalTo: mapImageViewLeft.centerXAnchor),
+      pointImageLeft.bottomAnchor.constraint(equalTo: mapImageViewLeft.bottomAnchor, constant: -30),
+    ])
+
+    backgroundViewLeft.addSubview(emptyLabelLeft)
+    NSLayoutConstraint.activate([
+      emptyLabelLeft.leftAnchor.constraint(equalTo: backgroundViewLeft.leftAnchor),
+      emptyLabelLeft.rightAnchor.constraint(equalTo: backgroundViewLeft.rightAnchor),
+      emptyLabelLeft.bottomAnchor.constraint(equalTo: backgroundViewLeft.bottomAnchor, constant: -40),
+    ])
   }
 
-  open func commonUIRight() {
+  override open func commonUIRight() {
+    super.commonUIRight()
     backgroundViewRight.backgroundColor = UIColor.white
     contentView.addSubview(backgroundViewRight)
     bubbleImageRight.isHidden = true
@@ -158,6 +185,8 @@ open class FunChatMessageLocationCell: FunChatMessageBaseCell {
     backgroundViewRight.layer.cornerRadius = 4
     backgroundViewRight.layer.borderWidth = 1
     backgroundViewRight.layer.borderColor = UIColor.ne_outlineColor.cgColor
+    backgroundViewRight.accessibilityIdentifier = "id.mapView"
+
     let messageLongPress = UILongPressGestureRecognizer(
       target: self,
       action: #selector(longPress)
@@ -171,6 +200,7 @@ open class FunChatMessageLocationCell: FunChatMessageBaseCell {
       backgroundViewRight.bottomAnchor.constraint(equalTo: bubbleImageRight.bottomAnchor),
     ])
     let messageTap = UITapGestureRecognizer(target: self, action: #selector(tapMessage))
+    messageTap.cancelsTouchesInView = false
     backgroundViewRight.addGestureRecognizer(messageTap)
 
     backgroundViewRight.addSubview(titleLabelRight)
@@ -187,33 +217,26 @@ open class FunChatMessageLocationCell: FunChatMessageBaseCell {
       subTitleLabelRight.topAnchor.constraint(equalTo: titleLabelRight.bottomAnchor, constant: 4),
     ])
 
-    if let map = NEChatKitClient.instance.delegate?.getCellMapView?() as? UIView {
-      mapViewRight = map
-      backgroundViewRight.addSubview(map)
-      map.translatesAutoresizingMaskIntoConstraints = false
-      NSLayoutConstraint.activate([
-        map.leftAnchor.constraint(equalTo: backgroundViewRight.leftAnchor),
-        map.bottomAnchor.constraint(equalTo: backgroundViewRight.bottomAnchor),
-        map.rightAnchor.constraint(equalTo: backgroundViewRight.rightAnchor),
-        map.topAnchor.constraint(equalTo: subTitleLabelRight.bottomAnchor, constant: 4),
-      ])
+    backgroundViewRight.addSubview(mapImageViewRight)
+    NSLayoutConstraint.activate([
+      mapImageViewRight.leftAnchor.constraint(equalTo: backgroundViewRight.leftAnchor),
+      mapImageViewRight.bottomAnchor.constraint(equalTo: backgroundViewRight.bottomAnchor),
+      mapImageViewRight.rightAnchor.constraint(equalTo: backgroundViewRight.rightAnchor),
+      mapImageViewRight.heightAnchor.constraint(equalToConstant: 86),
+    ])
 
-      let pointImage = UIImageView()
-      pointImage.translatesAutoresizingMaskIntoConstraints = false
-      pointImage.image = coreLoader.loadImage("location_point")
-      map.addSubview(pointImage)
-      NSLayoutConstraint.activate([
-        pointImage.centerXAnchor.constraint(equalTo: map.centerXAnchor),
-        pointImage.bottomAnchor.constraint(equalTo: map.bottomAnchor, constant: -30),
-      ])
-    } else {
-      backgroundViewRight.addSubview(emptyLabelRight)
-      NSLayoutConstraint.activate([
-        emptyLabelRight.leftAnchor.constraint(equalTo: backgroundViewRight.leftAnchor),
-        emptyLabelRight.rightAnchor.constraint(equalTo: backgroundViewRight.rightAnchor),
-        emptyLabelRight.bottomAnchor.constraint(equalTo: backgroundViewRight.bottomAnchor, constant: -40),
-      ])
-    }
+    mapImageViewRight.addSubview(pointImageRight)
+    NSLayoutConstraint.activate([
+      pointImageRight.centerXAnchor.constraint(equalTo: mapImageViewRight.centerXAnchor),
+      pointImageRight.bottomAnchor.constraint(equalTo: mapImageViewRight.bottomAnchor, constant: -30),
+    ])
+
+    backgroundViewRight.addSubview(emptyLabelRight)
+    NSLayoutConstraint.activate([
+      emptyLabelRight.leftAnchor.constraint(equalTo: backgroundViewRight.leftAnchor),
+      emptyLabelRight.rightAnchor.constraint(equalTo: backgroundViewRight.rightAnchor),
+      emptyLabelRight.bottomAnchor.constraint(equalTo: backgroundViewRight.bottomAnchor, constant: -40),
+    ])
   }
 
   override open func showLeftOrRight(showRight: Bool) {
@@ -222,23 +245,32 @@ open class FunChatMessageLocationCell: FunChatMessageBaseCell {
     backgroundViewRight.isHidden = !showRight
   }
 
-  override open func setModel(_ model: MessageContentModel) {
-    super.setModel(model)
-    guard let isSend = model.message?.isOutgoingMsg else {
-      return
-    }
+  override open func setModel(_ model: MessageContentModel, _ isSend: Bool) {
+    super.setModel(model, isSend)
     let titleLabel = isSend ? titleLabelRight : titleLabelLeft
     let subTitleLabel = isSend ? subTitleLabelRight : subTitleLabelLeft
     let mapView = isSend ? mapViewRight : mapViewLeft
     let bubbleW = isSend ? bubbleWRight : bubbleWLeft
-
-    bubbleW?.constant = kScreenWidth <= 320 ? 222 : 242 // 适配小屏幕
+    let mapImageView = isSend ? mapImageViewRight : mapImageViewLeft
+    let emptyLabel = isSend ? emptyLabelRight : emptyLabelLeft
+    let pointImage = isSend ? pointImageRight : pointImageLeft
 
     if let m = model as? MessageLocationModel {
       titleLabel.text = m.title
       subTitleLabel.text = m.subTitle
-      if let lat = m.lat, let lng = m.lng, let map = mapView {
-        NEChatKitClient.instance.delegate?.setMapviewLocation?(lat: lat, lng: lng, mapview: map)
+      if let lat = m.lat, let lng = m.lng {
+        if let url = NEChatKitClient.instance.delegate?.getMapImageUrl?(lat: lat, lng: lng) {
+          NEALog.infoLog(className(), desc: #function + "location image url = \(url)")
+          mapImageView.sd_setImage(with: URL(string: url),
+                                   placeholderImage: coreLoader.loadImage("map_placeholder_image"),
+                                   options: .retryFailed)
+          emptyLabel.isHidden = true
+          pointImage.isHidden = false
+        } else {
+          mapImageView.image = UIImage.ne_imageNamed(name: "map_placeholder_image")
+          emptyLabel.isHidden = false
+          pointImage.isHidden = true
+        }
       }
     }
   }

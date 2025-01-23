@@ -4,8 +4,8 @@
 
 import Foundation
 
-@objcMembers
 /// OneOnOneKit 配置项
+@objcMembers
 public class NEOneOnOneKitConfig: NSObject {
   /// appKey 为OneOnOne服务的Key
   public var appKey: String = ""

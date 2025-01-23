@@ -2,10 +2,10 @@
 // Use of this source code is governed by a MIT license that can be
 // found in the LICENSE file.
 
-import UIKit
-import SnapKit
 import FaceUnity
 import NERtcSDK
+import SnapKit
+import UIKit
 
 // TODO: 一对一视频通话要留口子来设置美颜
 class NPTBeautySettingsViewController: UIViewController {

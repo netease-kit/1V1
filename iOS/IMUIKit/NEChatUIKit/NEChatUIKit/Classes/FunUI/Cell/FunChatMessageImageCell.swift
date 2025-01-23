@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import NIMSDK
+import SDWebImage
 import UIKit
 
 @objcMembers
@@ -11,23 +12,19 @@ open class FunChatMessageImageCell: FunChatMessageBaseCell {
   public let contentImageViewRight = UIImageView()
   override public init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
     super.init(style: style, reuseIdentifier: reuseIdentifier)
-    commonUI()
   }
 
   public required init?(coder: NSCoder) {
-    fatalError("init(coder:) has not been implemented")
+    super.init(coder: coder)
   }
 
-  open func commonUI() {
-    commonUIRight()
-    commonUILeft()
-  }
-
-  open func commonUILeft() {
+  override open func commonUILeft() {
+    super.commonUILeft()
     contentImageViewLeft.translatesAutoresizingMaskIntoConstraints = false
     contentImageViewLeft.contentMode = .scaleAspectFill
     contentImageViewLeft.clipsToBounds = true
     contentImageViewLeft.layer.cornerRadius = 4
+    contentImageViewLeft.accessibilityIdentifier = "id.thumbnail"
     bubbleImageLeft.image = nil
     bubbleImageLeft.addSubview(contentImageViewLeft)
     NSLayoutConstraint.activate([
@@ -38,11 +35,13 @@ open class FunChatMessageImageCell: FunChatMessageBaseCell {
     ])
   }
 
-  open func commonUIRight() {
+  override open func commonUIRight() {
+    super.commonUIRight()
     contentImageViewRight.translatesAutoresizingMaskIntoConstraints = false
     contentImageViewRight.contentMode = .scaleAspectFill
     contentImageViewRight.clipsToBounds = true
     contentImageViewRight.layer.cornerRadius = 4
+    contentImageViewRight.accessibilityIdentifier = "id.thumbnail"
     bubbleImageRight.image = nil
     bubbleImageRight.addSubview(contentImageViewRight)
     NSLayoutConstraint.activate([
@@ -59,24 +58,23 @@ open class FunChatMessageImageCell: FunChatMessageBaseCell {
     contentImageViewRight.isHidden = !showRight
   }
 
-  override open func setModel(_ model: MessageContentModel) {
-    super.setModel(model)
-    guard let isSend = model.message?.isOutgoingMsg else {
-      return
-    }
+  override open func setModel(_ model: MessageContentModel, _ isSend: Bool) {
+    super.setModel(model, isSend)
     let contentImageView = isSend ? contentImageViewRight : contentImageViewLeft
 
-    if let m = model as? MessageImageModel, let imageUrl = m.imageUrl {
+    if let m = model as? MessageImageModel, let imageUrl = m.urlString {
+      var options: SDWebImageOptions = [.retryFailed]
+      if let imageObject = model.message?.attachment as? V2NIMMessageImageAttachment, imageObject.ext != ".gif" {
+        options = [.retryFailed, .progressiveLoad]
+      }
+
+      let context: [SDWebImageContextOption: Any] = [.imageThumbnailPixelSize: CGSize(width: 1000, height: 1000)]
       if imageUrl.hasPrefix("http") {
-        contentImageView.sd_setImage(
-          with: URL(string: imageUrl),
-          placeholderImage: nil,
-          options: .retryFailed,
-          progress: nil,
-          completed: nil
-        )
+        let url = URL(string: imageUrl)
+        contentImageView.sd_setImage(with: url, placeholderImage: nil, options: options, context: context)
       } else {
-        contentImageView.image = UIImage(contentsOfFile: imageUrl)
+        let url = URL(fileURLWithPath: imageUrl)
+        contentImageView.sd_setImage(with: url, placeholderImage: nil, options: options, context: context)
       }
     } else {
       contentImageView.image = nil

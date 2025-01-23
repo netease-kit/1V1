@@ -12,18 +12,19 @@ open class ChatMessageFileCell: NormalChatMessageBaseCell {
   weak var weakModel: MessageFileModel?
 
   public lazy var imgViewLeft: UIImageView = {
-    let view_img = UIImageView()
-    view_img.translatesAutoresizingMaskIntoConstraints = false
-    view_img.backgroundColor = .clear
-    view_img.accessibilityIdentifier = "id.fileType"
-    return view_img
+    let imageView = UIImageView()
+    imageView.translatesAutoresizingMaskIntoConstraints = false
+    imageView.backgroundColor = .clear
+    imageView.accessibilityIdentifier = "id.fileType"
+    return imageView
   }()
 
   public lazy var stateViewLeft: FileStateView = {
-    let state = FileStateView()
-    state.translatesAutoresizingMaskIntoConstraints = false
-    state.backgroundColor = .clear
-    return state
+    let stateView = FileStateView()
+    stateView.translatesAutoresizingMaskIntoConstraints = false
+    stateView.backgroundColor = .clear
+    stateView.accessibilityIdentifier = "id.fileStatus"
+    return stateView
   }()
 
   public lazy var titleLabelLeft: UILabel = {
@@ -69,18 +70,53 @@ open class ChatMessageFileCell: NormalChatMessageBaseCell {
     return view
   }()
 
+  public lazy var backViewLeft: UIView = {
+    let view = UIView()
+    view.translatesAutoresizingMaskIntoConstraints = false
+    view.backgroundColor = .white
+    view.layer.cornerRadius = 8
+    view.layer.borderColor = UIColor.ne_borderColor.cgColor
+    view.layer.borderWidth = 1
+
+    view.addSubview(imgViewLeft)
+    NSLayoutConstraint.activate([
+      imgViewLeft.leftAnchor.constraint(equalTo: view.leftAnchor, constant: 10),
+      imgViewLeft.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+      imgViewLeft.widthAnchor.constraint(equalToConstant: 32),
+      imgViewLeft.heightAnchor.constraint(equalToConstant: 32),
+    ])
+
+    imgViewLeft.addSubview(stateViewLeft)
+    NSLayoutConstraint.activate([
+      stateViewLeft.leftAnchor.constraint(equalTo: imgViewLeft.leftAnchor, constant: 0),
+      stateViewLeft.topAnchor.constraint(equalTo: imgViewLeft.topAnchor, constant: 0),
+      stateViewLeft.widthAnchor.constraint(equalToConstant: 32),
+      stateViewLeft.heightAnchor.constraint(equalToConstant: 32),
+    ])
+
+    view.addSubview(labelViewLeft)
+    NSLayoutConstraint.activate([
+      labelViewLeft.leftAnchor.constraint(equalTo: imgViewLeft.rightAnchor, constant: 15),
+      labelViewLeft.topAnchor.constraint(equalTo: view.topAnchor, constant: 10),
+      labelViewLeft.rightAnchor.constraint(equalTo: view.rightAnchor, constant: -10),
+      labelViewLeft.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: 0),
+    ])
+    return view
+  }()
+
   public lazy var imgViewRight: UIImageView = {
-    let view_img = UIImageView()
-    view_img.translatesAutoresizingMaskIntoConstraints = false
-    view_img.backgroundColor = .clear
-    view_img.accessibilityIdentifier = "id.fileType"
-    return view_img
+    let imageView = UIImageView()
+    imageView.translatesAutoresizingMaskIntoConstraints = false
+    imageView.backgroundColor = .clear
+    imageView.accessibilityIdentifier = "id.fileType"
+    return imageView
   }()
 
   public lazy var stateViewRight: FileStateView = {
     let state = FileStateView()
     state.translatesAutoresizingMaskIntoConstraints = false
     state.backgroundColor = .clear
+    state.accessibilityIdentifier = "id.fileStatus"
     return state
   }()
 
@@ -127,168 +163,155 @@ open class ChatMessageFileCell: NormalChatMessageBaseCell {
     return view
   }()
 
-  override public init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
-    super.init(style: style, reuseIdentifier: reuseIdentifier)
-    setupUI()
-  }
+  public lazy var backViewRight: UIView = {
+    let view = UIView()
+    view.translatesAutoresizingMaskIntoConstraints = false
+    view.backgroundColor = .white
+    view.layer.cornerRadius = 8
+    view.layer.borderColor = UIColor.ne_borderColor.cgColor
+    view.layer.borderWidth = 1
 
-  public required init?(coder: NSCoder) {
-    fatalError("init(coder:) has not been implemented")
-  }
-
-  open func setupUI() {
-    setupUIRight()
-    setupUILeft()
-  }
-
-  open func setupUILeft() {
-    bubbleImageLeft.image = nil
-    bubbleImageLeft.backgroundColor = .white
-    bubbleImageLeft.layer.cornerRadius = 8
-    bubbleImageLeft.layer.borderColor = UIColor.ne_borderColor.cgColor
-    bubbleImageLeft.layer.borderWidth = 1
-
-    bubbleImageLeft.addSubview(imgViewLeft)
+    view.addSubview(imgViewRight)
     NSLayoutConstraint.activate([
-      imgViewLeft.leftAnchor.constraint(equalTo: bubbleImageLeft.leftAnchor, constant: 10),
-      imgViewLeft.centerYAnchor.constraint(equalTo: bubbleImageLeft.centerYAnchor),
-      imgViewLeft.widthAnchor.constraint(equalToConstant: 32),
-      imgViewLeft.heightAnchor.constraint(equalToConstant: 32),
-    ])
-
-    contentView.addSubview(stateViewLeft)
-    NSLayoutConstraint.activate([
-      stateViewLeft.leftAnchor.constraint(equalTo: bubbleImageLeft.leftAnchor, constant: 10),
-      stateViewLeft.topAnchor.constraint(equalTo: bubbleImageLeft.topAnchor, constant: 10),
-      stateViewLeft.widthAnchor.constraint(equalToConstant: 32),
-      stateViewLeft.heightAnchor.constraint(equalToConstant: 32),
-    ])
-
-    bubbleImageLeft.addSubview(labelViewLeft)
-    NSLayoutConstraint.activate([
-      labelViewLeft.leftAnchor.constraint(equalTo: imgViewLeft.rightAnchor, constant: 15),
-      labelViewLeft.topAnchor.constraint(equalTo: bubbleImageLeft.topAnchor, constant: 10),
-      labelViewLeft.rightAnchor.constraint(equalTo: bubbleImageLeft.rightAnchor, constant: -10),
-      labelViewLeft.bottomAnchor.constraint(equalTo: bubbleImageLeft.bottomAnchor, constant: 0),
-    ])
-  }
-
-  open func setupUIRight() {
-    bubbleImageRight.image = nil
-    bubbleImageRight.backgroundColor = .white
-    bubbleImageRight.layer.cornerRadius = 8
-    bubbleImageRight.layer.borderColor = UIColor.ne_borderColor.cgColor
-    bubbleImageRight.layer.borderWidth = 1
-
-    bubbleImageRight.addSubview(imgViewRight)
-    NSLayoutConstraint.activate([
-      imgViewRight.leftAnchor.constraint(equalTo: bubbleImageRight.leftAnchor, constant: 10),
-      imgViewRight.centerYAnchor.constraint(equalTo: bubbleImageRight.centerYAnchor),
+      imgViewRight.leftAnchor.constraint(equalTo: view.leftAnchor, constant: 10),
+      imgViewRight.centerYAnchor.constraint(equalTo: view.centerYAnchor),
       imgViewRight.widthAnchor.constraint(equalToConstant: 32),
       imgViewRight.heightAnchor.constraint(equalToConstant: 32),
     ])
 
-    contentView.addSubview(stateViewRight)
+    imgViewRight.addSubview(stateViewRight)
     NSLayoutConstraint.activate([
-      stateViewRight.leftAnchor.constraint(equalTo: bubbleImageRight.leftAnchor, constant: 10),
-      stateViewRight.topAnchor.constraint(equalTo: bubbleImageRight.topAnchor, constant: 10),
+      stateViewRight.leftAnchor.constraint(equalTo: imgViewRight.leftAnchor, constant: 0),
+      stateViewRight.topAnchor.constraint(equalTo: imgViewRight.topAnchor, constant: 0),
       stateViewRight.widthAnchor.constraint(equalToConstant: 32),
       stateViewRight.heightAnchor.constraint(equalToConstant: 32),
     ])
 
-    bubbleImageRight.addSubview(labelViewRight)
+    view.addSubview(labelViewRight)
     NSLayoutConstraint.activate([
       labelViewRight.leftAnchor.constraint(equalTo: imgViewRight.rightAnchor, constant: 15),
-      labelViewRight.topAnchor.constraint(equalTo: bubbleImageRight.topAnchor, constant: 10),
-      labelViewRight.rightAnchor.constraint(equalTo: bubbleImageRight.rightAnchor, constant: -10),
-      labelViewRight.bottomAnchor.constraint(equalTo: bubbleImageRight.bottomAnchor, constant: 0),
+      labelViewRight.topAnchor.constraint(equalTo: view.topAnchor, constant: 10),
+      labelViewRight.rightAnchor.constraint(equalTo: view.rightAnchor, constant: -10),
+      labelViewRight.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: 0),
+    ])
+    return view
+  }()
+
+  override public init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
+    super.init(style: style, reuseIdentifier: reuseIdentifier)
+  }
+
+  public required init?(coder: NSCoder) {
+    super.init(coder: coder)
+  }
+
+  override open func commonUILeft() {
+    super.commonUILeft()
+    bubbleImageLeft.addSubview(backViewLeft)
+    NSLayoutConstraint.activate([
+      backViewLeft.leftAnchor.constraint(equalTo: bubbleImageLeft.leftAnchor, constant: 0),
+      backViewLeft.topAnchor.constraint(equalTo: replyViewLeft.bottomAnchor, constant: 0),
+      backViewLeft.rightAnchor.constraint(equalTo: bubbleImageLeft.rightAnchor, constant: 0),
+      backViewLeft.bottomAnchor.constraint(equalTo: bubbleImageLeft.bottomAnchor, constant: 0),
+    ])
+  }
+
+  override open func commonUIRight() {
+    super.commonUIRight()
+    bubbleImageRight.addSubview(backViewRight)
+    NSLayoutConstraint.activate([
+      backViewRight.leftAnchor.constraint(equalTo: bubbleImageRight.leftAnchor, constant: 0),
+      backViewRight.topAnchor.constraint(equalTo: replyViewRight.bottomAnchor, constant: 0),
+      backViewRight.rightAnchor.constraint(equalTo: bubbleImageRight.rightAnchor, constant: 0),
+      backViewRight.bottomAnchor.constraint(equalTo: bubbleImageRight.bottomAnchor, constant: 0),
     ])
   }
 
   override open func showLeftOrRight(showRight: Bool) {
     super.showLeftOrRight(showRight: showRight)
-    imgViewLeft.isHidden = showRight
-    stateViewLeft.isHidden = showRight
-    labelViewLeft.isHidden = showRight
-
-    imgViewRight.isHidden = !showRight
-    stateViewRight.isHidden = !showRight
-    labelViewRight.isHidden = !showRight
+    backViewLeft.isHidden = showRight
+    backViewRight.isHidden = !showRight
   }
 
-  override open func setModel(_ model: MessageContentModel) {
-    super.setModel(model)
-    guard let isSend = model.message?.isOutgoingMsg else {
-      return
-    }
+  override open func setModel(_ model: MessageContentModel, _ isSend: Bool) {
+    super.setModel(model, isSend)
     let stateView = isSend ? stateViewRight : stateViewLeft
     let imgView = isSend ? imgViewRight : imgViewLeft
     let titleLabel = isSend ? titleLabelRight : titleLabelLeft
     let sizeLabel = isSend ? sizeLabelRight : sizeLabelLeft
     let bubbleW = isSend ? bubbleWRight : bubbleWLeft
+    let bubble = isSend ? bubbleImageRight : bubbleImageLeft
 
     bubbleW?.constant = kScreenWidth <= 320 ? 222 : 242 // 适配小屏幕
 
-    if let fileObject = model.message?.messageObject as? NIMFileObject {
+    if model.isReplay {
+      setBubbleImage()
+    } else {
+      bubble.image = nil
+    }
+
+    if let fileObject = model.message?.attachment as? V2NIMMessageFileAttachment {
       if let fileModel = model as? MessageFileModel {
         weakModel?.cell = nil
         weakModel = fileModel
         fileModel.cell = self
-        fileModel.size = Float(fileObject.fileLength)
+        fileModel.size = Float(fileObject.size)
         if fileModel.state == .Success {
           stateView.state = .FileOpen
         } else {
           stateView.state = .FileDownload
-          stateView.setProgress(fileModel.progress)
-          if fileModel.progress >= 1 {
+          stateView.setProgress(Float(fileModel.progress / 100))
+          if fileModel.progress >= 100 {
             fileModel.state = .Success
           }
         }
       }
       var imageName = "file_unknown"
-      var displayName = "未知文件"
-      if let filePath = fileObject.path as? NSString {
-        displayName = filePath.lastPathComponent
-        switch filePath.pathExtension.lowercased() {
-        case file_doc_support:
-          imageName = "file_doc"
-        case file_xls_support:
-          imageName = "file_xls"
-        case file_img_support:
-          imageName = "file_img"
-        case file_ppt_support:
-          imageName = "file_ppt"
-        case file_txt_support:
-          imageName = "file_txt"
-        case file_audio_support:
-          imageName = "file_audio"
-        case file_vedio_support:
-          imageName = "file_vedio"
-        case file_zip_support:
-          imageName = "file_zip"
-        case file_pdf_support:
-          imageName = "file_pdf"
-        case file_html_support:
-          imageName = "file_html"
-        case "key", "keynote":
-          imageName = "file_keynote"
-        default:
-          imageName = "file_unknown"
-        }
+      var suffix = (fileObject.name as NSString).pathExtension.lowercased()
+      if suffix.isEmpty, let ext = fileObject.ext {
+        suffix = ext[(ext.index(after: ext.startIndex)) ..< ext.endIndex].lowercased()
       }
+      switch suffix {
+      case file_doc_support:
+        imageName = "file_doc"
+      case file_xls_support:
+        imageName = "file_xls"
+      case file_img_support:
+        imageName = "file_img"
+      case file_ppt_support:
+        imageName = "file_ppt"
+      case file_txt_support:
+        imageName = "file_txt"
+      case file_audio_support:
+        imageName = "file_audio"
+      case file_video_support:
+        imageName = "file_vedio"
+      case file_zip_support:
+        imageName = "file_zip"
+      case file_pdf_support:
+        imageName = "file_pdf"
+      case file_html_support:
+        imageName = "file_html"
+      case "key", "keynote":
+        imageName = "file_keynote"
+      default:
+        imageName = "file_unknown"
+      }
+
       imgView.image = UIImage.ne_imageNamed(name: imageName)
-      titleLabel.text = fileObject.displayName ?? displayName
-      let size_B = Double(fileObject.fileLength)
-      var size_str = String(format: "%.1f B", size_B)
+      titleLabel.text = fileObject.name
+
+      let size_B = Double(fileObject.size)
+      var size_str = String(format: "%.2f B", size_B)
       if size_B > 1e3 {
         let size_KB = size_B / 1e3
-        size_str = String(format: "%.1f KB", size_KB)
+        size_str = String(format: "%.2f KB", size_KB)
         if size_KB > 1e3 {
           let size_MB = size_KB / 1e3
-          size_str = String(format: "%.1f MB", size_MB)
+          size_str = String(format: "%.2f MB", size_MB)
           if size_MB > 1e3 {
             let size_GB = size_KB / 1e6
-            size_str = String(format: "%.1f GB", size_GB)
+            size_str = String(format: "%.2f GB", size_GB)
           }
         }
       }
@@ -296,8 +319,8 @@ open class ChatMessageFileCell: NormalChatMessageBaseCell {
     }
   }
 
-  override open func uploadProgress(byRight: Bool, _ progress: Float) {
-    let stateView = byRight ? stateViewRight : stateViewLeft
-    stateView.setProgress(progress)
+  override open func uploadProgress(_ progress: UInt) {
+    let stateView = stateViewLeft.isHidden ? stateViewRight : stateViewLeft
+    stateView.setProgress(Float(progress) / 100)
   }
 }

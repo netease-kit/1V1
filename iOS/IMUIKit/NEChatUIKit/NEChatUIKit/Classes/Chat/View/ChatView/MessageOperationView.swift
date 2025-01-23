@@ -3,6 +3,7 @@
 // Use of this source code is governed by a MIT license that can be
 // found in the LICENSE file.
 
+import NEChatKit
 import UIKit
 
 @objc
@@ -11,7 +12,7 @@ public protocol MessageOperationViewDelegate: AnyObject {
 }
 
 @objcMembers
-public class MessageOperationView: UIView, UICollectionViewDataSource, UICollectionViewDelegate {
+open class MessageOperationView: UIView, UICollectionViewDataSource, UICollectionViewDelegate {
   var collcetionView: UICollectionView
   public weak var delegate: MessageOperationViewDelegate?
   public var items = [OperationItem]() {
@@ -20,7 +21,7 @@ public class MessageOperationView: UIView, UICollectionViewDataSource, UICollect
     }
   }
 
-  override init(frame: CGRect) {
+  override public init(frame: CGRect) {
     let layout = UICollectionViewFlowLayout()
     layout.itemSize = CGSize(width: 60, height: 56)
     layout.minimumLineSpacing = 0
@@ -32,16 +33,11 @@ public class MessageOperationView: UIView, UICollectionViewDataSource, UICollect
 
     super.init(frame: frame)
     backgroundColor = .white
-//        self.layer.cornerRadius = 8
-//        self.layer.shadowRadius = 4
-//        self.layer.shadowColor = UIColor.black.cgColor
-//        self.layer.shadowOffset = CGSize(width: 4.0, height: 4.0)
-//
-//        collcetionView.layer.shadowRadius = 4
-//        collcetionView.layer.shadowColor = UIColor.black.cgColor
-//        collcetionView.layer.shadowOffset = CGSize(width: 4.0, height: 4.0)
-//        collcetionView.layer.shadowOpacity = 0.8
-//
+    layer.cornerRadius = 8
+    layer.shadowOffset = CGSize(width: 0, height: 4)
+    layer.shadowColor = UIColor.ne_operationBorderColor.cgColor
+    layer.shadowOpacity = 0.25
+    layer.shadowRadius = 8
 
     collcetionView.dataSource = self
     collcetionView.delegate = self
@@ -61,19 +57,20 @@ public class MessageOperationView: UIView, UICollectionViewDataSource, UICollect
     addSubview(collcetionView)
   }
 
-  required init?(coder: NSCoder) {
-    fatalError("init(coder:) has not been implemented")
+  public required init?(coder: NSCoder) {
+    collcetionView = UICollectionView(frame: .zero)
+    super.init(coder: coder)
   }
 
 //    MARK: UICollectionViewDataSource
 
-  public func collectionView(_ collectionView: UICollectionView,
-                             numberOfItemsInSection section: Int) -> Int {
+  open func collectionView(_ collectionView: UICollectionView,
+                           numberOfItemsInSection section: Int) -> Int {
     items.count
   }
 
-  public func collectionView(_ collectionView: UICollectionView,
-                             cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+  open func collectionView(_ collectionView: UICollectionView,
+                           cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
     let cell = collectionView.dequeueReusableCell(
       withReuseIdentifier: "\(OperationCell.self)",
       for: indexPath
@@ -85,9 +82,8 @@ public class MessageOperationView: UIView, UICollectionViewDataSource, UICollect
 
 //    MARK: UICollectionViewDelegate
 
-  public func collectionView(_ collectionView: UICollectionView,
-                             didSelectItemAt indexPath: IndexPath) {
-    removeFromSuperview()
+  open func collectionView(_ collectionView: UICollectionView,
+                           didSelectItemAt indexPath: IndexPath) {
     delegate?.didSelectedItem(item: items[indexPath.row])
   }
 

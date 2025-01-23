@@ -7,22 +7,25 @@ import Foundation
 import NIMSDK
 
 @objcMembers
-class MessageAudioModel: MessageContentModel {
+open class MessageAudioModel: MessageContentModel {
   public var duration: Int = 0
+  public var audioWidth: Double = 0
   public var isPlaying = false
-  required init(message: NIMMessage?) {
+  public var text: String? // 语音转文字结果
+
+  public required init(message: V2NIMMessage?) {
     super.init(message: message)
     type = .audio
     var audioW = 96.0
-    let audioTotalWidth = kScreenWidth <= 325 ? 230 : 265.0
     // contentSize
-    if let obj = message?.messageObject as? NIMAudioObject {
-      duration = obj.duration / 1000
+    if let obj = message?.attachment as? V2NIMMessageAudioAttachment {
+      duration = Int((Double(obj.duration) / 1000).rounded())
       if duration > 2 {
-        audioW = min(Double(duration) * 8 + audioW, audioTotalWidth)
+        audioW = min(Double(duration) * 8 + audioW, audio_max_width)
       }
     }
+    audioWidth = audioW
     contentSize = CGSize(width: audioW, height: chat_min_h)
-    height = Float(contentSize.height + chat_content_margin) + fullNameHeight
+    height = contentSize.height + chat_content_margin * 2 + fullNameHeight + chat_pin_height
   }
 }

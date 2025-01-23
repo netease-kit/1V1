@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import Foundation
+
 class NEOneOnOneHeaderView: UIView {
   var backAction: (() -> Void)?
   var settingAction: (() -> Void)?

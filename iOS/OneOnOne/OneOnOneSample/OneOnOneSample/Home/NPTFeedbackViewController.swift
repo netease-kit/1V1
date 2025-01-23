@@ -2,10 +2,10 @@
 // Use of this source code is governed by a MIT license that can be
 // found in the LICENSE file.
 
-import UIKit
-import SnapKit
-import NERoomKit
 import IHProgressHUD
+import NERoomKit
+import SnapKit
+import UIKit
 
 class NPTFeedbackViewController: UIViewController {
   var checkBoxs: [NPTCheckBox] = []

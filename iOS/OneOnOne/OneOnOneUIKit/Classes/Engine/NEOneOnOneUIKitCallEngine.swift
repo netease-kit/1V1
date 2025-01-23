@@ -3,17 +3,14 @@
 // found in the LICENSE file.
 
 import Foundation
+import NECommonUIKit
 import NERtcCallKit
 import NERtcCallUIKit
 
 @objcMembers public class NEOneOnOneUIKitCallEngine: NSObject, NECallUIKitDelegate {
   public var baseOnWindow: UIWindow?
-  public typealias NEOneOnOneUIInterceptor = () -> (Bool)
   /// 单例初始化
   public static let getInstance: NEOneOnOneUIKitCallEngine = .init()
-
-  // 拦截器 ，是否拦截邀请消息
-  public var interceptor: NEOneOnOneUIInterceptor?
   /// 是否在进行呼叫中
   private var isEnterRoom = false
 
@@ -31,6 +28,11 @@ import NERtcCallUIKit
 //      config.uiConfig.showCallingSwitchCallType = true;
 //      config.uiConfig.enableVideoToAudio = true;
 //      config.uiConfig.enableAudioToVideo = true;
+    // 开启应用内小窗
+    config.uiConfig.enableFloatingWindow = true
+    // 开启应用外小窗，目前只支持iOS16+
+    config.uiConfig.enableFloatingWindowOutOfApp = true
+
     NERtcCallUIKit.sharedInstance().setup(with: config)
 
     NERtcCallUIKit.sharedInstance().customControllerClass = NEOneOnOneCallViewController.self
@@ -75,38 +77,15 @@ import NERtcCallUIKit
     // 判断自身是否忙碌
 
     // 用户不在RTC房间中
-
-    if NEOneOnOneUIKitEngine.sharedInstance().canCall() != nil {
-      let message = NEOneOnOneUIKitEngine.sharedInstance().canCall()
-
-      if let message = message, message.count > 0 {
-        /// 不能拨号
-
-        /// 弹出提示框
-
-        ///
-
-        // pragma mark TODO
-
-        /// 需要确认是否要迁移到 all In One 中
-
-        /// 1v1的业务逻辑
-
-        /// all in one 才会存在
-
-        NEOneOnOneUIKitUtils.presentAlert(controller, titile: message, cancelTitle: "", confirmTitle: ne_oneOnOne_localized("确定"), confirmComplete: {})
-
-        // 取消已点击通话数据
-
-        isEnterRoom = false
-
-      } else {
-        startCallKitJudgeUserBusy(controller, sessionId: sessionId, isAudio: isAudio, isVirtualRoom: isVirtualRoom, nickName: nickName, icon: icon, audioUrl: audioUrl, videoUrl: videoUrl)
-      }
+    if let canContinueAction = NEOneOnOneUIManager.sharedInstance().canContinueAction,
+       !canContinueAction() {
+      /// 不能拨号
+      /// 弹出提示框
+      // 取消已点击通话数据
+      isEnterRoom = false
 
     } else {
       // 外部未实现,则认为不需要处理，用户处于闲置中
-
       startCallKitJudgeUserBusy(controller, sessionId: sessionId, isAudio: isAudio, isVirtualRoom: isVirtualRoom, nickName: nickName, icon: icon, audioUrl: audioUrl, videoUrl: videoUrl)
     }
   }
@@ -135,11 +114,7 @@ import NERtcCallUIKit
               self?.startCallAction(controller, sessionId: sessionId, isAudio: isAudio, isVirtualRoom: isVirtualRoom, nickName: nickName, icon: icon, audioUrl: audioUrl, videoUrl: videoUrl)
             } else {
               // 不在线
-              NEOneOnOneUIKitUtils.presentAlert(controller,
-                                                titile: ne_oneOnOne_localized("对方不在线，请稍后再试"),
-                                                cancelTitle: "",
-                                                confirmTitle: ne_oneOnOne_localized("确定"),
-                                                confirmComplete: {})
+              NEAlertViewController.presentAlertViewController("", messageContent: ne_oneOnOne_localized("对方不在线，请稍后再试"), cancelTitle: nil, confirmTitle: ne_oneOnOne_localized("确定"))
               // 取消已点击通话数据
               self?.isEnterRoom = false
               return
@@ -203,7 +178,7 @@ import NERtcCallUIKit
     print("权限判断通过")
 
     if !isVirtualRoom {
-      NERtcCallKit.sharedInstance().timeOutSeconds = isAudio ? 15 : 30
+      NECallEngine.sharedInstance().timeOutSeconds = isAudio ? 15 : 30
     }
 
     let attachment: [String: Any] = [
@@ -220,17 +195,15 @@ import NERtcCallUIKit
       guard let strongSelf = self else { return }
       if isVirtualRoom {
         let callViewController = NEOneOnOneCallViewController()
-        NERtcCallKit.sharedInstance().changeStatusCalling()
+        NECallEngine.sharedInstance().changeStatusCalling()
         strongSelf.startCallKit(controller, sessionId: sessionId, isAudio: isAudio, isVirtualRoom: isVirtualRoom, nickName: nickName, icon: icon, audioUrl: audioUrl, videoUrl: videoUrl, callViewController: callViewController)
         return
       }
 
-      NERtcCallKit.sharedInstance().call(sessionId,
-                                         type: isAudio ? .audio : .video,
-                                         attachment: jsonString,
-                                         globalExtra: nil,
-                                         withToken: nil,
-                                         channelName: nil) { [weak self] error in
+      let param = NECallParam(accId: sessionId, with: isAudio ? .audio : .video)
+      param.extraInfo = jsonString
+
+      NECallEngine.sharedInstance().call(param) { [weak self] error, info in
         print("\(String(describing: error))")
         if let error = error as NSError?, error.code != 0 {
           NEOneOnOneToast.show(ne_oneOnOne_localized("呼叫未成功发出"))
@@ -249,8 +222,6 @@ import NERtcCallUIKit
       remoteUser.userUuid = sessionId
 
       remoteUser.userName = nickName
-
-      //      remoteUser.mobile = user?.userInfo?.mobile
 
       remoteUser.icon = icon
       remoteUser.callType = isVirtualRoom ? 1 : 0
@@ -280,53 +251,21 @@ import NERtcCallUIKit
       }
       return
     }
-//    let remoteUser = NEOneOnOneOnlineUser()
-//
-//    remoteUser.userUuid = sessionId
-//
-//    remoteUser.userName = nickName
-//
-    ////      remoteUser.mobile = user?.userInfo?.mobile
-//
-//    remoteUser.icon = icon
-//    remoteUser.callType = isVirtualRoom ? 1 : 0
-//    remoteUser.audioUrl = audioUrl
-//    remoteUser.videoUrl = videoUrl
-//
-//    callViewController.remoteUser = remoteUser
-//
-//    if isAudio {
-//      callViewController.enterStatus = NEEnterStatus(rawValue: 0)
-//    } else {
-//      callViewController.enterStatus = NEEnterStatus(rawValue: 1)
-//    }
 
     let callParam = NEUICallParam()
     callParam.remoteUserAccid = sessionId
     callParam.remoteShowName = nickName ?? ""
     callParam.remoteAvatar = icon ?? ""
-//      callParam.channelName = [[SettingManager shareInstance] customChannelName];
-//      callParam.remoteDefaultImage = [[SettingManager shareInstance] remoteDefaultImage];
-//      callParam.muteDefaultImage = [[SettingManager shareInstance] muteDefaultImage];
-//      do {
-//          let jsonData = try JSONSerialization.data(withJSONObject: dictionary, options: .prettyPrinted)
-//          if let jsonString = String(data: jsonData, encoding: .utf8) {
-//              // 使用jsonString
-//              callParam.extra = jsonString
-//          }
-//      } catch {
-//
-//          NEOneOnOneToast.show(ne_oneOnOne_localized("发生转换错误，请稍后再试"))
-//          self.isEnterRoom = false
-//          return
-//      }
 
     if isAudio {
       callParam.callType = .audio
     } else {
       callParam.callType = .video
     }
-
+    let callPushConfig = NECallPushConfig()
+    let pushContent = isAudio ? "\(NEOneOnOneKit.getInstance().localMember?.nickName ?? "") \(ne_oneOnOne_localized("邀请您语音聊天"))" : "\(NEOneOnOneKit.getInstance().localMember?.nickName ?? "") \(ne_oneOnOne_localized("邀请您视频聊天"))"
+    callPushConfig.pushContent = pushContent
+    callParam.pushConfig = callPushConfig
     NERtcCallUIKit.sharedInstance().call(with: callParam)
 
     DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in
@@ -336,41 +275,29 @@ import NERtcCallUIKit
 
   // MARK: NECallUIKitDelegate
 
-  public func didCallComing(withInvitor invitor: String, withCompletion completion: @escaping (Bool) -> Void) {
-    if let interceptor = interceptor {
-      // 是否需要拦截
-      let needInterceptor: Bool = interceptor()
-      if needInterceptor {
-        NERtcCallKit.sharedInstance().reject(withReason: NSInteger(NERtcCallTerminalCode.TerminalCodeBusy.rawValue))
-        return
-      }
+  public func didCallComing(with inviteInfo: NEInviteInfo, with callParam: NEUICallParam, withCompletion completion: @escaping (Bool) -> Void) {
+    let needInterceptor: Bool = NEOneOnOneUIManager.sharedInstance().interceptor()
+    // 是否需要拦截
+    if needInterceptor {
+      let param = NEHangupParam()
+      param.setValue(NSInteger(NERtcCallTerminalCode.TerminalCodeBusy.rawValue), forKey: "reasonCode")
+      NECallEngine.sharedInstance().hangup(param)
+      return
     }
 
     // 如果是黑名单成员，直接拒接
-    if NIMSDK.shared().userManager.isUser(inBlackList: invitor) {
-      NERtcCallKit.sharedInstance().reject()
+    if NIMSDK.shared().userManager.isUser(inBlackList: inviteInfo.callerAccId) {
+      NECallEngine.sharedInstance().hangup(NEHangupParam())
       return
     }
     callComing?()
     completion(true)
   }
 
-  public func didCallComing(with inviteInfo: NEInviteInfo, with callParam: NEUICallParam, withCompletion completion: @escaping (Bool) -> Void) {
-    if let interceptor = interceptor {
-      // 是否需要拦截
-      let needInterceptor: Bool = interceptor()
-      if needInterceptor {
-        NERtcCallKit.sharedInstance().reject(withReason: NSInteger(NERtcCallTerminalCode.TerminalCodeBusy.rawValue))
-        return
-      }
-    }
-
-    // 如果是黑名单成员，直接拒接
-    if NIMSDK.shared().userManager.isUser(inBlackList: inviteInfo.callerAccId) {
-      NERtcCallKit.sharedInstance().reject()
-      return
-    }
-    callComing?()
-    completion(true)
+  // 外部调用挂断的时候需要调用此方法，因为还需要发送通知，将小窗消失掉，后期呼叫组件优化后，调用内部hangup的效果相同
+  public func hangUpOutside() {
+    NECallEngine.sharedInstance().hangup(NEHangupParam(), completion: nil)
+    // 这行代码应该删除，现在退出登录后，呼叫组件没有主动消失小窗，所以需要特殊处理
+    NotificationCenter.default.post(name: NSNotification.Name(kCallKitDismissNoti), object: nil)
   }
 }

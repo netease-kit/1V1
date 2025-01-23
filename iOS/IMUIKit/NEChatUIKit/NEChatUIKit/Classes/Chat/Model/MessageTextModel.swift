@@ -4,42 +4,52 @@
 // found in the LICENSE file.
 
 import Foundation
+import NEChatKit
+import NECommonKit
 import NIMSDK
 
 @objcMembers
-class MessageTextModel: MessageContentModel {
+open class MessageTextModel: MessageContentModel {
   public var attributeStr: NSMutableAttributedString?
   public var textHeight: CGFloat = 0
 
-  required init(message: NIMMessage?) {
+  public required init(message: V2NIMMessage?) {
     super.init(message: message)
     type = .text
 
-    attributeStr = NEEmotionTool.getAttWithStr(
-      str: message?.text ?? "",
-      font: NEKitChatConfig.shared.ui.messageTextSize
-    )
+    if let text = message?.text, !text.isEmpty {
+      attributeStr = NEEmotionTool.getAttWithStr(
+        str: text,
+        font: messageTextFont
+      )
+    }
 
-    if let remoteExt = message?.remoteExt, let dic = remoteExt[yxAtMsg] as? [String: AnyObject] {
-      dic.forEach { (key: String, value: AnyObject) in
-        if let contentDic = value as? [String: AnyObject] {
-          if let array = contentDic[atSegmentsKey] as? [AnyObject] {
-            if let models = NSArray.yx_modelArray(with: MessageAtInfoModel.self, json: array) as? [MessageAtInfoModel] {
-              models.forEach { model in
-                if attributeStr?.length ?? 0 > model.end {
-                  attributeStr?.addAttribute(NSAttributedString.Key.foregroundColor, value: UIColor.ne_blueText, range: NSMakeRange(model.start, model.end - model.start + atRangeOffset))
-                }
-              }
-            }
-          }
-        }
+    // 解析 @，效果高亮
+    if IMKitConfigCenter.shared.enableAtMessage {
+      if let att = ChatMessageHelper.loadAtInMessage(message, attributeStr) {
+        attributeStr = att
       }
     }
 
-    let textSize = attributeStr?.finalSize(NEKitChatConfig.shared.ui.messageTextSize, CGSize(width: chat_text_maxW, height: CGFloat.greatestFiniteMagnitude)) ?? .zero
+    let textSize = NSAttributedString.getRealSize(attributeStr, messageTextFont, messageMaxSize)
+    textHeight = ceil(textSize.height)
+    textWidth = ceil(textSize.width)
+    let contentSizeWidth = textWidth + chat_content_margin * 2
+    let contentSizeHeight = textHeight + chat_content_margin * 2
+    contentSize = CGSize(width: contentSizeWidth, height: contentSizeHeight)
+    height = contentSizeHeight + chat_content_margin * 2 + fullNameHeight + chat_pin_height
+  }
 
-    textHeight = textSize.height
-    contentSize = CGSize(width: textSize.width + chat_content_margin * 2, height: textHeight + chat_content_margin * 2)
-    height = Float(contentSize.height + chat_content_margin) + fullNameHeight
+  /// 获取划词选中的文本（替换内置表情）
+  /// - Returns: 选中的文本
+  override open func selectText() -> String? {
+    if let selectRange = selectRange {
+      // 内置表情转为文本
+      let text = NEEmotionTool.getTextWithAtt(attributeStr, selectRange)
+
+      return text
+    }
+
+    return nil
   }
 }

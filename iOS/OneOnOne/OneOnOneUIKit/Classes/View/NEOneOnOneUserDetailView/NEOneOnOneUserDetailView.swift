@@ -470,7 +470,7 @@ class MyCollectionViewFlowLayout: UICollectionViewFlowLayout {
     let label = UILabel()
     label.text = ne_oneOnOne_localized("title")
     label.textColor = UIColor(hexString: "#666666")
-    label.font = UIFont(name: "PingFangSC", size: 14)
+    label.font = UIFont(name: "PingFangSC-Regular", size: 14)
     return label
   }()
 
@@ -478,7 +478,7 @@ class MyCollectionViewFlowLayout: UICollectionViewFlowLayout {
     let label = UILabel()
     label.text = ne_oneOnOne_localized("未填写")
     label.textColor = UIColor(hexString: "#C4C4C4")
-    label.font = UIFont(name: "PingFangSC", size: 14)
+    label.font = UIFont(name: "PingFangSC-Regular", size: 14)
     return label
   }()
 

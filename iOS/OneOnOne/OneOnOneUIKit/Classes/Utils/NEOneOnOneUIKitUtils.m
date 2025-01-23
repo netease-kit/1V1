@@ -10,7 +10,7 @@ static UIWindow *subWindow;
 // 获取当前时间戳
 + (NSString *)currentTimeStr {
   NSDate *date = [NSDate dateWithTimeIntervalSinceNow:0];  // 获取当前时间0秒后的时间
-  NSTimeInterval time = [date timeIntervalSince1970];  // *1000 是精确到毫秒，不乘就是精确到秒
+  NSTimeInterval time = [date timeIntervalSince1970];      // *1000 是精确到毫秒，不乘就是精确到秒
   NSString *timeString = [NSString stringWithFormat:@"%.0f", time];
   return timeString;
 }
@@ -23,54 +23,6 @@ static UIWindow *subWindow;
   } else {
     return -1;
   }
-}
-
-// 提示框
-+ (void)presentAlertViewController:(UIViewController *)target
-                            titile:(NSString *)title
-                       cancelTitle:(NSString *)cancelTitle
-                      confirmTitle:(NSString *)confirmTitle
-                   confirmComplete:(void (^)(void))complete {
-  UIAlertController *alerVC =
-      [UIAlertController alertControllerWithTitle:@""
-                                          message:title
-                                   preferredStyle:UIAlertControllerStyleAlert];
-
-  if (cancelTitle.length > 0) {
-    UIAlertAction *cancelAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"取消", nil)
-                                                           style:UIAlertActionStyleCancel
-                                                         handler:^(UIAlertAction *_Nonnull action){
-                                                         }];
-    [alerVC addAction:cancelAction];
-  }
-  if (confirmTitle.length > 0) {
-    UIAlertAction *okAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"确认", nil)
-                                                       style:UIAlertActionStyleDefault
-                                                     handler:^(UIAlertAction *_Nonnull action) {
-                                                       [subWindow resignKeyWindow];
-                                                       subWindow = nil;
-                                                       [target.view.window makeKeyAndVisible];
-                                                       if (complete) {
-                                                         complete();
-                                                       }
-                                                     }];
-
-    [alerVC addAction:okAction];
-  }
-  dispatch_async(dispatch_get_main_queue(), ^{
-      {
-//        static dispatch_once_t onceToken;
-//        dispatch_once(&onceToken, ^{
-            subWindow = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
-            subWindow.rootViewController = [[UIViewController alloc] init];
-            subWindow.windowLevel = UIWindowLevelNormal;
-            [subWindow makeKeyAndVisible];;
-//        });
-          [subWindow.rootViewController presentViewController: alerVC
-                                                        animated:YES
-                                                      completion:nil];
-}
-});
 }
 
 + (BOOL)permisionDenied:(AVAuthorizationStatus)AVstatus {

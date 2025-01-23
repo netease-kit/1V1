@@ -11,17 +11,19 @@ open class FunChatMessageFileCell: FunChatMessageBaseCell {
   weak var weakModel: MessageFileModel?
 
   public lazy var imgViewLeft: UIImageView = {
-    let view_img = UIImageView()
-    view_img.translatesAutoresizingMaskIntoConstraints = false
-    view_img.backgroundColor = .clear
-    return view_img
+    let imageView = UIImageView()
+    imageView.translatesAutoresizingMaskIntoConstraints = false
+    imageView.backgroundColor = .clear
+    imageView.accessibilityIdentifier = "id.fileType"
+    return imageView
   }()
 
   public lazy var stateViewLeft: FileStateView = {
-    let state = FileStateView()
-    state.translatesAutoresizingMaskIntoConstraints = false
-    state.backgroundColor = .clear
-    return state
+    let stateView = FileStateView()
+    stateView.translatesAutoresizingMaskIntoConstraints = false
+    stateView.backgroundColor = .clear
+    stateView.accessibilityIdentifier = "id.fileStatus"
+    return stateView
   }()
 
   public lazy var titleLabelLeft: UILabel = {
@@ -32,6 +34,7 @@ open class FunChatMessageFileCell: FunChatMessageBaseCell {
     label.lineBreakMode = .byTruncatingMiddle
     label.font = DefaultTextFont(14)
     label.textAlignment = .left
+    label.accessibilityIdentifier = "id.displayName"
     return label
   }()
 
@@ -41,6 +44,7 @@ open class FunChatMessageFileCell: FunChatMessageBaseCell {
     label.textColor = UIColor(hexString: "#999999")
     label.font = NEConstant.defaultTextFont(10.0)
     label.textAlignment = .left
+    label.accessibilityIdentifier = "id.displaySize"
     return label
   }()
 
@@ -66,17 +70,19 @@ open class FunChatMessageFileCell: FunChatMessageBaseCell {
   }()
 
   public lazy var imgViewRight: UIImageView = {
-    let view_img = UIImageView()
-    view_img.translatesAutoresizingMaskIntoConstraints = false
-    view_img.backgroundColor = .clear
-    return view_img
+    let imageView = UIImageView()
+    imageView.translatesAutoresizingMaskIntoConstraints = false
+    imageView.backgroundColor = .clear
+    imageView.accessibilityIdentifier = "id.fileType"
+    return imageView
   }()
 
   public lazy var stateViewRight: FileStateView = {
-    let state = FileStateView()
-    state.translatesAutoresizingMaskIntoConstraints = false
-    state.backgroundColor = .clear
-    return state
+    let stateView = FileStateView()
+    stateView.translatesAutoresizingMaskIntoConstraints = false
+    stateView.backgroundColor = .clear
+    stateView.accessibilityIdentifier = "id.fileStatus"
+    return stateView
   }()
 
   public lazy var titleLabelRight: UILabel = {
@@ -87,6 +93,7 @@ open class FunChatMessageFileCell: FunChatMessageBaseCell {
     label.lineBreakMode = .byTruncatingMiddle
     label.font = DefaultTextFont(14)
     label.textAlignment = .left
+    label.accessibilityIdentifier = "id.displayName"
     return label
   }()
 
@@ -96,6 +103,7 @@ open class FunChatMessageFileCell: FunChatMessageBaseCell {
     label.textColor = UIColor(hexString: "#999999")
     label.font = NEConstant.defaultTextFont(10.0)
     label.textAlignment = .left
+    label.accessibilityIdentifier = "id.displaySize"
     return label
   }()
 
@@ -126,7 +134,7 @@ open class FunChatMessageFileCell: FunChatMessageBaseCell {
   }
 
   public required init?(coder: NSCoder) {
-    fatalError("init(coder:) has not been implemented")
+    super.init(coder: coder)
   }
 
   open func setupUI() {
@@ -149,10 +157,10 @@ open class FunChatMessageFileCell: FunChatMessageBaseCell {
       imgViewLeft.heightAnchor.constraint(equalToConstant: 32),
     ])
 
-    addSubview(stateViewLeft)
+    imgViewLeft.addSubview(stateViewLeft)
     NSLayoutConstraint.activate([
-      stateViewLeft.leftAnchor.constraint(equalTo: bubbleImageLeft.leftAnchor, constant: 10),
-      stateViewLeft.topAnchor.constraint(equalTo: bubbleImageLeft.topAnchor, constant: 10),
+      stateViewLeft.leftAnchor.constraint(equalTo: imgViewLeft.leftAnchor, constant: 0),
+      stateViewLeft.topAnchor.constraint(equalTo: imgViewLeft.topAnchor, constant: 0),
       stateViewLeft.widthAnchor.constraint(equalToConstant: 32),
       stateViewLeft.heightAnchor.constraint(equalToConstant: 32),
     ])
@@ -181,10 +189,10 @@ open class FunChatMessageFileCell: FunChatMessageBaseCell {
       imgViewRight.heightAnchor.constraint(equalToConstant: 32),
     ])
 
-    addSubview(stateViewRight)
+    imgViewRight.addSubview(stateViewRight)
     NSLayoutConstraint.activate([
-      stateViewRight.leftAnchor.constraint(equalTo: bubbleImageRight.leftAnchor, constant: 10),
-      stateViewRight.topAnchor.constraint(equalTo: bubbleImageRight.topAnchor, constant: 10),
+      stateViewRight.leftAnchor.constraint(equalTo: imgViewRight.leftAnchor, constant: 0),
+      stateViewRight.topAnchor.constraint(equalTo: imgViewRight.topAnchor, constant: 0),
       stateViewRight.widthAnchor.constraint(equalToConstant: 32),
       stateViewRight.heightAnchor.constraint(equalToConstant: 32),
     ])
@@ -209,11 +217,8 @@ open class FunChatMessageFileCell: FunChatMessageBaseCell {
     labelViewRight.isHidden = !showRight
   }
 
-  override open func setModel(_ model: MessageContentModel) {
-    super.setModel(model)
-    guard let isSend = model.message?.isOutgoingMsg else {
-      return
-    }
+  override open func setModel(_ model: MessageContentModel, _ isSend: Bool) {
+    super.setModel(model, isSend)
     let stateView = isSend ? stateViewRight : stateViewLeft
     let imgView = isSend ? imgViewRight : imgViewLeft
     let titleLabel = isSend ? titleLabelRight : titleLabelLeft
@@ -222,66 +227,68 @@ open class FunChatMessageFileCell: FunChatMessageBaseCell {
 
     bubbleW?.constant = kScreenWidth <= 320 ? 222 : 242 // 适配小屏幕
 
-    if let fileObject = model.message?.messageObject as? NIMFileObject {
+    if let fileObject = model.message?.attachment as? V2NIMMessageFileAttachment {
       if let fileModel = model as? MessageFileModel {
         weakModel?.cell = nil
         weakModel = fileModel
         fileModel.cell = self
-        fileModel.size = Float(fileObject.fileLength)
+        fileModel.size = Float(fileObject.size)
         if fileModel.state == .Success {
           stateView.state = .FileOpen
         } else {
           stateView.state = .FileDownload
-          stateView.setProgress(fileModel.progress)
-          if fileModel.progress >= 1 {
+          stateView.setProgress(Float(fileModel.progress / 100))
+          if fileModel.progress >= 100 {
             fileModel.state = .Success
           }
         }
       }
       var imageName = "file_unknown"
-      var displayName = "未知文件"
-      if let filePath = fileObject.path as? NSString {
-        displayName = filePath.lastPathComponent
-        switch filePath.pathExtension.lowercased() {
-        case file_doc_support:
-          imageName = "file_doc"
-        case file_xls_support:
-          imageName = "file_xls"
-        case file_img_support:
-          imageName = "file_img"
-        case file_ppt_support:
-          imageName = "file_ppt"
-        case file_txt_support:
-          imageName = "file_txt"
-        case file_audio_support:
-          imageName = "file_audio"
-        case file_vedio_support:
-          imageName = "file_vedio"
-        case file_zip_support:
-          imageName = "file_zip"
-        case file_pdf_support:
-          imageName = "file_pdf"
-        case file_html_support:
-          imageName = "file_html"
-        case "key", "keynote":
-          imageName = "file_keynote"
-        default:
-          imageName = "file_unknown"
-        }
+      var suffix = (fileObject.name as NSString).pathExtension.lowercased()
+      if suffix.isEmpty, let ext = fileObject.ext {
+        suffix = ext[(ext.index(after: ext.startIndex)) ..< ext.endIndex].lowercased()
       }
+      switch suffix {
+      case file_doc_support:
+        imageName = "file_doc"
+      case file_xls_support:
+        imageName = "file_xls"
+      case file_img_support:
+        imageName = "file_img"
+      case file_ppt_support:
+        imageName = "file_ppt"
+      case file_txt_support:
+        imageName = "file_txt"
+      case file_audio_support:
+        imageName = "file_audio"
+      case file_video_support:
+        imageName = "file_vedio"
+      case file_zip_support:
+        imageName = "file_zip"
+      case file_pdf_support:
+        imageName = "file_pdf"
+      case file_html_support:
+        imageName = "file_html"
+      case "key", "keynote":
+        imageName = "file_keynote"
+      default:
+        imageName = "file_unknown"
+      }
+
       imgView.image = UIImage.ne_imageNamed(name: imageName)
-      titleLabel.text = fileObject.displayName ?? displayName
-      let size_B = Double(fileObject.fileLength)
-      var size_str = String(format: "%.1f B", size_B)
+      titleLabel.text = fileObject.name
+
+      let size_B = Double(fileObject.size)
+      var size_str = String(format: "%.2f B", size_B)
       if size_B > 1e3 {
         let size_KB = size_B / 1e3
-        size_str = String(format: "%.1f KB", size_KB)
+        size_str = String(format: "%.2f KB", size_KB)
         if size_KB > 1e3 {
           let size_MB = size_KB / 1e3
-          size_str = String(format: "%.1f MB", size_MB)
+          size_str = String(format: "%.2f MB", size_MB)
           if size_MB > 1e3 {
             let size_GB = size_KB / 1e6
-            size_str = String(format: "%.1f GB", size_GB)
+            size_str = String(format: "%.2f GB", size_GB)
           }
         }
       }
@@ -289,8 +296,8 @@ open class FunChatMessageFileCell: FunChatMessageBaseCell {
     }
   }
 
-  override open func uploadProgress(byRight: Bool, _ progress: Float) {
-    let stateView = byRight ? stateViewRight : stateViewLeft
-    stateView.setProgress(progress)
+  override open func uploadProgress(_ progress: UInt) {
+    let stateView = stateViewLeft.isHidden ? stateViewRight : stateViewLeft
+    stateView.setProgress(Float(progress) / 100)
   }
 }

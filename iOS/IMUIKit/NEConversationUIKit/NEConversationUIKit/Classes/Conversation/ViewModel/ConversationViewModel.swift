@@ -4,384 +4,397 @@
 
 import Foundation
 import NEChatKit
+import NECoreIM2Kit
 import NIMSDK
-
-let revokeLocalMessage = "revoke_message_local"
-let revokeLocalMessageContent = "revoke_message_local_content"
 
 @objc
 public protocol ConversationViewModelDelegate: NSObjectProtocol {
-  func didAddRecentSession()
-  func didUpdateRecentSession(index: Int)
   func reloadData()
   func reloadTableView()
+  /// 底部加载更多状态变更
+  func loadMoreStateChange(_ finish: Bool)
 }
 
+public typealias ConversationCallBack = (NSError?, Bool?) -> Void
+
 @objcMembers
-public class ConversationViewModel: NSObject, ConversationRepoDelegate,
-  NIMConversationManagerDelegate, NIMTeamManagerDelegate, NIMUserManagerDelegate, NIMChatManagerDelegate {
-  public var conversationListArray: [ConversationListModel]?
-  public var stickTopInfos = [NIMSession: NIMStickTopSessionInfo]()
+open class ConversationViewModel: NSObject, NEConversationListener, NETeamListener, NEChatListener, NEContactListener, NEIMKitClientListener, AIUserPinListener, AIUserChangeListener {
   public weak var delegate: ConversationViewModelDelegate?
   private let className = "ConversationViewModel"
-  public let repo = ConversationRepo.shared
 
-  var cacheUpdateSessionDic = [String: NIMRecentSession]()
-  var cacheAddSessionDic = [String: ConversationListModel]()
+  /// 会话API单例
+  public let conversationRepo = ConversationRepo.shared
+
+  /// 会话列表起始索引
+  public var offset: Int64 = 0
+
+  /// 会话列表分页大小
+  public var page = 200
+
+  /// 非置顶会话数据
+  public var conversationListData = [NEConversationListModel]()
+
+  /// 置顶会话数据
+  public var stickTopConversations = [NEConversationListModel]()
+
+  /// AI 数字人列表
+  public var aiUserListData = [NEAIUserModel]()
+
+  /// 所有会话数据记录
+  public var conversationDic = [String: NEConversationListModel]()
+
+  /// 当前是否在请求会话列表
+  private var isRequesting = false
+
+  /// 是否同步完成
+  public var syncFinished = false {
+    didSet {
+      print("syncFinished ", syncFinished)
+    }
+  }
+
+  /// 回调
+  public var callBack: ConversationCallBack?
 
   override public init() {
-    NELog.infoLog(ModuleName + " " + className, desc: #function)
+    NEALog.infoLog(ModuleName + " " + className, desc: #function)
     super.init()
-    repo.delegate = self
-    repo.addSessionDelegate(delegate: self)
-    repo.chatProvider.addDelegate(delegate: self)
-    repo.addTeamDelegate(delegate: self)
-    stickTopInfos = repo.getStickTopInfos()
-    NIMSDK.shared().userManager.add(self)
     NotificationCenter.default.addObserver(self, selector: #selector(atMessageChange), name: Notification.Name(AtMessageChangeNoti), object: nil)
-  }
-
-  func atMessageChange() {
-    NELog.infoLog(className(), desc: "atMessageChange")
-    delegate?.reloadTableView()
-  }
-
-  public func fetchServerSessions(option: NIMFetchServerSessionOption,
-                                  _ completion: @escaping (NSError?, [ConversationListModel]?)
-                                    -> Void) {
-    NELog.infoLog(ModuleName + " " + className, desc: #function)
-    weak var weakSelf = self
-    repo.getSessionList { error, conversaitonList in
-      DispatchQueue.main.async {
-        weakSelf?.conversationListArray = conversaitonList
-        NELog.infoLog(ModuleName, desc: "get session list : \(conversaitonList?.count ?? 0)")
-        var set = Set<String>()
-        conversaitonList?.forEach { model in
-          NELog.infoLog(ModuleName, desc: "get session sid : \(model.recentSession?.session?.sessionId ?? "nil")")
-          if let recentSession = model.recentSession, let sid = recentSession.session?.sessionId {
-            set.insert(sid)
-            if let recent = weakSelf?.cacheUpdateSessionDic[sid] {
-              NELog.infoLog(ModuleName, desc: "cacheUpdateSessionDic fitler sid: \(recent.session?.sessionId ?? "nil")")
-              if let time1 = recentSession.lastMessage?.timestamp, let time2 = recent.lastMessage?.timestamp, time1 < time2 {
-                model.recentSession = recent
-              }
-            }
-
-            if let recent = weakSelf?.cacheAddSessionDic[sid]?.recentSession {
-              NELog.infoLog(ModuleName, desc: "cacheAddSessionDic fitler sid: \(recent.session?.sessionId ?? "nil")")
-              if let time1 = recentSession.lastMessage?.timestamp, let time2 = recent.lastMessage?.timestamp, time1 < time2 {
-                model.recentSession = recent
-              }
-            }
-          }
-        }
-        NELog.infoLog(ModuleName, desc: "cacheAddSessionDic count: \(weakSelf?.cacheAddSessionDic.count ?? 0)")
-        weakSelf?.cacheAddSessionDic.forEach { (key: String, value: ConversationListModel) in
-          NELog.infoLog(ModuleName, desc: "cacheAddSessionDic  key: \(key)")
-          if set.contains(key) == false {
-            if let recent = weakSelf?.cacheUpdateSessionDic[key] {
-              if let time1 = value.recentSession?.lastMessage?.timestamp, let time2 = recent.lastMessage?.timestamp, time1 < time2 {
-                value.recentSession = recent
-              }
-            }
-            NELog.infoLog(ModuleName, desc: "cacheAddSessionDic : \(key)")
-            weakSelf?.conversationListArray?.append(value)
-          }
-        }
-        weakSelf?.cacheAddSessionDic.removeAll()
-        NELog.infoLog(ModuleName, desc: "conversationListArray count : \(weakSelf?.conversationListArray?.count ?? 0)")
-        completion(error, weakSelf?.conversationListArray)
-      }
-    }
-  }
-
-  public func deleteRecentSession(recentSession: NIMRecentSession) {
-    NELog.infoLog(
-      ModuleName + " " + className,
-      desc: #function + ", sessionId:" + (recentSession.session?.sessionId ?? "nil")
-    )
-    weak var weakSelf = self
-    let option = NIMDeleteRecentSessionOption()
-    option.isDeleteRoamMessage = true
-    option.shouldMarkAllMessagesReadInSessions = true
-    repo.deleteRecentConversation(recentSession, option) { error in
-      weakSelf?.repo.deleteLocalSession(recentSession: recentSession)
-    }
-  }
-
-  public func stickTopInfoForSession(session: NIMSession) -> NIMStickTopSessionInfo? {
-    NELog.infoLog(ModuleName + " " + className, desc: #function + ", sessionId:" + session.sessionId)
-    return repo.getStickTopSessionInfo(session: session)
-  }
-
-  public func addStickTopSession(session: NIMSession,
-                                 _ completion: @escaping (NSError?, NIMStickTopSessionInfo?)
-                                   -> Void) {
-    NELog.infoLog(ModuleName + " " + className, desc: #function + ", sessionId:" + session.sessionId)
-    let params = NIMAddStickTopSessionParams(session: session)
-    repo.addStickTop(params: params) { error, stickTopSessionInfo in
-      completion(error as NSError?, stickTopSessionInfo)
-    }
-  }
-
-  public func removeStickTopSession(params: NIMStickTopSessionInfo,
-                                    _ completion: @escaping (NSError?, NIMStickTopSessionInfo?)
-                                      -> Void) {
-    NELog.infoLog(ModuleName + " " + className, desc: #function + ", sessionId:" + params.session.sessionId)
-    repo.removeStickTop(params: params) { error, stickTopSessionInfo in
-      completion(error as NSError?, stickTopSessionInfo)
-    }
-  }
-
-  public func loadStickTopSessionInfos(_ completion:
-    @escaping (NSError?, [NIMSession: NIMStickTopSessionInfo]?)
-      -> Void) {
-    NELog.infoLog(ModuleName + " " + className, desc: #function)
-    repo.getStickTopSessionList(completion)
-  }
-
-  public func notifyForNewMsg(userId: String?) -> Bool {
-    NELog.infoLog(ModuleName + " " + className, desc: #function + ", userId:" + (userId ?? "nil"))
-    return repo.isNeedNotify(userId: userId)
-  }
-
-  public func notifyStateForNewMsg(teamId: String?) -> NIMTeamNotifyState {
-    NELog.infoLog(ModuleName + " " + className, desc: #function + ", teamId:" + (teamId ?? "nil"))
-    return repo.isNeedNotifyForTeam(teamId: teamId)
+    NotificationCenter.default.addObserver(self, selector: #selector(deleteConversationNoti), name: NENotificationName.deleteConversationNotificationName, object: nil)
+    conversationRepo.addConversationListener(self)
+    ChatRepo.shared.addChatListener(self)
+    TeamRepo.shared.addTeamListener(self)
+    ContactRepo.shared.addContactListener(self)
+    IMKitClient.instance.addLoginListener(self)
+    NEAIUserPinManager.shared.addPinManagerListener(self)
+    NEAIUserManager.shared.addAIUserChangeListener(listener: self)
   }
 
   deinit {
-    NELog.infoLog(ModuleName + " " + className, desc: #function)
-    NIMSDK.shared().userManager.remove(self)
-    repo.removeSessionDelegate(delegate: self)
-    repo.removeTeamDelegate(delegate: self)
+    NEALog.infoLog(ModuleName + className(), desc: #function)
     NotificationCenter.default.removeObserver(self)
+    conversationRepo.removeConversationListener(self)
+    ChatRepo.shared.removeChatListener(self)
+    TeamRepo.shared.removeTeamListener(self)
+    ContactRepo.shared.removeContactListener(self)
+    IMKitClient.instance.removeLoginListener(self)
+    NEAIUserPinManager.shared.removePinManagerListener(self)
+    NEAIUserManager.shared.removeAIUserChangeListener(listener: self)
   }
 
-  // MARK: ======================== private method ==============================
-
-  public func sortRecentSession() {
-    NELog.infoLog(ModuleName + " " + className, desc: #function)
-    var tempArr = [NIMRecentSession]()
-    var dic = [String: ConversationListModel]()
-    conversationListArray?.forEach { listModel in
-      if let session = listModel.recentSession {
-        tempArr.append(session)
-        if let sessionId = session.session?.sessionId {
-          dic[sessionId] = listModel
-        }
-      }
-    }
-
-    let resultArr = repo.sortSessionList(recentSessions: tempArr, stickTopInfo: stickTopInfos)
-    var sortResultArr = [ConversationListModel]()
-    resultArr.forEach { recentSession in
-      let listModel = ConversationListModel()
-      listModel.recentSession = recentSession
-      if recentSession.session?.sessionType == .P2P {
-        if let sessionId = recentSession.session?.sessionId,
-           let userInfo = dic[sessionId]?.userInfo {
-          listModel.userInfo = userInfo
-        }
-
-      } else if recentSession.session?.sessionType == .team {
-        if let sessionId = recentSession.session?.sessionId,
-           let teamInfo = dic[sessionId]?.teamInfo {
-          listModel.teamInfo = teamInfo
-        }
-      }
-      sortResultArr.append(listModel)
-    }
-    conversationListArray = sortResultArr
-  }
-
-  // 本地排序 在didUpdate的时候如有需要在打开
-  func findInsertPlace(recentSession: NIMRecentSession) -> NSInteger {
-    NELog.infoLog(
-      ModuleName + " " + className,
-      desc: #function + ", sessionId:" + (recentSession.session?.sessionId ?? "nil")
-    )
-    var matchIndex = 0
-    var find = false
-    if let conversationArr = conversationListArray {
-      for (i, listModel) in conversationArr.enumerated() {
-        if let enumTime = listModel.recentSession?.lastMessage?.timestamp,
-           let targetTime = recentSession.lastMessage?.timestamp {
-          if enumTime <= targetTime {
-            find = true
-            matchIndex = i
-            break
-          }
-        }
-      }
-    }
-
-    if find {
-      return matchIndex
-    } else {
-      return conversationListArray?.count ?? 0
-    }
-  }
-
-  // MARK: ==================== NIMChatManagerDelegate ==========================
-
-  public func onRecvMessageReceipts(_ receipts: [NIMMessageReceipt]) {
-    receipts.forEach { receipt in
-      if receipt.session?.sessionType == .P2P {
-        if let listArr = conversationListArray {
-          for (i, listModel) in listArr.enumerated() {
-            if listModel.recentSession?.session?.sessionType == .P2P,
-               receipt.session?.sessionId == listModel.recentSession?.session?.sessionId {
-              delegate?.didUpdateRecentSession(index: i)
-            }
-          }
-        }
-      }
-    }
-  }
-
-  // MARK: ==================== ConversationRepoDelegate ==========================
-
-  public func onNotifyAddStickTopSession(_ newInfo: NIMStickTopSessionInfo) {
-    NELog.infoLog(ModuleName + " " + className, desc: #function + ",onNotifyAddStickTopSession sessionId:" + newInfo.session.sessionId)
-    stickTopInfos[newInfo.session] = newInfo
+  func atMessageChange() {
+    NEALog.infoLog(className(), desc: "atMessageChange")
     delegate?.reloadTableView()
   }
 
-  public func onNotifyRemoveStickTopSession(_ removedInfo: NIMStickTopSessionInfo) {
-    NELog.infoLog(ModuleName + " " + className, desc: #function + ",onNotifyRemoveStickTopSession  sessionId:" + removedInfo.session.sessionId)
-    stickTopInfos[removedInfo.session] = nil
-    delegate?.reloadTableView()
-  }
-
-  public func onNotifySyncStickTopSessions(_ response: NIMSyncStickTopSessionResponse) {
-    loadStickTopSessionInfos { [weak self] error, sessionInfos in
-      if error != nil {
-        if let infos = self?.repo.getStickTopInfos() {
-          self?.stickTopInfos = infos
-        }
-      } else if let infos = sessionInfos {
-        self?.stickTopInfos = infos
+  func deleteConversationNoti(_ noti: NSNotification) {
+    if let conversationId = noti.object as? String {
+      weak var weakSelf = self
+      conversationRepo.deleteConversation(conversationId) { error in
+        NEALog.infoLog(weakSelf?.className() ?? "", desc: #function + " deleteConversationNoti \(error?.localizedDescription ?? "") ")
       }
-      self?.delegate?.reloadTableView()
-      self?.delegate?.reloadData()
     }
   }
 
-  public func didServerSessionUpdated(_ recentSession: NIMRecentSession?) {}
+  open func getAIUserList() {
+    NEAIUserManager.shared.getAIUserList()
+  }
 
-  // MARK: ====================NIMConversationManagerDelegate=====================
-
-  public func didAdd(_ recentSession: NIMRecentSession, totalUnreadCount: Int) {
-    guard let targetId = recentSession.session?.sessionId else {
-      NELog.errorLog(ModuleName + " " + className, desc: "❌sessionId is nil")
+  /// 分页获取会话列表
+  open func getConversationListByPage(_ completion: @escaping (NSError?, Bool?) -> Void) {
+    if syncFinished == false {
+      callBack = completion
       return
     }
-    NELog.infoLog(ModuleName + " " + className, desc: #function + ", did add session targetId:" + targetId)
-    DispatchQueue.main.async {}
-    if let object = recentSession.lastMessage?.messageObject as? NIMNotificationObject, object.notificationType == .team {
-      if let content = object.content as? NIMTeamNotificationContent {
-        if content.operationType == .dismiss || (content.operationType == .leave && content.sourceID == NIMSDK.shared().loginManager.currentAccount()) {
-          NELog.infoLog(
-            ModuleName + " " + className,
-            desc: #function + "didAdd team dismiss or leave noti" + (recentSession.session?.sessionId ?? "nil")
-          )
-          repo.deleteLocalSession(recentSession: recentSession)
-          return
-        }
-      }
-    }
 
-    weak var weakSelf = self
-    var listModel = ConversationListModel()
-    if let sid = recentSession.session?.sessionId {
-      print("session session id : ", sid)
-      if let model = cacheAddSessionDic[sid] {
-        listModel = model
-        NELog.infoLog(
-          ModuleName + " " + className,
-          desc: #function + "didAdd team has added" + (recentSession.session?.sessionId ?? "nil")
-        )
-      }
-      cacheAddSessionDic[sid] = listModel
+    if isRequesting == true {
+      // 防止多次请求造成数据混乱，等上次请求成功后进行下一次
+      completion(nil, false)
+      return
     }
-    listModel.recentSession = recentSession
-    if recentSession.session?.sessionType == .P2P {
-      repo.getUserInfo(userId: targetId) { user, error in
-        if error == nil {
-          listModel.userInfo = user
-          if let model = weakSelf?.sessionIsExist(listModel) {
-            NELog.infoLog(
-              ModuleName,
-              desc: #function + "conversation session user : " + "\(user?.userId ?? "nil")"
-            )
-            model.userInfo = user
-          } else {
-            weakSelf?.conversationListArray?.append(listModel)
-          }
-          weakSelf?.delegate?.didAddRecentSession()
+    isRequesting = true
+    print("did getConversationList")
+    conversationRepo.getConversationList(offset, page) { [weak self] conversations, offset, finished, error in
+      if error == nil {
+        if let set = offset {
+          // 更新索引
+          self?.offset = set
+        }
+        self?.isRequesting = false
+        // 区分置顶消息和非置顶消息
+        conversations?.forEach { conversation in
+          self?.addOrUpdateConversationData(conversation)
         }
       }
+      completion(error, finished)
+    }
+  }
 
-    } else if recentSession.session?.sessionType == .team {
-      repo.getTeamInfo(teamId: targetId) { error, teamInfo in
-        listModel.teamInfo = teamInfo
-        if let model = weakSelf?.sessionIsExist(listModel) {
-          NELog.infoLog(
-            ModuleName,
-            desc: #function + "conversation session team : " + "\(teamInfo?.teamId ?? "nil")"
-          )
-          model.teamInfo = teamInfo
-        } else {
-          weakSelf?.conversationListArray?.append(listModel)
-        }
-        weakSelf?.delegate?.didAddRecentSession()
+  /// 添加或者更新会话
+  /// - Parameter conversation 会话对象
+  open func addOrUpdateConversationData(_ conversation: V2NIMConversation) {
+    if let cacheModel = conversationDic[conversation.conversationId] {
+      cacheModel.conversation = conversation
+    } else {
+      let model = NEConversationListModel()
+      model.conversation = conversation
+      conversationDic[conversation.conversationId] = model
+      if conversation.stickTop == true {
+        stickTopConversations.insert(model, at: 0)
+      } else {
+        conversationListData.insert(model, at: 0)
       }
     }
   }
 
-  public func didUpdate(_ recentSession: NIMRecentSession, totalUnreadCount: Int) {
-    NELog.infoLog(
-      ModuleName + " " + className,
-      desc: #function + "recentSession, didUpdate sessionId: " + (recentSession.session?.sessionId ?? "nil" + " unread count : \(totalUnreadCount)")
-    )
-    if let sessionId = recentSession.session?.sessionId, recentSession.unreadCount <= 0 {
-      if NEAtMessageManager.instance.isAtCurrentUser(sessionId: sessionId) == true {
-        NEAtMessageManager.instance.clearAtRecord(sessionId)
+  /// 删除会话
+  ///  - Parameter conversation 会话对象
+  ///  - Parameter completion 完成回调
+  open func deleteConversation(_ conversation: V2NIMConversation, _ completion: @escaping (NSError?) -> Void) {
+    conversationRepo.deleteConversation(conversation.conversationId) { error in
+      if let err = error {
+        completion(err)
+      } else {
+        // 通知界面刷新
+        completion(nil)
+      }
+    }
+  }
+
+  /// 添加置顶
+  /// - Parameter conversation 会话对象
+  /// - Parameter completion 完成回调
+  open func addStickTop(conversation: V2NIMConversation,
+                        _ completion: @escaping (NSError?)
+                          -> Void) {
+    NEALog.infoLog(ModuleName + " " + className, desc: #function + ", sessionId:" + conversation.conversationId)
+    conversationRepo.setStickTop(conversation.conversationId, true) { error in
+      completion(error)
+    }
+  }
+
+  /// 取消置顶
+  /// - Parameter conversation 会话对象
+  /// - Parameter completion 完成回调
+  open func removeStickTop(conversation: V2NIMConversation,
+                           _ completion: @escaping (NSError?)
+                             -> Void) {
+    NEALog.infoLog(ModuleName + " " + className, desc: #function + ", sessionId:" + conversation.conversationId)
+    conversationRepo.setStickTop(conversation.conversationId, false) { error in
+      completion(error)
+    }
+  }
+
+  open func onMuteListChanged() {
+    delegate?.reloadTableView()
+  }
+
+  open func updateUserInfo(_ model: NEConversationListModel, _ user: NEUserWithFriend, _ conversation: V2NIMConversation) {
+    model.conversation = conversation
+  }
+
+  open func updateTeamInfo(_ model: NEConversationListModel, _ team: V2NIMTeam, _ conversation: V2NIMConversation) {
+    model.conversation = conversation
+  }
+
+  /// 处理置顶变更逻辑
+  open func filterStickTopData(_ conversations: [V2NIMConversation]) {
+    // 记录置顶
+    var changeTostickTopSet = Set<String>()
+    // 记录移除置顶
+    var changeToUnStickTopDic = Set<String>()
+    for conversation in conversations {
+      if let model = conversationDic[conversation.conversationId] {
+        if model.conversation?.stickTop != conversation.stickTop {
+          if conversation.stickTop == true {
+            changeTostickTopSet.insert(conversation.conversationId)
+          } else {
+            changeToUnStickTopDic.insert(conversation.conversationId)
+          }
+        }
+        model.conversation = conversation
       }
     }
 
-    if let object = recentSession.lastMessage?.messageObject as? NIMNotificationObject, object.notificationType == .team {
-      if let content = object.content as? NIMTeamNotificationContent {
-        if content.operationType == .dismiss || (content.operationType == .leave && content.sourceID == NIMSDK.shared().loginManager.currentAccount()) {
-          NELog.infoLog(
+    conversationListData.removeAll { model in
+      if let cid = model.conversation?.conversationId {
+        if changeTostickTopSet.contains(cid) {
+          stickTopConversations.insert(model, at: 0)
+          return true
+        }
+      }
+      return false
+    }
+
+    stickTopConversations.removeAll { model in
+      if let cid = model.conversation?.conversationId {
+        if changeToUnStickTopDic.contains(cid) {
+          conversationListData.append(model)
+          return true
+        }
+      }
+      return false
+    }
+  }
+
+  // 创建会话回调
+  open func onConversationCreated(_ conversation: V2NIMConversation) {
+    NEALog.infoLog(ModuleName + " " + className, desc: #function + ", did add session targetId:" + conversation.conversationId)
+    if checkDismissTeamNoti(conversation) {
+      return
+    }
+
+    addOrUpdateConversationData(conversation)
+    delegate?.reloadTableView()
+  }
+
+  /// 会话变更
+  /// - Parameter conversations 会话列表
+  open func onConversationChanged(_ conversations: [V2NIMConversation]) {
+    // 置顶逻辑处理
+    filterStickTopData(conversations)
+
+    for conversation in conversations {
+      if let manager = NEAtMessageManager.instance {
+        if conversation.unreadCount == 0, manager.isAtCurrentUser(conversationId: conversation.conversationId) {
+          NEAtMessageManager.instance?.clearAtRecord(conversation.conversationId)
+        }
+      }
+
+      if checkDismissTeamNoti(conversation) {
+        continue
+      }
+      addOrUpdateConversationData(conversation)
+    }
+
+    delegate?.reloadTableView()
+  }
+
+  /// 会话删除
+  /// - Parameter conversationIds: 会话id列表
+  open func onConversationDeleted(_ conversationIds: [String]) {
+    var removeFlagSet = Set<String>()
+    for id in conversationIds {
+      removeFlagSet.insert(id)
+      conversationDic.removeValue(forKey: id)
+    }
+    stickTopConversations.removeAll(where: {
+      if let sid = $0.conversation?.conversationId, removeFlagSet.contains(sid) {
+        return true
+      }
+      return false
+    })
+    conversationListData.removeAll(where: {
+      if let sid = $0.conversation?.conversationId, removeFlagSet.contains(sid) {
+        return true
+      }
+      return false
+    })
+    delegate?.reloadTableView()
+  }
+
+  /// 检查会话是否包含解散通知的变更
+  /// - Parameter conversation: 会话
+  open func checkDismissTeamNoti(_ conversation: V2NIMConversation) -> Bool {
+    if IMKitConfigCenter.shared.enabledismissTeamDeleteConversation == false {
+      return false
+    }
+
+    if conversation.type != V2NIMConversationType.CONVERSATION_TYPE_TEAM {
+      return false
+    }
+    // 解散、退出群聊
+    let targetId = conversation.conversationId
+
+    if conversation.lastMessage?.messageType == V2NIMMessageType.MESSAGE_TYPE_NOTIFICATION {
+      if let content = conversation.lastMessage?.attachment as? V2NIMMessageNotificationAttachment {
+        if content.type == V2NIMMessageNotificationType.MESSAGE_NOTIFICATION_TYPE_TEAM_DISMISS ||
+          (content.type == V2NIMMessageNotificationType.MESSAGE_NOTIFICATION_TYPE_TEAM_KICK &&
+            content.targetIds?.contains(IMKitClient.instance.account()) == true) ||
+          (content.type == V2NIMMessageNotificationType.MESSAGE_NOTIFICATION_TYPE_TEAM_LEAVE &&
+            IMKitClient.instance.isMe(conversation.lastMessage?.messageRefer.senderId)) {
+          // 群聊被解散
+          // 被踢出群聊
+          // 主动退出群聊
+          NEALog.infoLog(
             ModuleName + " " + className,
-            desc: #function + "didUpdate team dismiss or leave noti" + (recentSession.session?.sessionId ?? "nil")
+            desc: #function + "didAdd team dismiss or leave noti " + targetId
           )
-          repo.deleteLocalSession(recentSession: recentSession)
-          return
+          conversationRepo.deleteConversation(targetId) { error in
+          }
+
+          // 移除置顶
+          conversationDic.removeValue(forKey: targetId)
+          stickTopConversations.removeAll { model in
+            if model.conversation?.conversationId == targetId {
+              return true
+            }
+            return false
+          }
+          delegate?.reloadTableView()
+          return true
         }
       }
     }
+    return false
+  }
 
-    if let sid = recentSession.session?.sessionId {
-      cacheUpdateSessionDic[sid] = recentSession
-      if let model = cacheAddSessionDic[sid], let recent = model.recentSession {
-        if let time1 = recentSession.lastMessage?.timestamp, let time2 = recent.lastMessage?.timestamp, time1 > time2 {
-          model.recentSession = recentSession
+  /// 保存撤回消息
+  /// - Parameter conversationId: 会话id
+  /// - Parameter createTime: 撤回时间
+  /// - Parameter revokeAccountId: 撤回人id
+  /// - Parameter extention: 扩展信息
+  /// - Parameter completion: 完成回调
+  open func saveRevokeMessage(_ messageRevoke: V2NIMMessageRevokeNotification,
+                              _ completion: @escaping (NSError?) -> Void) {
+    let messageNew = V2NIMMessageCreator.createTextMessage(localizable("message_recalled"))
+    messageNew.messageConfig?.unreadEnabled = true
+
+    var muta = [String: Any]()
+    if let ext = NECommonUtil.getDictionaryFromJSONString(messageRevoke.serverExtension ?? "") as? [String: Any] {
+      muta = ext
+    }
+    muta[revokeLocalMessage] = true
+    messageNew.serverExtension = NECommonUtil.getJSONStringFromDictionary(muta)
+
+    ChatRepo.shared.insertMessageToLocal(message: messageNew,
+                                         conversationId: messageRevoke.messageRefer?.conversationId ?? "",
+                                         senderId: messageRevoke.revokeAccountId,
+                                         createTime: messageRevoke.messageRefer?.createTime) { _, error in
+      completion(error)
+    }
+  }
+
+  /// 撤回通知监听
+  /// - Parameter revokeNotifications: 撤回通知列表
+  open func onMessageRevokeNotifications(_ revokeNotifications: [V2NIMMessageRevokeNotification]) {
+    NEALog.infoLog(ModuleName + " " + className(), desc: #function + "onMessageRevokeNotifications ids: \(revokeNotifications.map { $0.messageRefer?.messageServerId })")
+
+    for messageRevoke in revokeNotifications {
+      guard let msgServerId = messageRevoke.messageRefer?.messageServerId else {
+        return
+      }
+
+      // 防止重复插入本地撤回消息
+      if ConversationDeduplicationHelper.instance.isRevokeMessageSaved(messageId: msgServerId) {
+        return
+      }
+
+      saveRevokeMessage(messageRevoke) { error in
+        if let err = error {
+          NEALog.infoLog(ModuleName + " " + ConversationViewModel.className(), desc: "saveRevokeMessage error \(err)")
         }
       }
     }
+  }
 
-    if let _ = conversationListArray {
-      for i in 0 ..< conversationListArray!.count {
-        let listModel = conversationListArray![i]
-        NELog.infoLog(
-          ModuleName + " " + className,
-          desc: #function + "update session id : " + (listModel.recentSession?.session?.sessionId ?? "nil")
-        )
-        if recentSession.session?.sessionId == listModel.recentSession?.session?.sessionId {
-          listModel.recentSession = recentSession
+  /// 收到点对点已读回执
+  /// - Parameter readReceipts: 已读回执
+  open func onReceiveP2PMessageReadReceipts(_ readReceipts: [V2NIMP2PMessageReadReceipt]) {
+    NEALog.infoLog(ModuleName + " " + className, desc: #function + "onReceive p2p readReceipts count: \(readReceipts.count)")
+    for receipt in readReceipts {
+      if let cid = receipt.conversationId {
+        if conversationDic[cid] != nil {
           delegate?.reloadTableView()
           break
         }
@@ -389,126 +402,148 @@ public class ConversationViewModel: NSObject, ConversationRepoDelegate,
     }
   }
 
-  public func didRemove(_ recentSession: NIMRecentSession, totalUnreadCount: Int) {
-    NELog.infoLog(
-      ModuleName + " " + className,
-      desc: #function + ",didRemove recentSession  sessionId:" + (recentSession.session?.sessionId ?? "nil")
-    )
-    if let sid = recentSession.session?.sessionId {
-      cacheUpdateSessionDic.removeValue(forKey: sid)
-    }
-    if let conversationArr = conversationListArray {
-      for i in 0 ..< conversationArr.count {
-        if conversationArr[i].recentSession?.session?.sessionId.count ?? 0 <= 0 {
-          NELog.infoLog(
-            ModuleName + " " + className,
-            desc: #function + ",didRemove recentSession  sessionId is empty  user: \(conversationArr[i].userInfo?.userId ?? "") team: \(conversationArr[i].teamInfo?.teamId ?? "")"
-          )
-        }
-        if conversationArr[i].recentSession?.session?.sessionId == recentSession.session?
-          .sessionId {
-          NELog.infoLog(
-            ModuleName + " " + className,
-            desc: #function + ",remove session list at index : \(i) sessionid : \(recentSession.session?.sessionId ?? "")"
-          )
+  /// 加入群回调
+  /// - Parameter team: 群信息
+  open func onTeamJoined(_ team: V2NIMTeam) {}
 
-          conversationListArray?.remove(at: i)
-          break
-        }
+  /// 建群回调
+  /// - Parameter team: 群信息
+  open func onTeamCreated(_ team: V2NIMTeam) {}
+
+  open func onTeamLeft(_ team: V2NIMTeam, isKicked: Bool) {
+    NEALog.infoLog(className(), desc: "conversation onTeamLeft team id: \(team.teamId) team name : \(team.name) isKicked : \(isKicked)")
+    if let cid = V2NIMConversationIdUtil.teamConversationId(team.teamId) {
+      didDeleteConversation(cid)
+    }
+  }
+
+  /// 群解散回调
+  /// - Parameter team: 群信息
+  open func onTeamDismissed(_ team: V2NIMTeam) {
+    NEALog.infoLog(className(), desc: "onTeamDismissed team id : \(team.teamId) team name: \(team.name)")
+    if IMKitConfigCenter.shared.enabledismissTeamDeleteConversation {
+      if let cid = V2NIMConversationIdUtil.teamConversationId(team.teamId) {
+        didDeleteConversation(cid)
       }
     }
+  }
+
+  private func didDeleteConversation(_ cid: String) {
+    if IMKitConfigCenter.shared.enabledismissTeamDeleteConversation == false {
+      return
+    }
+    conversationRepo.deleteConversation(cid) { [weak self] error in
+      if let err = error {
+        NEALog.infoLog(self?.className() ?? " ", desc: "onTeamDismissed delete conversation error : \(err.localizedDescription)")
+      } else {
+        self?.conversationDic.removeValue(forKey: cid)
+        self?.stickTopConversations.removeAll { model in
+          if model.conversation?.conversationId == cid {
+            return true
+          }
+          return false
+        }
+        self?.conversationListData.removeAll { model in
+          if model.conversation?.conversationId == cid {
+            return true
+          }
+          return false
+        }
+        self?.delegate?.reloadTableView()
+      }
+    }
+  }
+
+  open func onConversationSyncFinished() {
+    NEALog.infoLog(className(), desc: "onConversationSyncFinished")
     delegate?.reloadTableView()
   }
 
-  // MARK: ========================NIMUserManagerDelegate=========================
+  open func onDataSync(_ type: V2NIMDataSyncType, state: V2NIMDataSyncState, error: V2NIMError?) {
+    if type == .DATA_SYNC_TYPE_MAIN, state == .DATA_SYNC_STATE_COMPLETED {
+      /// 设置同步完成标识
+      syncFinished = true
 
-  public func onFriendChanged(_ user: NIMUser) {
-    NELog.infoLog(ModuleName + " " + className, desc: #function + ", userId:" + (user.userId ?? "nil"))
-    if let listArr = conversationListArray {
-      for (i, listModel) in listArr.enumerated() {
-        if listModel.recentSession?.session?.sessionType == .P2P {
-          if listModel.userInfo?.userId == user.userId {
-            listModel.userInfo = User(user: user)
-            delegate?.didUpdateRecentSession(index: i)
-            break
-          }
+      if let completion = callBack {
+        NEALog.infoLog(className(), desc: "onConversationSyncFinished getConversationListByPage")
+        /// 取数据
+        getConversationListByPage(completion)
+        /// 回调置空
+        callBack = nil
+
+      } else {
+        NEALog.infoLog(className(), desc: #function + " retrieveConversationDatas")
+        retrieveConversationDatas()
+      }
+    }
+  }
+
+  /// 发生重连的情况重新获取数据
+  open func retrieveConversationDatas() {
+    var limit = 0
+    if conversationDic.count > page {
+      limit = conversationDic.count
+    } else {
+      limit = page
+    }
+    conversationRepo.getConversationList(0, limit) { [weak self] conversations, offset, finished, error in
+      if error == nil {
+        if let set = offset {
+          // 更新索引
+          self?.offset = set
+        }
+        // 清理之前数据
+        self?.stickTopConversations.removeAll()
+        self?.conversationListData.removeAll()
+        self?.conversationDic.removeAll()
+        // 区分置顶消息和非置顶消息
+        conversations?.forEach { conversation in
+          self?.addOrUpdateConversationData(conversation)
+        }
+        self?.delegate?.reloadTableView()
+        if let complete = finished {
+          self?.delegate?.loadMoreStateChange(complete)
         }
       }
     }
   }
 
-  // MARK: =========================NIMTeamManagerDelegate========================
+  open func onFriendDeleted(_ accountId: String, deletionType: V2NIMFriendDeletionType) {
+    delegate?.reloadTableView()
+  }
 
-  public func onTeamUpdated(_ team: NIMTeam) {
-    NELog.infoLog(ModuleName + " " + className, desc: #function + ", teamId:" + (team.teamId ?? "nil"))
-    guard let conversationArr = conversationListArray else {
-      return
-    }
-    for (i, listModel) in conversationArr.enumerated() {
-      if listModel.recentSession?.session?.sessionId == team.teamId {
-        listModel.teamInfo = team
-        delegate?.didUpdateRecentSession(index: i)
-        break
+  open func onTeamSyncFinished() {
+    delegate?.reloadTableView()
+  }
+
+  open func onConversationSyncFailed(_ error: V2NIMError) {
+    NEALog.infoLog(className(), desc: "onConversationSyncFailed : \(error.desc)")
+  }
+
+  /// 好友信息缓存更新
+  /// - Parameter accountId: 用户 id
+  open func onFriendInfoChanged(_ friendInfo: V2NIMFriend) {
+    NEALog.infoLog(className(), desc: "onFriendInfoUpdate : \(String(describing: friendInfo.accountId))")
+    delegate?.reloadTableView()
+  }
+
+  // MARK: Pin Manager Listener
+
+  open func userInfoDidChange() {
+    NEALog.infoLog(className(), desc: #function + "" + "conversaion view model userInfoDidChange")
+    getAIUserList()
+  }
+
+  open func onAIUserChanged(aiUsers: [V2NIMAIUser]) {
+    aiUserListData.removeAll()
+    weak var weakSelf = self
+    for aiUser in aiUsers {
+      if NEAIUserPinManager.shared.checkoutUnPinAIUser(aiUser) == true {
+        let model = NEAIUserModel()
+        model.aiUser = aiUser
+        weakSelf?.aiUserListData.append(model)
       }
     }
-  }
-
-  public func onTeamAdded(_ team: NIMTeam) {
-    NELog.infoLog(ModuleName + " " + className, desc: #function + "onTeamAdded, teamId:" + (team.teamId ?? "nil"))
-    guard let tid = team.teamId else {
-      return
-    }
-    let _ = repo.createTeamSession(tid)
-    delegate?.didAddRecentSession()
-  }
-
-  public func onTeamRemoved(_ team: NIMTeam) {
-    NELog.infoLog(ModuleName + " " + className, desc: #function + ", teamId:" + (team.teamId ?? "nil"))
-    // 做删除会话操作(自己退出群聊会触发)
-    guard let conversationArr = conversationListArray else {
-      return
-    }
-
-    // Fix sdk bug
-    DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-      for (_, listModel) in conversationArr.enumerated() {
-        if let teamInfo = listModel.teamInfo, teamInfo.teamId == team.teamId {
-          if let recentSession = listModel.recentSession {
-            self.deleteRecentSession(recentSession: recentSession)
-            break
-          }
-        }
-      }
-    }
-  }
-
-  public func onTeamMemberChanged(_ team: NIMTeam) {
-    NELog.infoLog(ModuleName + " " + className, desc: #function + ", teamId:" + (team.teamId ?? "nil"))
-    guard let conversationArr = conversationListArray else {
-      return
-    }
-    for (i, listModel) in conversationArr.enumerated() {
-      if listModel.recentSession?.session?.sessionId == team.teamId {
-        listModel.teamInfo = team
-        delegate?.didUpdateRecentSession(index: i)
-        break
-      }
-    }
-  }
-
-  private func sessionIsExist(_ model: ConversationListModel) -> ConversationListModel? {
-    if let array = conversationListArray {
-      for index in 0 ..< array.count {
-        let m = array[index]
-        if m.recentSession?.session?.sessionId == model.recentSession?.session?.sessionId {
-          return m
-        }
-      }
-    }
-    return nil
-  }
-
-  public func onMuteListChanged() {
     delegate?.reloadTableView()
   }
 }

@@ -15,11 +15,9 @@ open class NEBasePinMessageImageCell: NEBasePinMessageCell {
 
   override open func setSelected(_ selected: Bool, animated: Bool) {
     super.setSelected(selected, animated: animated)
-
-    // Configure the view for the selected state
   }
 
-  override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
+  override public init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
     super.init(style: style, reuseIdentifier: reuseIdentifier)
   }
 
@@ -32,6 +30,7 @@ open class NEBasePinMessageImageCell: NEBasePinMessageCell {
     contentImageView.translatesAutoresizingMaskIntoConstraints = false
     contentImageView.contentMode = .scaleAspectFill
     contentImageView.clipsToBounds = true
+    contentImageView.isUserInteractionEnabled = true
     contentImageView.addCustomCorner(
       conrners: [.bottomLeft, .bottomRight, .topRight, .topLeft],
       radius: 8,
@@ -46,12 +45,16 @@ open class NEBasePinMessageImageCell: NEBasePinMessageCell {
     contentWidth?.isActive = true
     contentHeight = contentImageView.heightAnchor.constraint(equalToConstant: 0)
     contentHeight?.isActive = true
+
+    if let gesture = contentGesture {
+      contentImageView.addGestureRecognizer(gesture)
+    }
   }
 
-  override public func configure(_ item: PinMessageModel) {
+  override open func configure(_ item: NEPinMessageModel) {
     super.configure(item)
 
-    if let m = item.chatmodel as? MessageImageModel, let imageUrl = m.imageUrl {
+    if let m = item.chatmodel as? MessageImageModel, let imageUrl = m.urlString {
       if imageUrl.hasPrefix("http") {
         contentImageView.sd_setImage(
           with: URL(string: imageUrl),
@@ -61,7 +64,8 @@ open class NEBasePinMessageImageCell: NEBasePinMessageCell {
           completed: nil
         )
       } else {
-        contentImageView.image = UIImage(contentsOfFile: imageUrl)
+        let url = URL(fileURLWithPath: imageUrl)
+        contentImageView.sd_setImage(with: url)
       }
 
     } else {

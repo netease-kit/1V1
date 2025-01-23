@@ -5,7 +5,7 @@
 import Foundation
 
 /// 解析器
-struct NEOneOnOneDecoder {
+enum NEOneOnOneDecoder {
   static let tag: String = "NEOneOnOneDecoder"
 
   // MARK: - ------------------------- 字典转模型 --------------------------
