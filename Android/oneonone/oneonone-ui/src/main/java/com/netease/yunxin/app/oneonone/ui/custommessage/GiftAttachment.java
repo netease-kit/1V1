@@ -4,11 +4,12 @@
 
 package com.netease.yunxin.app.oneonone.ui.custommessage;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import com.netease.yunxin.app.oneonone.ui.OneOnOneUI;
 import com.netease.yunxin.app.oneonone.ui.R;
 import com.netease.yunxin.kit.alog.ALog;
-import com.netease.yunxin.kit.corekit.im.custom.CustomAttachment;
+import com.netease.yunxin.kit.chatkit.model.CustomAttachment;
 import org.json.JSONObject;
 
 public class GiftAttachment extends CustomAttachment {
@@ -63,5 +64,19 @@ public class GiftAttachment extends CustomAttachment {
   @Override
   public String getContent() {
     return OneOnOneUI.getInstance().getContext().getString(R.string.one_on_one_message_gift);
+  }
+
+  @NonNull
+  @Override
+  public String toJsonStr() {
+    try {
+      JSONObject map = new JSONObject();
+      map.put("type", getCustomType());
+      map.put("data", packData());
+      return map.toString();
+    } catch (Exception e) {
+      e.printStackTrace();
+      return "";
+    }
   }
 }

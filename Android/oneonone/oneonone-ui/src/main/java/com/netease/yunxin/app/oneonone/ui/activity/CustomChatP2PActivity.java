@@ -35,6 +35,7 @@ import com.netease.yunxin.app.oneonone.ui.databinding.ActivityMyChatP2pBinding;
 import com.netease.yunxin.app.oneonone.ui.dialog.AudioInputDialog;
 import com.netease.yunxin.app.oneonone.ui.http.HttpService;
 import com.netease.yunxin.app.oneonone.ui.model.ModelResponse;
+import com.netease.yunxin.app.oneonone.ui.model.UserModel;
 import com.netease.yunxin.app.oneonone.ui.utils.AudioInputManager;
 import com.netease.yunxin.app.oneonone.ui.utils.CallKitUtil;
 import com.netease.yunxin.app.oneonone.ui.utils.ChatUIConfigManager;
@@ -52,12 +53,12 @@ import com.netease.yunxin.kit.chatkit.ui.normal.builder.P2PChatFragmentBuilder;
 import com.netease.yunxin.kit.chatkit.ui.normal.page.fragment.ChatP2PFragment;
 import com.netease.yunxin.kit.chatkit.ui.normal.view.MessageBottomLayout;
 import com.netease.yunxin.kit.chatkit.ui.view.emoji.EmojiPickerView;
+import com.netease.yunxin.kit.common.ui.dialog.TopPopupWindow;
 import com.netease.yunxin.kit.common.ui.utils.ToastX;
 import com.netease.yunxin.kit.common.utils.PermissionUtils;
 import com.netease.yunxin.kit.common.utils.ScreenUtils;
 import com.netease.yunxin.kit.common.utils.SizeUtils;
-import com.netease.yunxin.kit.corekit.im.model.UserInfo;
-import com.netease.yunxin.kit.corekit.im.utils.RouterConstant;
+import com.netease.yunxin.kit.corekit.im2.utils.RouterConstant;
 import com.netease.yunxin.kit.entertainment.common.activity.BasePartyActivity;
 import com.netease.yunxin.kit.entertainment.common.gift.GifAnimationView;
 import com.netease.yunxin.kit.entertainment.common.gift.GiftCache;
@@ -77,8 +78,8 @@ public class CustomChatP2PActivity extends BasePartyActivity {
   public static final String TAG_REPORT = "page_xiaoxi_huihua";
   private ActivityMyChatP2pBinding viewBinding;
   private ChatP2PFragment chatP2PFragment;
-  private UserInfo userInfo;
-  private String sessionId;
+  private UserModel userInfo;
+  private String accId;
   private ImageView mAudioIv;
   private ImageView mEmojiIv;
   private ImageView mGiftIv;
@@ -94,6 +95,7 @@ public class CustomChatP2PActivity extends BasePartyActivity {
   private final AudioInputManager audioInputManager = new AudioInputManager();
   private GiftRender giftRender;
   private int audioIvNormalViewTop;
+  private TopPopupWindow permissionPop;
   private final NECallEngineDelegate callEngineDelegate =
       new NECallEngineDelegateAbs() {
 
@@ -112,6 +114,9 @@ public class CustomChatP2PActivity extends BasePartyActivity {
           new ActivityResultContracts.RequestMultiplePermissions(),
           result -> {
             if (result != null) {
+              if (permissionPop != null) {
+                permissionPop.dismiss();
+              }
               for (Map.Entry<String, Boolean> entry : result.entrySet()) {
                 String permission = entry.getKey();
                 boolean grant = entry.getValue();
@@ -132,15 +137,15 @@ public class CustomChatP2PActivity extends BasePartyActivity {
   @Override
   protected void init() {
     paddingStatusBarHeight(viewBinding.getRoot());
-    userInfo = (UserInfo) getIntent().getSerializableExtra(RouterConstant.CHAT_KRY);
-    sessionId = getIntent().getStringExtra(RouterConstant.CHAT_ID_KRY);
-    if (userInfo == null && TextUtils.isEmpty(sessionId)) {
+    userInfo = (UserModel) getIntent().getSerializableExtra(RouterConstant.CHAT_KRY);
+    accId = getIntent().getStringExtra(RouterConstant.CHAT_ID_KRY);
+    if (userInfo == null && TextUtils.isEmpty(accId)) {
       ALog.e(TAG, "user info is null && sessionID is null:");
       finish();
       return;
     }
     viewModel = new ViewModelProvider(this).get(CustomP2PViewModel.class);
-    viewModel.initialize(sessionId, userInfo, chatUIConfigManager);
+    viewModel.initialize(accId, userInfo, chatUIConfigManager);
     configP2PChatCustomUI();
     loadP2PFragment();
     initGiftAnimation();
@@ -151,7 +156,7 @@ public class CustomChatP2PActivity extends BasePartyActivity {
   }
 
   private void configP2PChatCustomUI() {
-    chatUIConfigManager.initChatUIConfig(CustomChatP2PActivity.this, sessionId);
+    chatUIConfigManager.initChatUIConfig(CustomChatP2PActivity.this, accId);
   }
 
   private void initObserver() {
@@ -190,10 +195,10 @@ public class CustomChatP2PActivity extends BasePartyActivity {
         .observe(
             this,
             userInfo -> {
-              if (ChatUtil.isSystemAccount(sessionId)) {
+              if (ChatUtil.isSystemAccount(accId)) {
                 return;
               }
-              viewBinding.tvTitle.setText(userInfo.getUserInfoName());
+              viewBinding.tvTitle.setText(userInfo.nickname);
             });
     viewModel
         .getGiftMessageLiveData()
@@ -242,7 +247,7 @@ public class CustomChatP2PActivity extends BasePartyActivity {
     P2PChatFragmentBuilder fragmentBuilder = new P2PChatFragmentBuilder();
     chatP2PFragment = fragmentBuilder.build();
     Bundle bundle = new Bundle();
-    bundle.putSerializable(RouterConstant.CHAT_ID_KRY, sessionId);
+    bundle.putSerializable(RouterConstant.CHAT_ID_KRY, accId);
     bundle.putSerializable(RouterConstant.CHAT_KRY, userInfo);
     chatP2PFragment.setArguments(bundle);
     //将ChatP2PFragment加载到Activity中
@@ -294,16 +299,16 @@ public class CustomChatP2PActivity extends BasePartyActivity {
                 mEmojiIv.setImageResource(R.drawable.one_on_one_chat_emoji_icon);
               }
             });
-    messageInputLayout = view.findViewById(R.id.inputView);
-    if (ChatUtil.isSystemAccount(sessionId)) {
+    messageInputLayout = view.findViewById(R.id.chatBottomInputLayout);
+    if (ChatUtil.isSystemAccount(accId)) {
       messageInputLayout.setVisibility(View.GONE);
       viewBinding.ivSetting.setVisibility(View.GONE);
-      if (Constants.ASSIST_ACCOUNT.equals(sessionId)) {
+      if (Constants.ASSIST_ACCOUNT.equals(accId)) {
         viewBinding.tvTitle.setText(getString(R.string.one_one_one_littie_secre));
       }
     }
     viewBinding.llVirtualTips.setVisibility(
-        (ChatUtil.isVirtualManSession(sessionId) && !OneOnOneUI.getInstance().isOversea())
+        (ChatUtil.isVirtualManSession(accId) && !OneOnOneUI.getInstance().isOversea())
             ? View.VISIBLE
             : View.GONE);
     mAudioTv.setOnTouchListener(
@@ -395,7 +400,7 @@ public class CustomChatP2PActivity extends BasePartyActivity {
                 .reward(
                     giftId,
                     giftCount,
-                    sessionId,
+                    accId,
                     new Callback<ModelResponse<Boolean>>() {
 
                       @Override
@@ -416,13 +421,24 @@ public class CustomChatP2PActivity extends BasePartyActivity {
 
   private void showAudioInputDialog() {
     if (!PermissionUtils.hasPermissions(this, Manifest.permission.RECORD_AUDIO)) {
+      permissionPop =
+          new TopPopupWindow(
+              CustomChatP2PActivity.this,
+              R.string.app_permission_tip_microphone_title,
+              R.string.app_permission_tip_microphone_content);
+      viewBinding
+          .getRoot()
+          .post(
+              () -> {
+                permissionPop.showAtLocation(viewBinding.getRoot(), Gravity.TOP, 0, 100);
+              });
       permissionLauncher.launch(new String[] {Manifest.permission.RECORD_AUDIO});
       return;
     }
     audioInputManager.initAudioRecord(this);
     audioInputManager.startAudioRecord();
     if (dialog == null) {
-      dialog = new AudioInputDialog(CustomChatP2PActivity.this, sessionId, audioInputManager);
+      dialog = new AudioInputDialog(CustomChatP2PActivity.this, accId, audioInputManager);
     }
     if (!dialog.isShowing()) {
       dialog.show();

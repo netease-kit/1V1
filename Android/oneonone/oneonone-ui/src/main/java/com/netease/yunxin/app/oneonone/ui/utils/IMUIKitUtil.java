@@ -24,16 +24,17 @@ import com.netease.yunxin.app.oneonone.ui.custommessage.TryAudioCallMessageViewH
 import com.netease.yunxin.app.oneonone.ui.custommessage.TryVideoCallMessageAttachment;
 import com.netease.yunxin.app.oneonone.ui.custommessage.TryVideoCallMessageViewHolder;
 import com.netease.yunxin.kit.chatkit.ui.ChatKitClient;
-import com.netease.yunxin.kit.corekit.im.IMKitClient;
-import com.netease.yunxin.kit.corekit.im.utils.RouterConstant;
+import com.netease.yunxin.kit.corekit.im2.IMKitClient;
+import com.netease.yunxin.kit.corekit.im2.utils.RouterConstant;
 import com.netease.yunxin.kit.corekit.route.XKitRouter;
 import com.netease.yunxin.kit.locationkit.LocationKitClient;
+import java.util.Locale;
 
 public class IMUIKitUtil {
   public static void initIMUIKit(Context context, SDKOptions options) {
-    IMKitClient.init(context, null, options);
+    IMKitClient.init(context, options, Locale.getDefault());
     if (NIMUtil.isMainProcess(context)) {
-      LocationKitClient.init(context);
+      LocationKitClient.init(context, null);
       registerCustomAttachParse();
     }
     registerPageRouter();

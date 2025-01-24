@@ -75,7 +75,7 @@ public class OneOnOneHomeActivity extends BaseActivity {
     paddingStatusBarHeight(getRootView(this));
     getSupportFragmentManager()
         .beginTransaction()
-        .add(R.id.user_list_content, new HomeFragment())
+        .add(com.netease.yunxin.app.oneonone.ui.R.id.user_list_content, new HomeFragment())
         .commit();
 
     //    BeautyManager.getInstance().init(getApplicationContext());

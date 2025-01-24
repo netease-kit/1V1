@@ -68,7 +68,7 @@ public class AlbumsRecycleView extends RecyclerView {
     albumAdapter.bindData(list);
   }
 
-  static final class AlbumAdapter extends Adapter {
+  static final class AlbumAdapter extends RecyclerView.Adapter {
     ArrayList<String> list;
 
     public void bindData(ArrayList<String> list) {
@@ -100,7 +100,7 @@ public class AlbumsRecycleView extends RecyclerView {
     }
   }
 
-  public static class AlbumHolder extends ViewHolder {
+  public static class AlbumHolder extends RecyclerView.ViewHolder {
     private RvItemAlbumBinding binding;
 
     public AlbumHolder(@NonNull RvItemAlbumBinding binding) {

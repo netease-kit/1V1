@@ -24,13 +24,13 @@ import androidx.annotation.RequiresApi;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import com.airbnb.lottie.LottieAnimationView;
 import com.netease.nimlib.sdk.media.record.RecordType;
-import com.netease.nimlib.sdk.msg.constant.SessionTypeEnum;
+import com.netease.nimlib.sdk.v2.message.result.V2NIMSendMessageResult;
 import com.netease.yunxin.app.oneonone.ui.R;
 import com.netease.yunxin.app.oneonone.ui.utils.AudioInputManager;
 import com.netease.yunxin.app.oneonone.ui.utils.ChatUtil;
 import com.netease.yunxin.app.oneonone.ui.view.RingBar;
 import com.netease.yunxin.kit.alog.ALog;
-import com.netease.yunxin.kit.corekit.im.provider.FetchCallback;
+import com.netease.yunxin.kit.corekit.im2.extend.FetchCallback;
 import java.io.File;
 
 public class AudioInputDialog extends Dialog {
@@ -41,13 +41,13 @@ public class AudioInputDialog extends Dialog {
   private LottieAnimationView lottieAnimationView;
   private TextView chatMessageInputAudioTv;
   public final Rect flViewRect = new Rect();
-  private String sessionID;
+  private String accid;
   private AudioInputManager audioInputManager;
 
   public AudioInputDialog(
-      @NonNull Context context, String sessionID, AudioInputManager audioInputManager) {
+      @NonNull Context context, String accid, AudioInputManager audioInputManager) {
     super(context);
-    this.sessionID = sessionID;
+    this.accid = accid;
     this.audioInputManager = audioInputManager;
     rootView =
         LayoutInflater.from(getContext()).inflate(R.layout.one_on_one_dialog_audio_input, null);
@@ -93,27 +93,20 @@ public class AudioInputDialog extends Dialog {
             }
 
             @Override
-            public void onRecordSuccess(File audioFile, long audioLength, RecordType recordType) {
+            public void onRecordSuccess(File audioFile, int audioLength, RecordType recordType) {
               ChatUtil.sendAudioMessage(
-                  sessionID,
-                  SessionTypeEnum.P2P,
+                  accid,
                   audioFile,
                   audioLength,
-                  false,
-                  new FetchCallback<Void>() {
+                  new FetchCallback<V2NIMSendMessageResult>() {
                     @Override
-                    public void onSuccess(@Nullable Void param) {
-                      ALog.i(TAG, "sendAudioMessage success");
-                    }
-
-                    @Override
-                    public void onFailed(int code) {
+                    public void onError(int code, @Nullable String s) {
                       ALog.e(TAG, "sendAudioMessage failed,code:" + code);
                     }
 
                     @Override
-                    public void onException(@Nullable Throwable exception) {
-                      ALog.e(TAG, "sendAudioMessage failed,exception:" + exception);
+                    public void onSuccess(@Nullable V2NIMSendMessageResult v2NIMSendMessageResult) {
+                      ALog.i(TAG, "sendAudioMessage success");
                     }
                   });
               if (isShowing()) {

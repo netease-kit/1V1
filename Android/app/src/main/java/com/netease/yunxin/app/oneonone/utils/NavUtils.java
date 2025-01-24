@@ -13,6 +13,7 @@ import android.os.Build;
 import android.provider.Settings;
 import com.faceunity.nama.BeautySettingActivity;
 import com.netease.yunxin.app.oneonone.activity.CommonSettingActivity;
+import com.netease.yunxin.app.oneonone.activity.SampleBeautySettingActivity;
 import com.netease.yunxin.app.oneonone.config.AppConfig;
 import com.netease.yunxin.app.oneonone.ui.activity.OneOnOneHomeActivity;
 import com.netease.yunxin.kit.alog.ALog;
@@ -58,7 +59,7 @@ public class NavUtils {
   }
 
   public static void toBeautySettingPage(Context context) {
-    Intent intent = new Intent(context, BeautySettingActivity.class);
+    Intent intent = new Intent(context, SampleBeautySettingActivity.class);
     intent.putExtra(BeautySettingActivity.INTENT_KEY_APP_KEY, AppConfig.getAppKey());
     context.startActivity(intent);
   }

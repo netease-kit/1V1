@@ -11,7 +11,7 @@ plugins {
 }
 
 android {
-    compileSdk = 31
+    compileSdk = 34
 
     defaultConfig {
         applicationId = "com.netease.yunxin.app.oneonone"

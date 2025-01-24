@@ -19,13 +19,14 @@ import com.netease.nimlib.sdk.msg.attachment.AudioAttachment;
 import com.netease.nimlib.sdk.msg.attachment.NetCallAttachment;
 import com.netease.nimlib.sdk.msg.attachment.VideoAttachment;
 import com.netease.nimlib.sdk.msg.constant.MsgTypeEnum;
-import com.netease.nimlib.sdk.msg.model.IMMessage;
+import com.netease.nimlib.sdk.v2.message.V2NIMMessage;
 import com.netease.yunxin.app.oneonone.ui.R;
 import com.netease.yunxin.app.oneonone.ui.activity.CustomChatP2PActivity;
 import com.netease.yunxin.app.oneonone.ui.dialog.HotTopicDialog;
 import com.netease.yunxin.app.oneonone.ui.http.HttpService;
 import com.netease.yunxin.app.oneonone.ui.model.ModelResponse;
 import com.netease.yunxin.app.oneonone.ui.model.User;
+import com.netease.yunxin.app.oneonone.ui.model.UserModel;
 import com.netease.yunxin.app.oneonone.ui.view.CustomChatBottomView;
 import com.netease.yunxin.kit.alog.ALog;
 import com.netease.yunxin.kit.chatkit.ui.ChatKitClient;
@@ -37,12 +38,12 @@ import com.netease.yunxin.kit.chatkit.ui.normal.view.ChatView;
 import com.netease.yunxin.kit.chatkit.ui.view.input.ActionConstants;
 import com.netease.yunxin.kit.chatkit.ui.view.input.InputProperties;
 import com.netease.yunxin.kit.chatkit.ui.view.message.MessageProperties;
-import com.netease.yunxin.kit.chatkit.ui.view.popmenu.ChatPopMenuAction;
 import com.netease.yunxin.kit.chatkit.ui.view.popmenu.IChatPopMenu;
 import com.netease.yunxin.kit.common.ui.action.ActionItem;
 import com.netease.yunxin.kit.common.ui.dialog.CommonAlertDialog;
 import com.netease.yunxin.kit.common.ui.utils.ToastX;
-import com.netease.yunxin.kit.corekit.im.model.UserInfo;
+import com.netease.yunxin.kit.corekit.im2.model.UserWithFriend;
+import com.netease.yunxin.kit.corekit.model.PluginAction;
 import com.netease.yunxin.kit.entertainment.common.gift.GiftDialog;
 import com.netease.yunxin.kit.entertainment.common.utils.ClickUtils;
 import com.netease.yunxin.kit.entertainment.common.utils.DialogUtil;
@@ -58,7 +59,7 @@ public class ChatUIConfigManager {
   private static final String TAG = "ChatUIConfigUtil";
   private static final String ACTION_TYPE_TOPIC = "TOPIC";
   private static final String ONLINE = "online";
-  private UserInfo userInfo;
+  private UserModel userInfo;
   private String sessionId;
   public MutableLiveData<ChatMessageBean> reEditRevokeMessageLiveData = new MutableLiveData<>();
 
@@ -103,8 +104,8 @@ public class ChatUIConfigManager {
         new IChatPopMenu() {
           @NonNull
           @Override
-          public List<ChatPopMenuAction> customizePopMenu(
-              List<ChatPopMenuAction> menuList, ChatMessageBean messageBean) {
+          public List<PluginAction> customizePopMenu(
+              List<PluginAction> menuList, ChatMessageBean messageBean) {
             return generateCustomPopMenuAction(menuList, messageBean);
           }
 
@@ -115,10 +116,10 @@ public class ChatUIConfigManager {
         };
   }
 
-  private List<ChatPopMenuAction> generateCustomPopMenuAction(
-      List<ChatPopMenuAction> menuList, ChatMessageBean messageBean) {
-    List<ChatPopMenuAction> menuNewList = new ArrayList<>(3);
-    UserInfo fromUser = messageBean.getMessageData().getFromUser();
+  private List<PluginAction> generateCustomPopMenuAction(
+      List<PluginAction> menuList, ChatMessageBean messageBean) {
+    List<PluginAction> menuNewList = new ArrayList<>(3);
+    UserWithFriend fromUser = messageBean.getMessageData().getFromUser();
     boolean isSelf =
         fromUser != null
             && TextUtils.equals(fromUser.getAccount(), UserInfoManager.getSelfUserUuid());
@@ -129,10 +130,10 @@ public class ChatUIConfigManager {
       }
       for (int i = 0; i < size; i++) {
         menuNewList.add(
-            new ChatPopMenuAction(
-                "", "", com.netease.yunxin.kit.chatkit.ui.R.drawable.ic_message_copy));
+            new PluginAction(
+                "", "", com.netease.yunxin.kit.chatkit.ui.R.drawable.ic_message_copy, messageBean));
       }
-      for (ChatPopMenuAction chatPopMenuAction : menuList) {
+      for (PluginAction chatPopMenuAction : menuList) {
         if (TextUtils.equals(ActionConstants.POP_ACTION_COPY, chatPopMenuAction.getAction())) {
           menuNewList.set(0, chatPopMenuAction);
         } else if (TextUtils.equals(
@@ -150,10 +151,10 @@ public class ChatUIConfigManager {
       }
       for (int i = 0; i < size; i++) {
         menuNewList.add(
-            new ChatPopMenuAction(
-                "", "", com.netease.yunxin.kit.chatkit.ui.R.drawable.ic_message_copy));
+            new PluginAction(
+                "", "", com.netease.yunxin.kit.chatkit.ui.R.drawable.ic_message_copy, messageBean));
       }
-      for (ChatPopMenuAction chatPopMenuAction : menuList) {
+      for (PluginAction chatPopMenuAction : menuList) {
         if (TextUtils.equals(ActionConstants.POP_ACTION_DELETE, chatPopMenuAction.getAction())) {
           menuNewList.set(0, chatPopMenuAction);
         } else if (!ChatUtil.isGiftMessageType(messageBean.getMessageData())
@@ -180,7 +181,7 @@ public class ChatUIConfigManager {
           @Override
           public boolean onMessageClick(View view, int position, ChatMessageBean messageInfo) {
             if (messageInfo.getViewType() == MsgTypeEnum.nrtc_netcall.getValue()) {
-              IMMessage message = messageInfo.getMessageData().getMessage();
+              V2NIMMessage message = messageInfo.getMessageData().getMessage();
               if (message.getAttachment() instanceof NetCallAttachment) {
                 NetCallAttachment attachment = (NetCallAttachment) message.getAttachment();
                 int type = attachment.getType();
@@ -192,7 +193,7 @@ public class ChatUIConfigManager {
               }
               return true;
             } else if (messageInfo.getViewType() == MsgTypeEnum.video.getValue()) {
-              IMMessage message = messageInfo.getMessageData().getMessage();
+              V2NIMMessage message = messageInfo.getMessageData().getMessage();
               if (message.getAttachment() instanceof VideoAttachment) {
                 if (isInVoiceRoomOrInCall(context)) {
                   return true;
@@ -202,7 +203,7 @@ public class ChatUIConfigManager {
                 }
               }
             } else if (messageInfo.getViewType() == MsgTypeEnum.audio.getValue()) {
-              IMMessage message = messageInfo.getMessageData().getMessage();
+              V2NIMMessage message = messageInfo.getMessageData().getMessage();
               if (message.getAttachment() instanceof AudioAttachment) {
                 if (isInVoiceRoomOrInCall(context)) {
                   return true;
@@ -216,10 +217,10 @@ public class ChatUIConfigManager {
           }
 
           @Override
-          public boolean onReEditRevokeMessage(
+          public boolean onReeditRevokeMessage(
               View view, int position, ChatMessageBean messageInfo) {
             reEditRevokeMessageLiveData.setValue(messageInfo);
-            return IMessageItemClickListener.super.onReEditRevokeMessage(
+            return IMessageItemClickListener.super.onReeditRevokeMessage(
                 view, position, messageInfo);
           }
         };
@@ -332,10 +333,10 @@ public class ChatUIConfigManager {
     }
   }
 
-  private void queryOnlineStateThenVideoCall(Context context, UserInfo userInfo) {
+  private void queryOnlineStateThenVideoCall(Context context, UserModel userInfo) {
     HttpService.getInstance()
         .getUserState(
-            userInfo.getMobile(),
+            userInfo.mobile,
             new Callback<ModelResponse<String>>() {
               @Override
               public void onResponse(
@@ -405,10 +406,10 @@ public class ChatUIConfigManager {
     }
   }
 
-  private void queryOnlineStateThenAudioCall(Context context, UserInfo userInfo) {
+  private void queryOnlineStateThenAudioCall(Context context, UserModel userInfo) {
     HttpService.getInstance()
         .getUserState(
-            userInfo.getMobile(),
+            userInfo.mobile,
             new Callback<ModelResponse<String>>() {
               @Override
               public void onResponse(
@@ -493,7 +494,7 @@ public class ChatUIConfigManager {
         .show(activity.getSupportFragmentManager());
   }
 
-  public void setUserInfo(UserInfo userInfo) {
+  public void setUserInfo(UserModel userInfo) {
     this.userInfo = userInfo;
   }
 

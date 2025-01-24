@@ -45,8 +45,7 @@ public class GiftMessageViewHolder extends NormalChatBaseMessageViewHolder {
 
   @Override
   public void bindData(ChatMessageBean message, ChatMessageBean lastMessage) {
-    GiftAttachment attachment =
-        (GiftAttachment) message.getMessageData().getMessage().getAttachment();
+    GiftAttachment attachment = (GiftAttachment) message.getMessageData().getAttachment();
     if (attachment == null) {
       return;
     }

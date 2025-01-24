@@ -25,7 +25,7 @@ import com.netease.yunxin.kit.alog.ALog;
 import com.netease.yunxin.kit.chatkit.ui.databinding.ChatBaseMessageViewHolderBinding;
 import com.netease.yunxin.kit.chatkit.ui.model.ChatMessageBean;
 import com.netease.yunxin.kit.chatkit.ui.normal.view.message.viewholder.NormalChatBaseMessageViewHolder;
-import com.netease.yunxin.kit.corekit.im.utils.RouterConstant;
+import com.netease.yunxin.kit.corekit.im2.utils.RouterConstant;
 import com.netease.yunxin.kit.corekit.route.XKitRouter;
 
 public class AssistantMessageViewHolder extends NormalChatBaseMessageViewHolder {
@@ -49,8 +49,7 @@ public class AssistantMessageViewHolder extends NormalChatBaseMessageViewHolder 
   public void bindData(ChatMessageBean message, ChatMessageBean lastMessage) {
     super.bindData(message, lastMessage);
 
-    AssistantAttachment attachment =
-        (AssistantAttachment) message.getMessageData().getMessage().getAttachment();
+    AssistantAttachment attachment = (AssistantAttachment) message.getMessageData().getAttachment();
     if (attachment == null) {
       return;
     }

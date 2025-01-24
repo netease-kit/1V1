@@ -131,7 +131,7 @@ public final class AudioInputManager implements IAudioRecordCallback {
             + ",recordType:"
             + recordType);
     if (audioInputCallback != null) {
-      audioInputCallback.onRecordSuccess(audioFile, audioLength, recordType);
+      audioInputCallback.onRecordSuccess(audioFile, (int) audioLength, recordType);
     }
     endRecord();
   }
@@ -192,7 +192,7 @@ public final class AudioInputManager implements IAudioRecordCallback {
     void onAudioRecordProgress(int percent);
 
     /** 音频录制完成 */
-    void onRecordSuccess(File audioFile, long audioLength, RecordType recordType);
+    void onRecordSuccess(File audioFile, int audioLength, RecordType recordType);
 
     /** 录制失败 */
     void onRecordFail();

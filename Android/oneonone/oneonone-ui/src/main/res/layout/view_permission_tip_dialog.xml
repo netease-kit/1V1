@@ -30,7 +30,7 @@
         android:gravity="center"
         android:paddingEnd="20dp"
         android:paddingStart="20dp"
-        android:text="请确保已经授权相机摄像头以及麦克风权限，设置后重试。"
+        android:text="@string/ui_dialog_permission_content"
         android:textColor="#666666"
         android:textSize="15.5dp"
         app:layout_constraintTop_toBottomOf="@id/tv_tip_title" />

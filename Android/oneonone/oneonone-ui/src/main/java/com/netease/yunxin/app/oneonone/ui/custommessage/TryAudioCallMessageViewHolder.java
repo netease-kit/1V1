@@ -43,7 +43,7 @@ public class TryAudioCallMessageViewHolder extends ChatBaseMessageViewHolder {
     view.setLayoutParams(layoutParams);
     currentMessage = message;
     TryAudioCallMessageAttachment attachment =
-        (TryAudioCallMessageAttachment) message.getMessageData().getMessage().getAttachment();
+        (TryAudioCallMessageAttachment) message.getMessageData().getAttachment();
     if (attachment == null) {
       return;
     }

@@ -7,11 +7,21 @@ package com.netease.yunxin.app.oneonone.ui.viewmodel;
 import android.app.Application;
 import android.text.TextUtils;
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
+import com.netease.nimlib.sdk.NIMClient;
 import com.netease.nimlib.sdk.avsignalling.constant.ChannelType;
+import com.netease.nimlib.sdk.v2.message.V2NIMClearHistoryNotification;
+import com.netease.nimlib.sdk.v2.message.V2NIMMessage;
+import com.netease.nimlib.sdk.v2.message.V2NIMMessageDeletedNotification;
+import com.netease.nimlib.sdk.v2.message.V2NIMMessageListener;
+import com.netease.nimlib.sdk.v2.message.V2NIMMessagePinNotification;
+import com.netease.nimlib.sdk.v2.message.V2NIMMessageQuickCommentNotification;
+import com.netease.nimlib.sdk.v2.message.V2NIMMessageRevokeNotification;
+import com.netease.nimlib.sdk.v2.message.V2NIMMessageService;
+import com.netease.nimlib.sdk.v2.message.V2NIMP2PMessageReadReceipt;
+import com.netease.nimlib.sdk.v2.message.V2NIMTeamMessageReadReceipt;
 import com.netease.yunxin.app.oneonone.ui.R;
 import com.netease.yunxin.app.oneonone.ui.constant.AppParams;
 import com.netease.yunxin.app.oneonone.ui.custommessage.GiftAttachment;
@@ -34,9 +44,7 @@ import com.netease.yunxin.kit.call.p2p.model.NECallInfo;
 import com.netease.yunxin.kit.call.p2p.model.NECallTypeChangeInfo;
 import com.netease.yunxin.kit.call.p2p.model.NEHangupReasonCode;
 import com.netease.yunxin.kit.chatkit.model.IMMessageInfo;
-import com.netease.yunxin.kit.chatkit.repo.ChatObserverRepo;
 import com.netease.yunxin.kit.common.network.Response;
-import com.netease.yunxin.kit.corekit.im.model.EventObserver;
 import com.netease.yunxin.nertc.nertcvideocall.model.impl.NERtcCallbackExTemp;
 import com.netease.yunxin.nertc.nertcvideocall.model.impl.NERtcCallbackProxyMgr;
 import com.netease.yunxin.nertc.ui.base.AVChatSoundPlayer;
@@ -155,21 +163,55 @@ public class CallViewModel extends AndroidViewModel {
         }
       };
 
-  private final EventObserver<List<IMMessageInfo>> msgObserver =
-      new EventObserver<List<IMMessageInfo>>() {
-
+  private final V2NIMMessageListener messageListener =
+      new V2NIMMessageListener() {
         @Override
-        public void onEvent(@Nullable List<IMMessageInfo> event) {
-          if (event != null) {
-            for (IMMessageInfo messageInfo : event) {
+        public void onReceiveMessages(List<V2NIMMessage> messages) {
+          if (messages != null) {
+            for (V2NIMMessage messageInfo : messages) {
               if (ChatUtil.isCurrentSessionMessage(messageInfo, userInfo.accId)) {
-                if (ChatUtil.isGiftMessageType(messageInfo)) {
-                  handleGiftMessage((GiftAttachment) messageInfo.getMessage().getAttachment());
+                IMMessageInfo messageInfo1 = new IMMessageInfo(messageInfo);
+                messageInfo1.parseAttachment();
+                if (ChatUtil.isGiftMessageType(messageInfo1)) {
+                  handleGiftMessage((GiftAttachment) messageInfo.getAttachment());
                 }
               }
             }
           }
         }
+
+        @Override
+        public void onReceiveP2PMessageReadReceipts(
+            List<V2NIMP2PMessageReadReceipt> readReceipts) {}
+
+        @Override
+        public void onReceiveTeamMessageReadReceipts(
+            List<V2NIMTeamMessageReadReceipt> readReceipts) {}
+
+        @Override
+        public void onMessageRevokeNotifications(
+            List<V2NIMMessageRevokeNotification> revokeNotifications) {}
+
+        @Override
+        public void onMessagePinNotification(V2NIMMessagePinNotification pinNotification) {}
+
+        @Override
+        public void onMessageQuickCommentNotification(
+            V2NIMMessageQuickCommentNotification quickCommentNotification) {}
+
+        @Override
+        public void onMessageDeletedNotifications(
+            List<V2NIMMessageDeletedNotification> messageDeletedNotifications) {}
+
+        @Override
+        public void onClearHistoryNotifications(
+            List<V2NIMClearHistoryNotification> clearHistoryNotifications) {}
+
+        @Override
+        public void onSendMessage(V2NIMMessage message) {}
+
+        @Override
+        public void onReceiveMessagesModified(List<V2NIMMessage> messages) {}
       };
 
   private void handleGiftMessage(GiftAttachment giftAttachment) {
@@ -180,7 +222,7 @@ public class CallViewModel extends AndroidViewModel {
     super(application);
     NECallEngine.sharedInstance().addCallDelegate(neCallEngineDelegate);
     NERtcCallbackProxyMgr.getInstance().addCallback(rtcCallback);
-    ChatObserverRepo.registerReceiveMessageObserve(msgObserver);
+    NIMClient.getService(V2NIMMessageService.class).addMessageListener(messageListener);
     CallUIOperationsMgr.INSTANCE.configTimeTick(
         new CallUIOperationsMgr.TimeTickConfig(
             new Function1<Long, Unit>() {
@@ -248,7 +290,7 @@ public class CallViewModel extends AndroidViewModel {
           userInfo.title = getApplication().getString(R.string.invited_audio_title);
         }
         userInfo.subtitle = getApplication().getString(R.string.invited_subtitle);
-        userInfo.accId = callParam.getCallerAccId();
+        userInfo.accId = NIMClient.getCurrentAccount();
       } else {
         userInfo.nickname = jsonObject.optString(AppParams.CALLED_USER_NAME);
         userInfo.mobile = jsonObject.optString(AppParams.CALLED_USER_MOBILE);
@@ -333,7 +375,7 @@ public class CallViewModel extends AndroidViewModel {
     super.onCleared();
     NECallEngine.sharedInstance().removeCallDelegate(neCallEngineDelegate);
     NERtcCallbackProxyMgr.getInstance().removeCallback(rtcCallback);
-    ChatObserverRepo.unregisterReceiveMessageObserve(msgObserver);
+    NIMClient.getService(V2NIMMessageService.class).removeMessageListener(messageListener);
     securityAuditManager.stopAudit();
     securityAuditManager = null;
     ALog.i(TAG, "onCleared");

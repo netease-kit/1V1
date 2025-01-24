@@ -43,7 +43,7 @@ public class TryVideoCallMessageViewHolder extends ChatBaseMessageViewHolder {
     view.setLayoutParams(layoutParams);
     currentMessage = message;
     TryVideoCallMessageAttachment attachment =
-        (TryVideoCallMessageAttachment) message.getMessageData().getMessage().getAttachment();
+        (TryVideoCallMessageAttachment) message.getMessageData().getAttachment();
     if (attachment == null) {
       return;
     }
