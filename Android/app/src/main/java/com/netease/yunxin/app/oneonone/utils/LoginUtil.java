@@ -6,6 +6,7 @@ package com.netease.yunxin.app.oneonone.utils;
 
 import android.content.Context;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import com.netease.nimlib.sdk.auth.LoginInfo;
 import com.netease.yunxin.app.oneonone.config.AppConfig;
 import com.netease.yunxin.app.oneonone.ui.OneOnOneUI;
@@ -14,8 +15,8 @@ import com.netease.yunxin.app.oneonone.ui.model.ModelResponse;
 import com.netease.yunxin.app.oneonone.ui.model.User;
 import com.netease.yunxin.app.oneonone.ui.utils.CallKitUtil;
 import com.netease.yunxin.kit.alog.ALog;
-import com.netease.yunxin.kit.corekit.im.IMKitClient;
-import com.netease.yunxin.kit.corekit.im.login.LoginCallback;
+import com.netease.yunxin.kit.corekit.im2.IMKitClient;
+import com.netease.yunxin.kit.corekit.im2.extend.FetchCallback;
 import com.netease.yunxin.kit.entertainment.common.model.NemoAccount;
 import com.netease.yunxin.kit.entertainment.common.utils.UserInfoManager;
 import retrofit2.Call;
@@ -32,22 +33,21 @@ public class LoginUtil {
             new Callback<ModelResponse<User>>() {
               @Override
               public void onResponse(
-                  Call<ModelResponse<User>> call,
-                  retrofit2.Response<ModelResponse<User>> response) {
-                if (response == null || response.body() == null || response.body().data == null) {
+                  @NonNull Call<ModelResponse<User>> call,
+                  @NonNull retrofit2.Response<ModelResponse<User>> response) {
+                if (response.body() == null || response.body().data == null) {
                   ALog.e(TAG, "loginOneOnOne failed");
                   if (callback != null) {
                     callback.onError(response.code(), "loginOneOnOne failed,userinfo is null");
                   }
                   return;
                 }
-                long rtcUid = response.body().data.getRtcUid();
-                nemoAccount.rtcUid = rtcUid;
+                nemoAccount.rtcUid = response.body().data.getRtcUid();
                 loginIM(nemoAccount, callback);
               }
 
               @Override
-              public void onFailure(Call<ModelResponse<User>> call, Throwable t) {
+              public void onFailure(@NonNull Call<ModelResponse<User>> call, @NonNull Throwable t) {
                 ALog.e(TAG, "loginOneOnOne failed,t:" + t);
                 UserInfoManager.clearUserInfo();
                 if (callback != null) {
@@ -67,12 +67,29 @@ public class LoginUtil {
 
   private static void loginIM(NemoAccount nemoAccount, LoginOneOnOneCallback oneOnOneCallback) {
     LoginInfo info = new LoginInfo(nemoAccount.userUuid, nemoAccount.imToken);
-    LoginCallback<LoginInfo> callback =
-        new LoginCallback<LoginInfo>() {
+    FetchCallback<Void> callback =
+        new FetchCallback<Void>() {
           @Override
-          public void onError(int errorCode, @NonNull String errorMsg) {
+          public void onSuccess(@Nullable Void unused) {
+            ALog.i(TAG, "login success");
+            UserInfoManager.setUserInfo(
+                nemoAccount.userUuid,
+                nemoAccount.userToken,
+                nemoAccount.imToken,
+                nemoAccount.userName,
+                nemoAccount.icon,
+                nemoAccount.mobile);
+            initCallKit(nemoAccount.rtcUid);
+            UserInfoManager.saveUserInfoToSp(nemoAccount);
+            if (oneOnOneCallback != null) {
+              oneOnOneCallback.onSuccess();
+            }
+          }
+
+          @Override
+          public void onError(int errorCode, String errorMsg) {
             // 常见错误码参考：https://doc.yunxin.163.com/messaging/docs/TM5NTk2Mzc?platform=server
-            String toastStr = "";
+            String toastStr;
             if (errorCode == 302) {
               ALog.e(TAG, "账号密码错误");
               toastStr = "账号密码错误";
@@ -93,26 +110,9 @@ public class LoginUtil {
                   errorCode, "im login failed,code:" + errorCode + ",errorMsg:" + toastStr);
             }
           }
-
-          @Override
-          public void onSuccess(LoginInfo param) {
-            ALog.i(TAG, "login success");
-            UserInfoManager.setUserInfo(
-                nemoAccount.userUuid,
-                nemoAccount.userToken,
-                nemoAccount.imToken,
-                nemoAccount.userName,
-                nemoAccount.icon,
-                nemoAccount.mobile);
-            initCallKit(nemoAccount.rtcUid);
-            UserInfoManager.saveUserInfoToSp(nemoAccount);
-            if (oneOnOneCallback != null) {
-              oneOnOneCallback.onSuccess();
-            }
-          }
         };
     //执行手动登录
-    IMKitClient.loginIM(info, callback);
+    IMKitClient.login(info.getAccount(), info.getToken(), null, callback);
   }
 
   private static void initCallKit(long rtcUid) {

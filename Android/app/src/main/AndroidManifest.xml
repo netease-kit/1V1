@@ -115,6 +115,9 @@
             android:screenOrientation="portrait"
             android:launchMode="singleTask"
             android:theme="@style/Theme.AppCompat.NoActionBar" />
+        <activity android:name=".activity.SampleBeautySettingActivity"
+            android:theme="@style/Theme.AppCompat.NoActionBar"
+            android:screenOrientation="portrait"/>
 
         <!--        // 云信IM-->
         <!-- 云信后台服务，请使用独立进程。 -->

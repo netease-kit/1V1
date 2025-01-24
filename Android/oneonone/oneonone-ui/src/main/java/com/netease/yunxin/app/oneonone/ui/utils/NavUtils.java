@@ -17,15 +17,13 @@ import com.netease.yunxin.kit.alog.ALog;
 import com.netease.yunxin.kit.call.p2p.model.NECallPushConfig;
 import com.netease.yunxin.kit.common.ui.utils.ToastX;
 import com.netease.yunxin.kit.common.utils.XKitUtils;
-import com.netease.yunxin.kit.corekit.im.model.UserInfo;
-import com.netease.yunxin.kit.corekit.im.utils.RouterConstant;
+import com.netease.yunxin.kit.corekit.im2.utils.RouterConstant;
 import com.netease.yunxin.kit.corekit.route.XKitRouter;
 import com.netease.yunxin.kit.entertainment.common.activity.WebViewActivity;
 import com.netease.yunxin.kit.entertainment.common.utils.UserInfoManager;
 import com.netease.yunxin.nertc.ui.CallKitUI;
 import com.netease.yunxin.nertc.ui.base.CallParam;
 import java.util.HashMap;
-import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -82,8 +80,7 @@ public class NavUtils {
         new CallParam.Builder()
             .callType(channelType)
             .callExtraInfo(extra)
-            .calledAccId(userModel.imAccid)
-            .callerAccId(UserInfoManager.getSelfUserUuid())
+            .calledAccId(userModel.account)
             .pushConfig(providePushConfig(extra))
             .build();
     CallKitUI.startSingleCall(context, param);
@@ -96,7 +93,6 @@ public class NavUtils {
       jsonObject = new JSONObject(extraInfo);
       nickname = jsonObject.optString(AppParams.CALLER_USER_NAME);
     } catch (JSONException e) {
-      e.printStackTrace();
       ALog.e(TAG, "e:" + e);
     }
     HashMap<String, Object> pushPayload = new HashMap<>();
@@ -113,39 +109,10 @@ public class NavUtils {
     toCallPage(context, userModel, ChannelType.VIDEO.getValue());
   }
 
-  public static void toCallAudioPage(Context context, UserInfo userInfo) {
-    toCallPage(context, generateUserModel(userInfo), ChannelType.AUDIO.getValue());
-  }
-
-  public static void toCallVideoPage(Context context, UserInfo userInfo) {
-    toCallPage(context, generateUserModel(userInfo), ChannelType.VIDEO.getValue());
-  }
-
-  private static UserModel generateUserModel(UserInfo userInfo) {
-    UserModel userModel = new UserModel();
-    userModel.imAccid = userInfo.getAccount();
-    userModel.nickname = userInfo.getName();
-    userModel.avatar = userInfo.getAvatar();
-    Map<String, Object> extensionMap = userInfo.getExtensionMap();
-    if (extensionMap != null) {
-      if (extensionMap.get(AppParams.CALLED_USER_MOBILE) != null) {
-        userModel.mobile = (String) extensionMap.get(AppParams.CALLED_USER_MOBILE);
-      }
-      userModel.callType = (int) extensionMap.get(AppParams.CALL_TYPE);
-      if (extensionMap.get(AppParams.CALLED_AUDIO_URL) != null) {
-        userModel.audioUrl = (String) extensionMap.get(AppParams.CALLED_AUDIO_URL);
-      }
-      if (extensionMap.get(AppParams.CALLED_VIDEO_URL) != null) {
-        userModel.videoUrl = (String) extensionMap.get(AppParams.CALLED_VIDEO_URL);
-      }
-    }
-    return userModel;
-  }
-
-  public static void toP2pPage(Context context, UserInfo userInfo, String content) {
+  public static void toP2pPage(Context context, UserModel userInfo, String content) {
     XKitRouter.withKey(RouterConstant.PATH_CHAT_P2P_PAGE)
         .withParam(RouterConstant.CHAT_KRY, userInfo)
-        .withParam(RouterConstant.CHAT_ID_KRY, userInfo.getAccount())
+        .withParam(RouterConstant.CHAT_ID_KRY, userInfo.account)
         .withParam("content", content)
         .withContext(context)
         .navigate();

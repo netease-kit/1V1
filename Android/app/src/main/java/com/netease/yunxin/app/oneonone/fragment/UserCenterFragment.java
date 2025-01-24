@@ -24,6 +24,7 @@ import com.netease.lava.nertc.sdk.NERtcEx;
 import com.netease.yunxin.app.oneonone.R;
 import com.netease.yunxin.app.oneonone.config.AppConfig;
 import com.netease.yunxin.app.oneonone.databinding.FragmentUserCenterBinding;
+import com.netease.yunxin.app.oneonone.ui.utils.CallKitUtil;
 import com.netease.yunxin.app.oneonone.utils.AppUtils;
 import com.netease.yunxin.app.oneonone.utils.NavUtils;
 import com.netease.yunxin.kit.alog.ALog;
@@ -96,6 +97,11 @@ public class UserCenterFragment extends BaseFragment {
   private void initViews() {
     binding.beautySetting.setOnClickListener(
         v -> {
+          if (CallKitUtil.isInTheCall()) {
+            ToastX.showShortToast(
+                requireActivity().getString(R.string.one_on_one_in_the_call_set_beauty_tips));
+            return;
+          }
           ArrayList<String> list = new ArrayList<>();
           list.add(Manifest.permission.CAMERA);
           list.add(Manifest.permission.RECORD_AUDIO);

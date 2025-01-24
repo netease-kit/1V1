@@ -5,9 +5,10 @@
 package com.netease.yunxin.app.oneonone.ui.custommessage;
 
 import android.text.Html;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import com.netease.yunxin.kit.alog.ALog;
-import com.netease.yunxin.kit.corekit.im.custom.CustomAttachment;
+import com.netease.yunxin.kit.chatkit.model.CustomAttachment;
 import org.json.JSONObject;
 
 public class AssistantAttachment extends CustomAttachment {
@@ -41,5 +42,19 @@ public class AssistantAttachment extends CustomAttachment {
   @Override
   public String getContent() {
     return Html.fromHtml(msg).toString();
+  }
+
+  @NonNull
+  @Override
+  public String toJsonStr() {
+    try {
+      JSONObject map = new JSONObject();
+      map.put("type", getCustomType());
+      map.put("data", packData());
+      return map.toString();
+    } catch (Exception e) {
+      e.printStackTrace();
+      return "";
+    }
   }
 }

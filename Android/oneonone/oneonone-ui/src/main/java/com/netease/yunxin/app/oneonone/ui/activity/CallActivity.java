@@ -52,6 +52,7 @@ import com.netease.yunxin.nertc.ui.base.AVChatSoundPlayer;
 import com.netease.yunxin.nertc.ui.base.CallParam;
 import com.netease.yunxin.nertc.ui.base.CommonCallActivity;
 import com.netease.yunxin.nertc.ui.p2p.P2PUIConfig;
+import com.netease.yunxin.nertc.ui.utils.PermissionTipDialog;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -119,6 +120,7 @@ public class CallActivity extends CommonCallActivity {
     } else {
       viewModel = new ViewModelProvider(this).get(CallViewModel.class);
     }
+
     if (!isFromFloatWindow()) {
       showCallingUI(savedInstanceState, false);
       if (callParam.getCallType() == ChannelType.AUDIO.getValue()) {
@@ -196,6 +198,16 @@ public class CallActivity extends CommonCallActivity {
   }
 
   private void handlePermission(Bundle savedInstanceState, String... permissions) {
+
+    PermissionTipDialog tipDialog =
+        showPermissionDialog(
+            new View.OnClickListener() {
+              @Override
+              public void onClick(View v) {
+                ToastX.showShortToast(R.string.tip_permission_request_failed);
+              }
+            });
+
     Permission.requirePermissions(CallActivity.this, permissions)
         .request(
             new Permission.PermissionCallback() {
@@ -204,6 +216,7 @@ public class CallActivity extends CommonCallActivity {
                 if (isFinishing() || isDestroyed()) {
                   return;
                 }
+                tipDialog.dismiss();
                 ArrayList<String> list = new ArrayList<>(Arrays.asList(permissions));
                 if (granted.containsAll(list)) {
                   if (callParam.isCalled() && currentCallState() == CallState.STATE_IDLE) {
@@ -222,6 +235,7 @@ public class CallActivity extends CommonCallActivity {
                 for (String s : permissionsDenial) {
                   LogUtil.i(TAG, "onDenied:" + s);
                 }
+                tipDialog.dismiss();
                 if (!callParam.isCalled()) {
                   if (permissionsDenial.size() == 2 || permissionDenialForever.size() == 2) {
                     ToastX.showShortToast(R.string.permission_microphone_and_camera_missing_tips);
@@ -244,7 +258,9 @@ public class CallActivity extends CommonCallActivity {
               }
 
               @Override
-              public void onException(Exception exception) {}
+              public void onException(Exception exception) {
+                tipDialog.dismiss();
+              }
             });
   }
 

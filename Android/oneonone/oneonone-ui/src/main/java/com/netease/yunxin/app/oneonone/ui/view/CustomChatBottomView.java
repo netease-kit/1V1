@@ -14,12 +14,12 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import com.netease.nimlib.sdk.msg.constant.SessionTypeEnum;
+import com.netease.nimlib.sdk.v2.message.result.V2NIMSendMessageResult;
 import com.netease.yunxin.app.oneonone.ui.R;
 import com.netease.yunxin.app.oneonone.ui.utils.ChatUtil;
 import com.netease.yunxin.kit.alog.ALog;
 import com.netease.yunxin.kit.common.utils.SizeUtils;
-import com.netease.yunxin.kit.corekit.im.provider.FetchCallback;
+import com.netease.yunxin.kit.corekit.im2.extend.ProgressFetchCallback;
 
 public class CustomChatBottomView extends RecyclerView {
   private static final String TAG = "CustomChatBottomView";
@@ -62,24 +62,21 @@ public class CustomChatBottomView extends RecyclerView {
                 v -> {
                   ChatUtil.sendTextMessage(
                       sessionId,
-                      SessionTypeEnum.P2P,
                       topic,
-                      false,
-                      new FetchCallback<Void>() {
+                      new ProgressFetchCallback<V2NIMSendMessageResult>() {
                         @Override
-                        public void onSuccess(@Nullable Void unused) {
-                          ALog.e(TAG, "sendTextMessage success");
-                        }
-
-                        @Override
-                        public void onFailed(int i) {
+                        public void onError(int i, @NonNull String s) {
                           ALog.e(TAG, "sendTextMessage onFailed,code:" + i);
                         }
 
                         @Override
-                        public void onException(@Nullable Throwable throwable) {
-                          ALog.e(TAG, "sendTextMessage onException,throwable:" + throwable);
+                        public void onSuccess(
+                            @Nullable V2NIMSendMessageResult v2NIMSendMessageResult) {
+                          ALog.e(TAG, "sendTextMessage success");
                         }
+
+                        @Override
+                        public void onProgress(int i) {}
                       });
                 });
           }
@@ -98,7 +95,7 @@ public class CustomChatBottomView extends RecyclerView {
     this.sessionId = sessionId;
   }
 
-  private static class TopicViewHolder extends ViewHolder {
+  private static class TopicViewHolder extends RecyclerView.ViewHolder {
     private TextView tv;
 
     public TopicViewHolder(@NonNull View itemView) {

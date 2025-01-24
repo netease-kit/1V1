@@ -6,8 +6,6 @@ package com.netease.yunxin.app.oneonone.config;
 
 import android.content.Context;
 import android.graphics.Color;
-import android.os.Environment;
-import android.text.TextUtils;
 import com.netease.nimlib.sdk.NotificationFoldStyle;
 import com.netease.nimlib.sdk.SDKOptions;
 import com.netease.nimlib.sdk.ServerAddresses;
@@ -20,7 +18,6 @@ import com.netease.yunxin.app.oneonone.push.PushUserInfoProvider;
 import com.netease.yunxin.kit.alog.ALog;
 import com.netease.yunxin.kit.common.utils.ScreenUtils;
 import com.netease.yunxin.kit.entertainment.common.AppStatusManager;
-import java.io.IOException;
 
 /** Nim SDK config info */
 public class NimSDKOptionConfig {
@@ -34,7 +31,6 @@ public class NimSDKOptionConfig {
     SDKOptions options = new SDKOptions();
     options.appKey = appKey;
     initStatusBarNotificationConfig(options);
-    options.sdkStorageRootPath = getNimCacheDir(context);
     options.preloadAttach = true;
     options.thumbnailSize = (int) (222.0 / 375.0 * ScreenUtils.getDisplayWidth());
     options.userInfoProvider = new PushUserInfoProvider(context);
@@ -128,25 +124,5 @@ public class NimSDKOptionConfig {
     config.oppoAppSercet = "f55d519d05a04360a8ba3404a24594a0";
     config.oppoCertificateName = "KIT_OPPO_PUSH";
     return config;
-  }
-
-  static String getNimCacheDir(Context context) {
-    return getAppCacheDir(context) + "/nim";
-  }
-
-  /** config app image/voice/file/log directory */
-  static String getAppCacheDir(Context context) {
-    String storageRootPath = null;
-    try {
-      if (context.getExternalCacheDir() != null) {
-        storageRootPath = context.getExternalFilesDir(null).getCanonicalPath();
-      }
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
-    if (TextUtils.isEmpty(storageRootPath)) {
-      storageRootPath = Environment.getExternalStorageDirectory() + "/" + context.getPackageName();
-    }
-    return storageRootPath;
   }
 }

@@ -1,0 +1,163 @@
+<!--
+  ~ Copyright (c) 2022 NetEase, Inc. All rights reserved.
+  ~ Use of this source code is governed by a MIT license that can be
+  ~ found in the LICENSE file.
+  -->
+
+<resources>
+    <string name="one_on_one_app_name">One-on-One Social Demo</string>
+    <string name="title_home">Home</string>
+    <string name="title_dashboard">Dashboard</string>
+    <string name="title_notifications">Notifications</string>
+    <string name="privacy_policy">Privacy Policy</string>
+    <string name="user_agreement">Term of Service</string>
+    <string name="about_us">About Us</string>
+    <string name="bind_other_account">Enter a test account</string>
+    <string name="message_notice">Notifications</string>
+    <string name="cancel">Cancel</string>
+    <string name="accept">Accept</string>
+    <string name="connecting">Connecting...</string>
+    <string name="invited_audio_title">Inviting you to audio chat</string>
+    <string name="invited_video_title">Inviting you to video chat</string>
+    <string name="invite_subtitle">Everyone can meet a match</string>
+    <string name="invited_subtitle">Hang out with your friends</string>
+    <string name="in_the_chat">Chatting...</string>
+    <string name="reject">Reject</string>
+    <string name="audio_call_security_tips">Your message contains sensitive content. Use a proper expression~</string>
+    <string name="audio_call_other_security_tips">The message contain sensitive content. Use a proper expression~</string>
+    <string name="video_call_mine_security_tips">The image contains sensitive content.\nThe image is automatically filtered.</string>
+    <string name="video_call_other_security_tips">The image contains sensitive content.\nThe image is automatically filtered.</string>
+    <string name="video_call_mine_all_security_tips">The text or image in your message contains sensitive content. Use a proper expression~</string>
+    <string name="video_call_other_all_security_tips">The text or image in the message contains sensitive content. Use a proper expression~~</string>
+    <string name="pstn_item_text">PSTN</string>
+    <string name="verification_code">Verification code</string>
+    <string name="gift_tips">The functionality entry point for display. You can implement the feature on your own</string>
+    <string name="earphone_tips">ASMR coming soon</string>
+    <string name="input_other_test_account">Enter a test account</string>
+    <string name="called_timeout_tips">Connection timeout, calling ended</string>
+    <string name="cancel_by_other">Conncetion cancelled</string>
+    <string name="call_failed">Failed to start the call</string>
+    <string name="personal_info_edit">Edit</string>
+    <string name="yun_xin">CommsEase</string>
+    <string name="app_long_name">One-on-one social app</string>
+    <string name="app_version">V 1.0.0</string>
+    <string name="avatar">avatar</string>
+    <string name="nick">Nickname</string>
+    <string name="title_level1">PSTN: </string>
+    <string name="title_level2">Level 2</string>
+    <string name="content2">1. App Persistence: \nIf App Persistence is enabled, a notification will be shown on the notification bar for testing purpose.\nThe feature allows the app to run in the background for a long time (mobile phones of different brands can persist for a different time) \n\n\n2. Audio call: \nSIP calls are automatically switched to audio calls if failed.\nIf you start an audio call by clicking Auido Call and fails to get connected after 15 seconds, you are switched to SIP calling. The trigger condition can be customized.\n\n\n3. SMS notification:\nThe feature can notify the called parity of call requests. Users can open the app can handle the requests.\nIf an audio or video call is connecting for 30 seconds and fails, an SMS notification will be delivered.</string>
+    <string name="content3">The following articles also restrict and applies to the user of this website and is referenced herewith:</string>
+    <string name="home_page">Home</string>
+    <string name="message">Message</string>
+    <string name="mine">My</string>
+    <string name="system_message_notify">System notification</string>
+    <string name="empty_message_text">No message\nTalk with your friends</string>
+    <string name="my_diamond">My diamonds</string>
+    <string name="my_follow">My followers</string>
+    <string name="who_like_me">Likes</string>
+    <string name="beauty_setting">Beauty settings</string>
+    <string name="common_setting">General</string>
+    <string name="todo_fuction_tips">The functionality entry point for display. You must implement the feature on your own</string>
+    <string name="todo_fuction_tips2">The functionality entry point for display</string>
+    <string name="logout">Log out</string>
+    <string name="save">Save</string>
+    <string name="please_input_other_phone">Enter the registered phone number</string>
+    <string name="please_input_correct_phone_number">Enter a valid phone number</string>
+    <string name="bind_phone_tips">Note: \nEnter a new phone number and click Save.</string>
+    <string name="binded_phone_number_empty">Phone number: unspecified</string>
+    <string name="other_phone_number">Phone number: </string>
+    <string name="audio_call_text">Audio call</string>
+    <string name="video_call_text">Video call</string>
+    <string name="please_input_phone_number_in_setting_page">Enter a test phone number in the General setting</string>
+    <string name="bind_mine_phone_number_error_tips">You cannot bind your own number.</string>
+    <string name="help_notes">Note</string>
+    <string name="help_notes_tips">Note: Register two accounts with two different phone numbers for test. On the My page--General--enter the phone number for a peer.</string>
+    <string name="help_notes_content">1. The demo app is used for demostrating the one-on-one social solution. You can try a complete set of features from registering, user list, profiles, message interface, and My page.\n\n2. To handle the low calling answer rate in one-on-one social scenario, the PSTN component is integrated.\n\n3. The advanced beauty feature is also added for free use.\n\n4. The content moderation service can moderate the inappropriate content of the user generated data.</string>
+    <string name="gift">Gift</string>
+    <string name="album">Album</string>
+    <string name="info">Info</string>
+    <string name="age">Age</string>
+    <string name="sing">Sing</string>
+    <string name="dance">Dance</string>
+    <string name="travel">Travel</string>
+    <string name="height">Height</string>
+    <string name="hobby">Hobby</string>
+    <string name="yes">YES</string>
+    <string name="no">No</string>
+    <string name="end_call">End</string>
+    <string name="sure_end_call">Do you want to end the call?</string>
+    <string name="call_out_failed">Calling failed</string>
+
+
+    <string name="bind_other_phone_failed_tips">The number you entered is unregistered. Please use a registered number.</string>
+    <string name="app_high_keep_alive_feature">Keep alive</string>
+    <string name="tips">Tip</string>
+    <string name="app_notification_tips">The notification permission must be turned on before opening foreground services</string>
+    <string name="sure">OK</string>
+    <string name="login_home_desc">Build an all-in-one social app</string>
+    <string name="phonenumber_error_tips">Incorrect test number. Try an new number</string>
+    <string name="log_upload">Log upload</string>
+    <string name="network_probe">Network probe</string>
+    <string name="app_data_center">Service node: </string>
+    <string name="app_yes">Yes</string>
+    <string name="app_no">No</string>
+    <string name="app_data_center_mainland">China</string>
+    <string name="app_data_center_oversea">Global</string>
+    <string name="app_probing_in_progress">Probing in progress</string>
+    <string name="app_beauty_setting">Beauty settings</string>
+    <string name="app_log_upload">Upload log</string>
+    <string name="app_network_detect">Network probe</string>
+    <string name="app_phone_consult">Support</string>
+    <string name="app_common_setting">General</string>
+    <string name="app_disclaimer">Disclaimer</string>
+    <string name="app_user_center">User Profile</string>
+    <string name="app_application">Application</string>
+    <string name="app_1v1">One-on-One Hangout</string>
+    <string name="app_1v1_desc">Higher call answer rate and a more engaging experience with low latency and HD video.</string>
+
+    <string-array name="beauty_option_tags">
+        <item>Skin</item>
+        <item>Shape</item>
+        <item>Filter</item>
+    </string-array>
+
+    <string name="network_quality">Network quality: </string>
+    <string name="quality_result">Result: </string>
+    <string name="network_rtt">Round-trip time: </string>
+    <string name="network_up_packet_loss_rate">Outbound packet loss rate: </string>
+    <string name="network_up_jitter">Outbound network jitter: </string>
+    <string name="network_up_avaliable_band_width">Outbound available bandwidth: </string>
+    <string name="network_down_packet_loss_rate">Inbound packet loss rate: </string>
+    <string name="network_down_jitter">Inbound network jitter: </string>
+    <string name="network_down_available_band_width">Inbound available bandwidth: </string>
+    <string name="please_wait_five_second_upload">Uploading，Please wait for 5 seconds</string>
+    <string name="probing_in_progress">Probing in progress</string>
+
+
+    <string name="quality_unknown">Unknown</string>
+    <string name="quality_excellent">Excellent</string>
+    <string name="quality_good">User experience similar to the excellent quality with a lower bitrate</string>
+    <string name="quality_poor">Poor user experience but communication still works</string>
+    <string name="quality_bad">Poor communication</string>
+    <string name="quality_vbad">Communication is almost unavailable</string>
+    <string name="quality_down">No communication</string>
+    <string name="state_result_complete">The Last-mile quality detection is complete.</string>
+    <string name="state_result_incomplete_no_bwe">The Last-mile quality detection does not include bandwidth prediction. The result is incomplete. The common reason is limited resources</string>
+    <string name="state_result_unavailable">No Last-mile quality detection is performed. The common reason is disconnection. </string>
+    <string name="user_sign">The falling leaves in autumn are so appealing.</string>
+    <string name="user_sing">Sing</string>
+    <string name="user_dance">Dance</string>
+    <string name="user_travel">Travel</string>
+    <string name="weight">Weight</string>
+    <string name="app_year"> years old</string>
+    <string name="login_tips">By logging in, you agree to CommsEase Privacy Policy and Terms of Service</string>
+    <string name="terms_of_service">Terms of Service</string>
+    <string name="general_settings">General settings</string>
+    <string name="one_on_one_message">Message</string>
+    <string name="app_tip">tips</string>
+    <string name="app_permission_content">CommsEase Party requires microphone and camera permissions to enable the use of audio, video, and live streaming.</string>
+    <string name="app_ok">OK</string>
+    <string name="sample_login_desc">CommsEase Party - 1-on-1 Social App\nSample App</string>
+    <string name="start_exploring">Start exploring</string>
+    <string name="logining">logining...</string>
+</resources>

@@ -4,9 +4,10 @@
 
 package com.netease.yunxin.app.oneonone.ui.custommessage;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import com.netease.yunxin.kit.alog.ALog;
-import com.netease.yunxin.kit.corekit.im.custom.CustomAttachment;
+import com.netease.yunxin.kit.chatkit.model.CustomAttachment;
 import org.json.JSONObject;
 
 public class PrivacyRiskAttachment extends CustomAttachment {
@@ -26,5 +27,19 @@ public class PrivacyRiskAttachment extends CustomAttachment {
   @Override
   protected JSONObject packData() {
     return new JSONObject();
+  }
+
+  @NonNull
+  @Override
+  public String toJsonStr() {
+    try {
+      JSONObject map = new JSONObject();
+      map.put("type", getCustomType());
+      map.put("data", packData());
+      return map.toString();
+    } catch (Exception e) {
+      e.printStackTrace();
+      return "";
+    }
   }
 }

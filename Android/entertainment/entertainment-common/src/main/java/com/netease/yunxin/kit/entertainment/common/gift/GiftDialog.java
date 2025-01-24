@@ -18,17 +18,14 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
-
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import com.netease.yunxin.kit.common.utils.SizeUtils;
 import com.netease.yunxin.kit.entertainment.common.R;
 import com.netease.yunxin.kit.entertainment.common.adapter.LiveBaseAdapter;
 import com.netease.yunxin.kit.entertainment.common.dialog.BottomBaseDialog;
-
 import java.util.List;
-
-import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 public class GiftDialog extends BottomBaseDialog {
 

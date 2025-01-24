@@ -14,20 +14,20 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import com.netease.nimlib.sdk.msg.constant.SessionTypeEnum;
+import com.netease.nimlib.sdk.v2.message.result.V2NIMSendMessageResult;
 import com.netease.yunxin.app.oneonone.ui.R;
 import com.netease.yunxin.app.oneonone.ui.utils.ChatUtil;
 import com.netease.yunxin.kit.alog.ALog;
 import com.netease.yunxin.kit.common.ui.dialog.BaseBottomDialog;
 import com.netease.yunxin.kit.common.utils.SizeUtils;
-import com.netease.yunxin.kit.corekit.im.provider.FetchCallback;
+import com.netease.yunxin.kit.corekit.im2.extend.ProgressFetchCallback;
 
 public class HotTopicDialog extends BaseBottomDialog {
   public static final String TAG = "HotTopicDialog";
-  private String sessionId = "";
+  private String targetAccountId = "";
 
-  public HotTopicDialog(String sessionId) {
-    this.sessionId = sessionId;
+  public HotTopicDialog(String targetAccountId) {
+    this.targetAccountId = targetAccountId;
   }
 
   @Nullable
@@ -74,25 +74,22 @@ public class HotTopicDialog extends BaseBottomDialog {
             topicViewHolder.itemView.setOnClickListener(
                 v -> {
                   ChatUtil.sendTextMessage(
-                      sessionId,
-                      SessionTypeEnum.P2P,
+                      targetAccountId,
                       hotTopic,
-                      false,
-                      new FetchCallback<Void>() {
+                      new ProgressFetchCallback<V2NIMSendMessageResult>() {
                         @Override
-                        public void onSuccess(@Nullable Void unused) {
-                          ALog.e(TAG, "sendTextMessage success");
-                        }
-
-                        @Override
-                        public void onFailed(int i) {
+                        public void onError(int i, @NonNull String s) {
                           ALog.e(TAG, "sendTextMessage onFailed,code:" + i);
                         }
 
                         @Override
-                        public void onException(@Nullable Throwable throwable) {
-                          ALog.e(TAG, "sendTextMessage onException,throwable:" + throwable);
+                        public void onSuccess(
+                            @Nullable V2NIMSendMessageResult v2NIMSendMessageResult) {
+                          ALog.i(TAG, "sendTextMessage success");
                         }
+
+                        @Override
+                        public void onProgress(int i) {}
                       });
                   dismiss();
                 });

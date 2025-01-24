@@ -47,26 +47,26 @@ public class UserInfoManager {
 
   // 设置用户信息
   public static void setUserInfo(
-     String userUuid,
-     String userToken,
-     String imToken,
-     String userName,
-     String icon,
-     String mobile) {
+      String userUuid,
+      String userToken,
+      String imToken,
+      String userName,
+      String icon,
+      String mobile) {
     ALog.i(
-       TAG,
-       "setIMUserInfo: userUuid:"
-       + userUuid
-       + " userToken:"
-       + userToken
-       + " imToken:"
-       + imToken
-       + " userName:"
-       + userName
-       + " icon:"
-       + icon
-       + " mobile:"
-       + mobile);
+        TAG,
+        "setIMUserInfo: userUuid:"
+            + userUuid
+            + " userToken:"
+            + userToken
+            + " imToken:"
+            + imToken
+            + " userName:"
+            + userName
+            + " icon:"
+            + icon
+            + " mobile:"
+            + mobile);
     selfUserUuid = userUuid;
     selfUserToken = userToken;
     selfImToken = imToken;
