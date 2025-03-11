@@ -5,13 +5,17 @@
 
 import UIKit
 
-public class NEEmotionAttachment: NSTextAttachment {
+open class NEEmotionAttachment: NSTextAttachment {
   private var _emotion: NIMInputEmoticon?
 
   public var emotion: NIMInputEmoticon? {
     set {
       _emotion = newValue
-      image = UIImage.ne_bundleImage(name: emotion?.fileName ?? "")
+      if NIMInputEmoticonManager.shared.isCustomEmojResource == false {
+        image = UIImage.ne_bundleImage(name: emotion?.fileName ?? "")
+      } else {
+        image = UIImage(named: emotion?.fileName ?? "")
+      }
     }
     get {
       _emotion

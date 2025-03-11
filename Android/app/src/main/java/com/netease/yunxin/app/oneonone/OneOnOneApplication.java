@@ -11,11 +11,8 @@ import com.netease.yunxin.app.oneonone.config.NimSDKOptionConfig;
 import com.netease.yunxin.app.oneonone.ui.utils.IMUIKitUtil;
 import com.netease.yunxin.kit.alog.ALog;
 import com.netease.yunxin.kit.entertainment.common.AppStatusManager;
-import com.netease.yunxin.kit.entertainment.common.utils.IconFontUtil;
 
 public class OneOnOneApplication extends Application {
-
-  private static final String TAG = "OneOnOneApplication";
 
   @Override
   public void onCreate() {
@@ -23,7 +20,6 @@ public class OneOnOneApplication extends Application {
     ALog.init(this, ALog.LEVEL_ALL);
     AppConfig.init(this);
     AppStatusManager.init(this);
-    IconFontUtil.getInstance().init(this);
     FURenderer.getInstance().init(this);
     IMUIKitUtil.initIMUIKit(this, NimSDKOptionConfig.getSDKOptions(this, AppConfig.getAppKey()));
   }

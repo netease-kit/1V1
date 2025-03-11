@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import Foundation
-import NECoreIMKit
+import NECoreIM2Kit
 import NERtcCallKit
 import NERtcSDK
 import NIMSDK
@@ -51,30 +51,27 @@ public class NEOneOnOneKit: NSObject {
     }
     NE.config.isDebug = isDebug
     NE.config.isOverSea = isOversea
-    let option = NERtcCallOptions()
-    option.apnsCerName = config.APNSCerName
-    option.voIPCerName = config.VoIPCerName ?? ""
-    option.globalInit = false
-    //      option.joinRtcWhenCall = true
 
     if overseaAndNotPrivte {
       NIMSDK.shared().serverSetting.lbsAddress = "https://lbs.netease.im/lbs/conf.jsp"
       NIMSDK.shared().serverSetting.linkAddress = "link-sg.netease.im:7000"
     }
-    //    NERtcCallKit.sharedInstance().setupAppKey(config.appKey, withRtcUid: UInt64(account.longLongValue), options: option)
     /// CallKit 初始化
-    let context = NERtcEngineContext()
-    context.appKey = config.appKey
+    let context = NESetupConfig(appkey: config.appKey)
     let logSetting = NERtcLogSetting()
     logSetting.logLevel = .info
     logSetting.logDir = rtcLogPath()
-    context.logSetting = logSetting
-    NERtcCallKit.sharedInstance().setupAppKey(config.appKey, options: option, with: context)
+    let rtcInfo = NERtcEngineContext()
+    rtcInfo.logSetting = logSetting
+    context.rtcInfo = rtcInfo
+    context.initRtcMode = .InitRtcInNeedDelayToAccept
+    NECallEngine.sharedInstance().setup(context)
+
     /// CoreImKit 初始化
-    let NIMOption = NIMSDKOption()
-    NIMOption.appKey = config.appKey
-    NIMOption.apnsCername = config.APNSCerName
-    IMKitClient.instance.setupCoreKitIM(NIMOption)
+    let opt = NIMSDKOption(appKey: config.appKey)
+    opt.apnsCername = config.APNSCerName
+    opt.v2 = true
+    IMKitClient.instance.setupIM(opt)
 
     isInitialized = true
     NEOneOnOneLog.successLog(kitTag, desc: "Successfully initialize.")
@@ -114,7 +111,7 @@ public class NEOneOnOneKit: NSObject {
   override init() {
     super.init()
     /// 添加监听
-    NERtcCallKit.sharedInstance().add(self)
+    NECallEngine.sharedInstance().addCall(self)
     NIMSDK.shared().loginManager.add(self)
     NIMSDK.shared().passThroughManager.add(self)
     NIMSDK.shared().chatManager.add(self)
@@ -123,7 +120,7 @@ public class NEOneOnOneKit: NSObject {
 
   deinit {
     /// 移除监听
-    NERtcCallKit.sharedInstance().remove(self)
+    NECallEngine.sharedInstance().removeCall(self)
     NIMSDK.shared().loginManager.remove(self)
     NIMSDK.shared().passThroughManager.remove(self)
     NIMSDK.shared().systemNotificationManager.remove(self)

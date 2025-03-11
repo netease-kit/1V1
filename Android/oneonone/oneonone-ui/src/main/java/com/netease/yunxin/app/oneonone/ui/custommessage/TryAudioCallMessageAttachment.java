@@ -4,10 +4,11 @@
 
 package com.netease.yunxin.app.oneonone.ui.custommessage;
 
+import androidx.annotation.NonNull;
 import com.netease.yunxin.app.oneonone.ui.constant.AppParams;
+import com.netease.yunxin.app.oneonone.ui.model.UserModel;
 import com.netease.yunxin.kit.alog.ALog;
-import com.netease.yunxin.kit.corekit.im.custom.CustomAttachment;
-import com.netease.yunxin.kit.corekit.im.model.UserInfo;
+import com.netease.yunxin.kit.chatkit.model.CustomAttachment;
 import java.util.HashMap;
 import java.util.Map;
 import org.json.JSONObject;
@@ -31,10 +32,10 @@ public class TryAudioCallMessageAttachment extends CustomAttachment {
     super(OneOnOneChatCustomMessageType.TRY_AUDIO_CALL_MESSAGE_TYPE);
   }
 
-  public TryAudioCallMessageAttachment(UserInfo userInfo) {
+  public TryAudioCallMessageAttachment(UserModel userInfo) {
     this();
     this.targetAccount = userInfo.getAccount();
-    this.targetNickname = userInfo.getUserInfoName();
+    this.targetNickname = userInfo.getNickname();
     this.targetAvatar = userInfo.getAvatar();
     this.targetMobile = userInfo.getMobile();
     Map<String, Object> extensionMap = userInfo.getExtensionMap();
@@ -75,8 +76,8 @@ public class TryAudioCallMessageAttachment extends CustomAttachment {
     return data;
   }
 
-  public UserInfo getUserInfo() {
-    UserInfo userInfo = new UserInfo(targetAccount, targetNickname, targetAvatar);
+  public UserModel getUserInfo() {
+    UserModel userInfo = new UserModel(targetAccount, targetNickname, targetAvatar);
     userInfo.setMobile(targetMobile);
     HashMap<String, Object> hashMap = new HashMap<>();
     hashMap.put(AppParams.CALLED_USER_MOBILE, targetMobile);
@@ -84,5 +85,19 @@ public class TryAudioCallMessageAttachment extends CustomAttachment {
     hashMap.put(AppParams.CALLED_AUDIO_URL, audioUrl);
     userInfo.setExtensionMap(hashMap);
     return userInfo;
+  }
+
+  @NonNull
+  @Override
+  public String toJsonStr() {
+    try {
+      JSONObject map = new JSONObject();
+      map.put("type", getCustomType());
+      map.put("data", packData());
+      return map.toString();
+    } catch (Exception e) {
+      e.printStackTrace();
+      return "";
+    }
   }
 }

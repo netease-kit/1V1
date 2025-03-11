@@ -4,18 +4,18 @@
 // found in the LICENSE file.
 
 import NEChatKit
-import NECoreIMKit
+import NECoreIM2Kit
 import UIKit
 
 @objcMembers
 open class SelectUserViewController: NEBaseSelectUserViewController {
-  override init(sessionId: String, showSelf: Bool = true) {
-    super.init(sessionId: sessionId, showSelf: showSelf)
+  override public init(conversationId: String, showSelf: Bool = true, showTeamMembers: Bool = false) {
+    super.init(conversationId: conversationId, showSelf: showSelf, showTeamMembers: showTeamMembers)
     className = "SelectUserViewController"
   }
 
   public required init?(coder: NSCoder) {
-    fatalError("init(coder:) has not been implemented")
+    super.init(coder: coder)
   }
 
   override func commonUI() {
@@ -34,11 +34,11 @@ open class SelectUserViewController: NEBaseSelectUserViewController {
       withIdentifier: "\(ChatTeamMemberCell.self)",
       for: indexPath
     ) as! ChatTeamMemberCell
-    if indexPath.row == 0 {
+    if indexPath.section == 0 {
       cell.headerView.image = UIImage.ne_imageNamed(name: "chat_team")
       cell.nameLabel.text = chatLocalizable("user_select_all")
     } else {
-      if let model = teamInfo?.users[indexPath.row - 1] {
+      if let model = teamInfo?.users[indexPath.row] {
         cell.configure(model)
       }
     }

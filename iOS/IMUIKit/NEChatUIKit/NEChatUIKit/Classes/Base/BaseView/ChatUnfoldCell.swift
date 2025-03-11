@@ -6,12 +6,12 @@
 import UIKit
 
 @objcMembers
-public class ChatUnfoldCell: ChatCornerCell {
-  lazy var arrowImage: UIImageView = {
-    let arrow = UIImageView()
-    arrow.translatesAutoresizingMaskIntoConstraints = false
-    arrow.image = UIImage.ne_imageNamed(name: "arrowDown")
-    return arrow
+open class ChatUnfoldCell: ChatCornerCell {
+  lazy var arrowImageView: UIImageView = {
+    let arrowImageView = UIImageView()
+    arrowImageView.translatesAutoresizingMaskIntoConstraints = false
+    arrowImageView.image = UIImage.ne_imageNamed(name: "arrowDown")
+    return arrowImageView
   }()
 
   lazy var contentLabel: UILabel = {
@@ -22,23 +22,12 @@ public class ChatUnfoldCell: ChatCornerCell {
     return label
   }()
 
-  override public func awakeFromNib() {
-    super.awakeFromNib()
-    // Initialization code
-  }
-
-  override public func setSelected(_ selected: Bool, animated: Bool) {
-    super.setSelected(selected, animated: animated)
-
-    // Configure the view for the selected state
-  }
-
-  override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
+  override public init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
     super.init(style: style, reuseIdentifier: reuseIdentifier)
     setupUI()
   }
 
-  required init?(coder: NSCoder) {
+  public required init?(coder: NSCoder) {
     super.init(coder: coder)
   }
 
@@ -49,18 +38,18 @@ public class ChatUnfoldCell: ChatCornerCell {
       contentLabel.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
     ])
 
-    contentView.addSubview(arrowImage)
+    contentView.addSubview(arrowImageView)
     NSLayoutConstraint.activate([
-      arrowImage.leftAnchor.constraint(equalTo: contentLabel.rightAnchor, constant: 5),
-      arrowImage.centerYAnchor.constraint(equalTo: contentLabel.centerYAnchor),
+      arrowImageView.leftAnchor.constraint(equalTo: contentLabel.rightAnchor, constant: 5),
+      arrowImageView.centerYAnchor.constraint(equalTo: contentLabel.centerYAnchor),
     ])
   }
 
   func changeToArrowUp() {
-    arrowImage.image = UIImage.ne_imageNamed(name: "arrowUp")
+    arrowImageView.image = UIImage.ne_imageNamed(name: "arrowUp")
   }
 
   func changeToArrowDown() {
-    arrowImage.image = UIImage.ne_imageNamed(name: "arrowDown")
+    arrowImageView.image = UIImage.ne_imageNamed(name: "arrowDown")
   }
 }

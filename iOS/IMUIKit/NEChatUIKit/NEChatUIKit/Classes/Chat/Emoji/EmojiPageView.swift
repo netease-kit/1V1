@@ -19,20 +19,31 @@ import UIKit
   @objc optional func needScrollAnimation() -> Bool
 }
 
-public class EmojiPageView: UIView {
-  public weak var dataSource: EmojiPageViewDataSource?
-  public weak var pageViewDelegate: EmojiPageViewDelegate?
+open class EmojiPageView: UIView {
+  open weak var dataSource: EmojiPageViewDataSource?
+  open weak var pageViewDelegate: EmojiPageViewDelegate?
   private var currentPage: NSInteger = 0
   private var pages = [AnyObject]()
   private let className = "EmojiPageView"
+
+  private lazy var scrollView: UIScrollView = {
+    let scrollView = UIScrollView(frame: self.bounds)
+    scrollView.autoresizingMask = .flexibleWidth
+    scrollView.showsVerticalScrollIndicator = false
+    scrollView.showsHorizontalScrollIndicator = false
+    scrollView.isPagingEnabled = true
+    scrollView.delegate = self
+    scrollView.scrollsToTop = false
+    return scrollView
+  }()
 
   override public init(frame: CGRect) {
     super.init(frame: frame)
     setupControls()
   }
 
-  required init?(coder: NSCoder) {
-    fatalError("init(coder:) has not been implemented")
+  public required init?(coder: NSCoder) {
+    super.init(coder: coder)
   }
 
   override public var frame: CGRect {
@@ -52,14 +63,14 @@ public class EmojiPageView: UIView {
     addSubview(scrollView)
   }
 
-  public func scrollToPage(page: NSInteger) {
+  open func scrollToPage(page: NSInteger) {
     if currentPage != page || page == 0 {
       currentPage = page
       reloadData()
     }
   }
 
-  public func reloadData() {
+  open func reloadData() {
     calculatePageNumbers()
     setupInit()
 //       reloadPage()
@@ -78,7 +89,7 @@ public class EmojiPageView: UIView {
   func reloadPage() {
     // reload时候记录上次位置
 //        guard let cPage = currentPage else {
-//            NELog.errorLog(className, desc: "❌currentPage is nil")
+//            NEALog.errorLog(className, desc: "currentPage is nil")
 //            return
 //        }
     if currentPage >= pages.count {
@@ -187,7 +198,7 @@ public class EmojiPageView: UIView {
     }
   }
 
-  override public func layoutSubviews() {
+  override open func layoutSubviews() {
     super.layoutSubviews()
     let size = bounds.size
     scrollView.contentSize = CGSize(
@@ -223,19 +234,6 @@ public class EmojiPageView: UIView {
 //        }
   }
 
-  // MARK: private method
-
-  private lazy var scrollView: UIScrollView = {
-    let scrollView = UIScrollView(frame: self.bounds)
-    scrollView.autoresizingMask = .flexibleWidth
-    scrollView.showsVerticalScrollIndicator = false
-    scrollView.showsHorizontalScrollIndicator = false
-    scrollView.isPagingEnabled = true
-    scrollView.delegate = self
-    scrollView.scrollsToTop = false
-    return scrollView
-  }()
-
   // MARK: 辅助方法
 
   func raisePageIndexChangedDelegate() {
@@ -248,7 +246,7 @@ public class EmojiPageView: UIView {
 }
 
 extension EmojiPageView: UIScrollViewDelegate {
-  public func scrollViewDidScroll(_ scrollView: UIScrollView) {
+  open func scrollViewDidScroll(_ scrollView: UIScrollView) {
     let width = scrollView.bounds.size.width
     let offsetX = scrollView.contentOffset.x
     let page = Int(abs(offsetX / width))
@@ -263,7 +261,7 @@ extension EmojiPageView: UIScrollViewDelegate {
     pageViewDelegate?.pageViewDidScroll?(self)
   }
 
-  public func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
+  open func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
     pageViewDelegate?.pageViewScrollEnd?(
       self,
       currentIndex: currentPage,

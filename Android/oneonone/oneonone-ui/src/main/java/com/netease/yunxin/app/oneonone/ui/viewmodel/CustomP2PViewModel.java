@@ -15,24 +15,37 @@ import androidx.annotation.Nullable;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.MutableLiveData;
 import com.netease.nimlib.sdk.NIMClient;
-import com.netease.nimlib.sdk.Observer;
-import com.netease.nimlib.sdk.RequestCallbackWrapper;
-import com.netease.nimlib.sdk.ResponseCode;
-import com.netease.nimlib.sdk.event.EventSubscribeService;
-import com.netease.nimlib.sdk.event.EventSubscribeServiceObserver;
-import com.netease.nimlib.sdk.event.model.Event;
-import com.netease.nimlib.sdk.event.model.EventSubscribeRequest;
-import com.netease.nimlib.sdk.event.model.NimEventType;
-import com.netease.nimlib.sdk.event.model.NimOnlineStateEvent;
-import com.netease.nimlib.sdk.msg.constant.MsgTypeEnum;
-import com.netease.nimlib.sdk.msg.constant.SessionTypeEnum;
-import com.netease.nimlib.sdk.msg.model.CustomNotification;
-import com.netease.nimlib.sdk.uinfo.UserServiceObserve;
-import com.netease.nimlib.sdk.uinfo.model.NimUserInfo;
+import com.netease.nimlib.sdk.v2.message.V2NIMClearHistoryNotification;
+import com.netease.nimlib.sdk.v2.message.V2NIMMessage;
+import com.netease.nimlib.sdk.v2.message.V2NIMMessageDeletedNotification;
+import com.netease.nimlib.sdk.v2.message.V2NIMMessageListener;
+import com.netease.nimlib.sdk.v2.message.V2NIMMessagePinNotification;
+import com.netease.nimlib.sdk.v2.message.V2NIMMessageQuickCommentNotification;
+import com.netease.nimlib.sdk.v2.message.V2NIMMessageRevokeNotification;
+import com.netease.nimlib.sdk.v2.message.V2NIMMessageService;
+import com.netease.nimlib.sdk.v2.message.V2NIMP2PMessageReadReceipt;
+import com.netease.nimlib.sdk.v2.message.V2NIMTeamMessageReadReceipt;
+import com.netease.nimlib.sdk.v2.message.enums.V2NIMMessageType;
+import com.netease.nimlib.sdk.v2.message.result.V2NIMSendMessageResult;
+import com.netease.nimlib.sdk.v2.notification.V2NIMBroadcastNotification;
+import com.netease.nimlib.sdk.v2.notification.V2NIMCustomNotification;
+import com.netease.nimlib.sdk.v2.notification.V2NIMNotificationListener;
+import com.netease.nimlib.sdk.v2.notification.V2NIMNotificationService;
+import com.netease.nimlib.sdk.v2.subscription.V2NIMSubscribeListener;
+import com.netease.nimlib.sdk.v2.subscription.V2NIMSubscriptionService;
+import com.netease.nimlib.sdk.v2.subscription.enums.V2NIMUserStatusType;
+import com.netease.nimlib.sdk.v2.subscription.model.V2NIMUserStatus;
+import com.netease.nimlib.sdk.v2.subscription.option.V2NIMSubscribeUserStatusOption;
+import com.netease.nimlib.sdk.v2.subscription.option.V2NIMUnsubscribeUserStatusOption;
+import com.netease.nimlib.sdk.v2.user.V2NIMUser;
+import com.netease.nimlib.sdk.v2.user.V2NIMUserListener;
+import com.netease.nimlib.sdk.v2.user.V2NIMUserService;
+import com.netease.nimlib.sdk.v2.utils.V2NIMConversationIdUtil;
 import com.netease.yunxin.app.oneonone.ui.custommessage.GiftAttachment;
 import com.netease.yunxin.app.oneonone.ui.http.HttpService;
 import com.netease.yunxin.app.oneonone.ui.model.ModelResponse;
 import com.netease.yunxin.app.oneonone.ui.model.User;
+import com.netease.yunxin.app.oneonone.ui.model.UserModel;
 import com.netease.yunxin.app.oneonone.ui.model.YidunAntiSpamResModel;
 import com.netease.yunxin.app.oneonone.ui.utils.ChatUIConfigManager;
 import com.netease.yunxin.app.oneonone.ui.utils.ChatUtil;
@@ -44,16 +57,16 @@ import com.netease.yunxin.kit.call.p2p.model.NECallEngineDelegate;
 import com.netease.yunxin.kit.call.p2p.model.NECallEngineDelegateAbs;
 import com.netease.yunxin.kit.call.p2p.model.NEHangupReasonCode;
 import com.netease.yunxin.kit.chatkit.model.IMMessageInfo;
-import com.netease.yunxin.kit.chatkit.repo.ChatObserverRepo;
-import com.netease.yunxin.kit.chatkit.repo.ChatRepo;
+import com.netease.yunxin.kit.chatkit.repo.ContactRepo;
+import com.netease.yunxin.kit.chatkit.repo.SettingRepo;
 import com.netease.yunxin.kit.common.utils.SPUtils;
-import com.netease.yunxin.kit.corekit.im.model.EventObserver;
-import com.netease.yunxin.kit.corekit.im.model.UserInfo;
-import com.netease.yunxin.kit.corekit.im.provider.FetchCallback;
-import com.netease.yunxin.kit.corekit.im.repo.SettingRepo;
+import com.netease.yunxin.kit.corekit.im2.IMKitClient;
+import com.netease.yunxin.kit.corekit.im2.extend.FetchCallback;
+import com.netease.yunxin.kit.corekit.im2.extend.ProgressFetchCallback;
 import com.netease.yunxin.kit.entertainment.common.utils.UserInfoManager;
 import com.netease.yunxin.nertc.nertcvideocall.utils.GsonUtils;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import org.json.JSONException;
@@ -64,44 +77,102 @@ import retrofit2.Response;
 
 public class CustomP2PViewModel extends AndroidViewModel {
   private static final String TAG = "CustomP2PViewModel";
-  private String sessionId;
+  private String accId;
   private static final String ONLINE = "online";
   private static final int EXPIRY = 30 * 24 * 60 * 60;
   private final MutableLiveData<Boolean> onlineStatusData = new MutableLiveData<>();
   private final MutableLiveData<Boolean> typeStateLiveData = new MutableLiveData<>();
-  private final MutableLiveData<UserInfo> userInfoLiveData = new MutableLiveData<>();
+  private final MutableLiveData<UserModel> userInfoLiveData = new MutableLiveData<>();
   private final MutableLiveData<GiftAttachment> giftMessageLiveData = new MutableLiveData<>();
   private final MutableLiveData<Boolean> busyLiveData = new MutableLiveData<>();
-  private UserInfo userInfo;
+  private UserModel userInfo;
   private final Handler mainHandler = new Handler(Looper.getMainLooper());
   private static final String TYPE_STATE = "typing";
   private static final int DELAY_TIME = 300;
   private ChatUIConfigManager chatUIConfigManager;
-  private final EventObserver<List<IMMessageInfo>> incomingMessageObserver =
-      new EventObserver<List<IMMessageInfo>>() {
+  private V2NIMMessageListener messageListener =
+      new V2NIMMessageListener() {
         @Override
-        public void onEvent(@Nullable List<IMMessageInfo> event) {
-          if (event != null && !event.isEmpty()) {
-            for (IMMessageInfo messageInfo : event) {
-              // 消息发送者是当前会话对象
-              if (ChatUtil.isCurrentSessionMessage(messageInfo, sessionId)) {
-                if (ChatUtil.isGiftMessageType(messageInfo)) {
-                  giftMessageLiveData.setValue(
-                      (GiftAttachment) messageInfo.getMessage().getAttachment());
+        public void onReceiveMessages(List<V2NIMMessage> messages) {
+          if (messages != null) {
+            for (V2NIMMessage message : messages) {
+              if (message != null) {
+                // 消息发送者是当前会话对象
+                if (ChatUtil.isCurrentSessionMessage(message, accId)) {
+                  IMMessageInfo messageInfo1 = new IMMessageInfo(message);
+                  messageInfo1.parseAttachment();
+                  if (ChatUtil.isGiftMessageType(messageInfo1)) {
+                    giftMessageLiveData.setValue((GiftAttachment) message.getAttachment());
+                  }
                 }
               }
             }
           }
         }
-      };
-  private final Observer<List<NimUserInfo>> userInfoUpdateObserver =
-      new Observer<List<NimUserInfo>>() {
+
         @Override
-        public void onEvent(List<NimUserInfo> nimUserInfos) {
-          for (NimUserInfo nimUserInfo : nimUserInfos) {
-            if (TextUtils.equals(nimUserInfo.getAccount(), sessionId)) {
+        public void onReceiveP2PMessageReadReceipts(
+            List<V2NIMP2PMessageReadReceipt> readReceipts) {}
+
+        @Override
+        public void onReceiveTeamMessageReadReceipts(
+            List<V2NIMTeamMessageReadReceipt> readReceipts) {}
+
+        @Override
+        public void onMessageRevokeNotifications(
+            List<V2NIMMessageRevokeNotification> revokeNotifications) {}
+
+        @Override
+        public void onMessagePinNotification(V2NIMMessagePinNotification pinNotification) {}
+
+        @Override
+        public void onMessageQuickCommentNotification(
+            V2NIMMessageQuickCommentNotification quickCommentNotification) {}
+
+        @Override
+        public void onMessageDeletedNotifications(
+            List<V2NIMMessageDeletedNotification> messageDeletedNotifications) {}
+
+        @Override
+        public void onClearHistoryNotifications(
+            List<V2NIMClearHistoryNotification> clearHistoryNotifications) {}
+
+        @Override
+        public void onSendMessage(V2NIMMessage message) {
+          handleRiskMessage(message);
+        }
+
+        @Override
+        public void onReceiveMessagesModified(List<V2NIMMessage> messages) {}
+      };
+
+  private final V2NIMSubscribeListener subscribeListener =
+      new V2NIMSubscribeListener() {
+        @Override
+        public void onUserStatusChanged(List<V2NIMUserStatus> userStatusList) {
+          ALog.i(TAG, "onUserStatusChanged userStatusList = " + userStatusList);
+          if (userStatusList != null) {
+            for (V2NIMUserStatus event : userStatusList) {
+              if (event.getStatusType()
+                  == V2NIMUserStatusType.V2NIM_USER_STATUS_TYPE_LOGIN.getValue()) {
+                onlineStatusData.setValue(true);
+              } else {
+                onlineStatusData.setValue(false);
+              }
+            }
+          }
+        }
+      };
+
+  private final V2NIMUserListener userInfoUpdateObserver =
+      new V2NIMUserListener() {
+        @Override
+        public void onUserProfileChanged(List<V2NIMUser> users) {
+
+          for (V2NIMUser nimUserInfo : users) {
+            if (TextUtils.equals(nimUserInfo.getAccountId(), accId)) {
               if (userInfo != null) {
-                userInfo.setName(nimUserInfo.getName());
+                userInfo.nickname = (nimUserInfo.getName());
                 userInfoLiveData.setValue(userInfo);
               } else {
                 fetchTargetUserName();
@@ -110,37 +181,45 @@ public class CustomP2PViewModel extends AndroidViewModel {
             }
           }
         }
-      };
-  private final Observer<CustomNotification> customNotificationObserver =
-      notification -> {
-        ALog.d(
-            LIB_TAG,
-            TAG,
-            "mcustomNotificationObserver:"
-                + (notification == null ? "null" : notification.getTime()));
-        if (!sessionId.equals(notification.getSessionId())
-            || notification.getSessionType() != SessionTypeEnum.P2P) {
-          return;
-        }
-        String content = notification.getContent();
-        try {
-          JSONObject json = new JSONObject(content);
-          int id = json.getInt(TYPE_STATE);
-          if (id == 1) {
-            typeStateLiveData.postValue(true);
-          } else {
-            typeStateLiveData.postValue(false);
-          }
-        } catch (JSONException e) {
-          ALog.e(TAG, e.getMessage());
-        }
-      };
-  private final EventObserver<IMMessageInfo> msgObserver =
-      new EventObserver<IMMessageInfo>() {
+
         @Override
-        public void onEvent(@Nullable IMMessageInfo event) {
-          handleRiskMessage(event);
+        public void onBlockListAdded(V2NIMUser user) {}
+
+        @Override
+        public void onBlockListRemoved(String accountId) {}
+      };
+
+  private final V2NIMNotificationListener customNotificationObserver =
+      new V2NIMNotificationListener() {
+        @Override
+        public void onReceiveCustomNotifications(
+            List<V2NIMCustomNotification> customNotifications) {
+          for (V2NIMCustomNotification notification : customNotifications) {
+            ALog.d(
+                LIB_TAG,
+                TAG,
+                "customNotificationObserver:"
+                    + (notification == null ? "null" : notification.getTimestamp()));
+            if (notification != null) {
+              String content = notification.getContent();
+              try {
+                JSONObject json = new JSONObject(content);
+                int id = json.getInt(TYPE_STATE);
+                if (id == 1) {
+                  typeStateLiveData.postValue(true);
+                } else {
+                  typeStateLiveData.postValue(false);
+                }
+              } catch (JSONException e) {
+                ALog.e(TAG, e.getMessage());
+              }
+            }
+          }
         }
+
+        @Override
+        public void onReceiveBroadcastNotifications(
+            List<V2NIMBroadcastNotification> broadcastNotifications) {}
       };
 
   private final NECallEngineDelegate callEngineDelegate =
@@ -159,48 +238,66 @@ public class CustomP2PViewModel extends AndroidViewModel {
   }
 
   public void initialize(
-      String sessionId, UserInfo userInfo, ChatUIConfigManager chatUIConfigManager) {
-    this.sessionId = sessionId;
+      String accId, UserModel userInfo, ChatUIConfigManager chatUIConfigManager) {
+    this.accId = accId;
     this.userInfo = userInfo;
     this.chatUIConfigManager = chatUIConfigManager;
     listenOnlineEvent(true);
-    listenMessageStatusEvent(true);
-    NIMClient.getService(UserServiceObserve.class)
-        .observeUserInfoUpdate(userInfoUpdateObserver, true);
-    ChatObserverRepo.registerCustomNotificationObserve(customNotificationObserver);
+
+    NIMClient.getService(V2NIMUserService.class).addUserListener(userInfoUpdateObserver);
+    NIMClient.getService(V2NIMNotificationService.class)
+        .addNotificationListener(customNotificationObserver);
     NECallEngine.sharedInstance().addCallDelegate(callEngineDelegate);
     fetchTargetUserName();
-    getTargetUserInfo(sessionId);
+    getTargetUserInfo(accId);
     // 语音消息改为扬声器播放
     SettingRepo.setHandsetMode(false);
-  }
+    IMKitClient.setSendMessageCallback(
+        new ProgressFetchCallback<V2NIMSendMessageResult>() {
+          @Override
+          public void onProgress(int i) {}
 
-  private void fetchTargetUserName() {
-    ChatRepo.fetchUserInfo(
-        sessionId,
-        new FetchCallback<UserInfo>() {
-          public void onSuccess(@Nullable UserInfo param) {
-            ALog.i(TAG, "fetchUserInfo success param:" + param);
-            userInfo = param;
-            if (userInfo != null) {
-              userInfoLiveData.setValue(userInfo);
-            }
+          @Override
+          public void onSuccess(@Nullable V2NIMSendMessageResult v2NIMSendMessageResult) {
+            ALog.e(TAG, "sendMessage onSuccess");
+            handleRiskMessage(v2NIMSendMessageResult);
           }
 
-          public void onFailed(int code) {
-            ALog.e(TAG, "fetchUserInfo onFailed code:" + code);
-          }
-
-          public void onException(@Nullable Throwable exception) {
-            ALog.e(TAG, "fetchUserInfo onException exception:" + exception);
+          @Override
+          public void onError(int i, @NonNull String s) {
+            ALog.e(TAG, "sendMessage onError code:" + i + ",msg:" + s);
           }
         });
   }
 
-  private void getTargetUserInfo(String sessionId) {
+  private void fetchTargetUserName() {
+    ContactRepo.getUserInfo(
+        Collections.singletonList(accId),
+        new FetchCallback<List<V2NIMUser>>() {
+          @Override
+          public void onError(int code, @Nullable String s) {
+            ALog.e(TAG, "fetchUserInfo onFailed code:" + code);
+          }
+
+          @Override
+          public void onSuccess(@Nullable List<V2NIMUser> v2NIMUsers) {
+            ALog.i(TAG, "fetchUserInfo success v2NIMUsers:" + v2NIMUsers);
+            userInfo = new UserModel();
+            if (v2NIMUsers != null && v2NIMUsers.get(0) != null) {
+              userInfo.nickname = v2NIMUsers.get(0).getName();
+              userInfo.account = v2NIMUsers.get(0).getAccountId();
+              userInfo.avatar = v2NIMUsers.get(0).getAvatar();
+              userInfo.mobile = v2NIMUsers.get(0).getMobile();
+            }
+            userInfoLiveData.setValue(userInfo);
+          }
+        });
+  }
+
+  private void getTargetUserInfo(String accId) {
     HttpService.getInstance()
         .getUserInfo(
-            sessionId,
+            accId,
             new Callback<ModelResponse<User>>() {
               @Override
               public void onResponse(
@@ -213,7 +310,7 @@ public class CustomP2PViewModel extends AndroidViewModel {
                 if (data != null) {
                   userInfo = UserInfoUtil.generateUserInfo(data);
                   chatUIConfigManager.setUserInfo(userInfo);
-                  getUserState(userInfo.getMobile());
+                  getUserState(userInfo.mobile);
                   sendAccostMessage(userInfo);
                 }
               }
@@ -245,23 +342,23 @@ public class CustomP2PViewModel extends AndroidViewModel {
             });
   }
 
-  private void sendAccostMessage(UserInfo userInfo) {
+  private void sendAccostMessage(UserModel userInfo) {
     String key =
         new StringBuilder()
             .append("insert")
             .append(",")
-            .append(sessionId)
+            .append(accId)
             .append(",")
             .append(UserInfoManager.getSelfUserUuid())
             .toString();
     boolean hasInsert = SPUtils.getInstance().getBoolean(key, false);
-    if (hasInsert || ChatUtil.isSystemAccount(userInfo.getAccount())) {
+    if (hasInsert || ChatUtil.isSystemAccount(userInfo.account)) {
       return;
     }
     // 其他任何时间进来列表，看有没有发过"缘分妙不可言"，没发过则发送   记个sp   缘分妙不可言是一条本地消息
     mainHandler.postDelayed(
         () -> {
-          ChatUtil.insertAccostMessage(sessionId);
+          ChatUtil.insertAccostMessage(accId);
           int result = new Random().nextInt(2);
           if (result == 0) {
             ChatUtil.insertTryAudioCallMessage(userInfo);
@@ -281,7 +378,7 @@ public class CustomP2PViewModel extends AndroidViewModel {
     return typeStateLiveData;
   }
 
-  public MutableLiveData<UserInfo> getUserInfoLiveData() {
+  public MutableLiveData<UserModel> getUserInfoLiveData() {
     return userInfoLiveData;
   }
 
@@ -297,89 +394,91 @@ public class CustomP2PViewModel extends AndroidViewModel {
   protected void onCleared() {
     super.onCleared();
     listenOnlineEvent(false);
-    listenMessageStatusEvent(false);
-    NIMClient.getService(UserServiceObserve.class)
-        .observeUserInfoUpdate(userInfoUpdateObserver, false);
-    ChatObserverRepo.unregisterCustomNotificationObserve(customNotificationObserver);
+    NIMClient.getService(V2NIMUserService.class).removeUserListener(userInfoUpdateObserver);
+    NIMClient.getService(V2NIMNotificationService.class)
+        .removeNotificationListener(customNotificationObserver);
     registerReceiveMessageObserve(false);
     NECallEngine.sharedInstance().removeCallDelegate(callEngineDelegate);
   }
 
   private void listenOnlineEvent(boolean listen) {
-    EventSubscribeRequest eventSubscribeRequest = new EventSubscribeRequest();
-    eventSubscribeRequest.setEventType(NimEventType.ONLINE_STATE.getValue());
-    eventSubscribeRequest.setExpiry(EXPIRY);
     ArrayList<String> publishers = new ArrayList<>();
-    publishers.add(sessionId);
-    eventSubscribeRequest.setPublishers(publishers);
+    publishers.add(V2NIMConversationIdUtil.conversationTargetId(accId));
+    V2NIMSubscribeUserStatusOption option =
+        new V2NIMSubscribeUserStatusOption(publishers, EXPIRY, false);
+
+    V2NIMUnsubscribeUserStatusOption option1 = new V2NIMUnsubscribeUserStatusOption();
+    option1.setAccountIds(publishers);
+
     if (listen) {
-      NIMClient.getService(EventSubscribeService.class)
-          .subscribeEvent(eventSubscribeRequest)
-          .setCallback(
-              new RequestCallbackWrapper<List<String>>() {
-                @Override
-                public void onResult(int code, List<String> result, Throwable exception) {
-                  if (code == ResponseCode.RES_SUCCESS) {
-                    if (result != null && !result.isEmpty()) {
-                      for (String s : result) {
-                        ALog.i(TAG, "subscribeEvent,accId:" + s);
-                      }
-                    }
-                  }
-                }
-              });
+      NIMClient.getService(V2NIMSubscriptionService.class).subscribeUserStatus(option, null, null);
     } else {
-      NIMClient.getService(EventSubscribeService.class)
-          .unSubscribeEvent(eventSubscribeRequest)
-          .setCallback(
-              new RequestCallbackWrapper<List<String>>() {
-                @Override
-                public void onResult(int code, List<String> result, Throwable exception) {
-                  if (code == ResponseCode.RES_SUCCESS) {
-                    if (result != null && !result.isEmpty()) {
-                      for (String s : result) {
-                        ALog.i(TAG, "unSubscribeEvent,accId:" + s);
-                      }
-                    }
-                  }
-                }
-              });
+      NIMClient.getService(V2NIMSubscriptionService.class)
+          .unsubscribeUserStatus(option1, null, null);
     }
-    NIMClient.getService(EventSubscribeServiceObserver.class)
-        .observeEventChanged(
-            (Observer<List<Event>>)
-                events -> {
-                  ALog.i(TAG, "events:" + events);
-                  if (!events.isEmpty()) {
-                    for (Event event : events) {
-                      if (event.getEventType() == NimEventType.ONLINE_STATE.getValue()) {
-                        if (event.getEventValue()
-                            == NimOnlineStateEvent.OnlineStateEventValue.Login.getValue()) {
-                          onlineStatusData.setValue(true);
-                        } else {
-                          onlineStatusData.setValue(false);
-                        }
-                      }
-                    }
-                  }
-                },
-            listen);
+
+    NIMClient.getService(V2NIMSubscriptionService.class).addSubscribeListener(subscribeListener);
   }
 
-  private void listenMessageStatusEvent(boolean listen) {
-    // 监听消息状态变化
-    if (listen) {
-      ChatObserverRepo.registerMsgStatusObserve(msgObserver);
-    } else {
-      ChatObserverRepo.unregisterMsgStatusObserve(msgObserver);
-    }
-  }
-
-  private void handleRiskMessage(IMMessageInfo event) {
-    if (event != null && !TextUtils.isEmpty(event.getMessage().getYidunAntiSpamRes())) {
+  private void handleRiskMessage(V2NIMSendMessageResult sendMessageResult) {
+    if (sendMessageResult != null && sendMessageResult.getAntispamResult() != null) {
       boolean isHitCustomWords = false;
-      if (event.getMessage().getMsgType() == MsgTypeEnum.text) {
-        String yidunAntiSpamRes = event.getMessage().getYidunAntiSpamRes();
+      String yidunAntiSpamRes = sendMessageResult.getAntispamResult();
+      try {
+        JSONObject jsonObject = new JSONObject(yidunAntiSpamRes);
+        String ext = jsonObject.optString("ext");
+        ALog.i(TAG, "ext:" + ext);
+        YidunAntiSpamResModel.ExtBean extBean =
+            GsonUtils.fromJson(ext, YidunAntiSpamResModel.ExtBean.class);
+        if (extBean != null
+            && extBean.getAntispam() != null
+            && extBean.getAntispam().getLabels() != null
+            && !extBean.getAntispam().getLabels().isEmpty()) {
+          for (YidunAntiSpamResModel.ExtBean.AntispamBean.LabelsBean label :
+              extBean.getAntispam().getLabels()) {
+            List<YidunAntiSpamResModel.ExtBean.AntispamBean.LabelsBean.SubLabelsBean> subLabels =
+                label.getSubLabels();
+            if (subLabels != null && !subLabels.isEmpty()) {
+              for (YidunAntiSpamResModel.ExtBean.AntispamBean.LabelsBean.SubLabelsBean subLabel :
+                  subLabels) {
+                if (subLabel.getDetails() != null
+                    && subLabel.getDetails().getKeywords() != null
+                    && !subLabel.getDetails().getKeywords().isEmpty()) {
+                  List<
+                          YidunAntiSpamResModel.ExtBean.AntispamBean.LabelsBean.SubLabelsBean
+                              .DetailsBean.KeywordsBean>
+                      keywords = subLabel.getDetails().getKeywords();
+                  for (YidunAntiSpamResModel.ExtBean.AntispamBean.LabelsBean.SubLabelsBean
+                          .DetailsBean.KeywordsBean
+                      keyword : keywords) {
+                    if (keyword != null && !TextUtils.isEmpty(keyword.getWord())) {
+                      isHitCustomWords = true;
+                      break;
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+
+      } catch (JSONException e) {
+        ALog.e(TAG, "e:" + e);
+      }
+      if (isHitCustomWords) {
+        mainHandler.postDelayed(() -> ChatUtil.insertPrivacyRiskMessage(accId), DELAY_TIME);
+      } else {
+        mainHandler.postDelayed(() -> ChatUtil.insertCommonRiskMessage(accId), DELAY_TIME);
+      }
+    }
+  }
+
+  private void handleRiskMessage(V2NIMMessage message) {
+    if (message != null
+        && !TextUtils.isEmpty(message.getAntispamConfig().getAntispamCustomMessage())) {
+      boolean isHitCustomWords = false;
+      if (message.getMessageType() == V2NIMMessageType.V2NIM_MESSAGE_TYPE_TEXT) {
+        String yidunAntiSpamRes = message.getAntispamConfig().getAntispamCustomMessage();
         try {
           JSONObject jsonObject = new JSONObject(yidunAntiSpamRes);
           String ext = jsonObject.optString("ext");
@@ -419,25 +518,24 @@ public class CustomP2PViewModel extends AndroidViewModel {
           }
 
         } catch (JSONException e) {
-          e.printStackTrace();
           ALog.e(TAG, "e:" + e);
         }
         if (isHitCustomWords) {
-          mainHandler.postDelayed(() -> ChatUtil.insertPrivacyRiskMessage(sessionId), DELAY_TIME);
+          mainHandler.postDelayed(() -> ChatUtil.insertPrivacyRiskMessage(accId), DELAY_TIME);
         } else {
-          mainHandler.postDelayed(() -> ChatUtil.insertCommonRiskMessage(sessionId), DELAY_TIME);
+          mainHandler.postDelayed(() -> ChatUtil.insertCommonRiskMessage(accId), DELAY_TIME);
         }
       } else {
-        mainHandler.postDelayed(() -> ChatUtil.insertCommonRiskMessage(sessionId), DELAY_TIME);
+        mainHandler.postDelayed(() -> ChatUtil.insertCommonRiskMessage(accId), DELAY_TIME);
       }
     }
   }
 
   public void registerReceiveMessageObserve(boolean register) {
     if (register) {
-      ChatObserverRepo.registerReceiveMessageObserve(incomingMessageObserver);
+      NIMClient.getService(V2NIMMessageService.class).addMessageListener(messageListener);
     } else {
-      ChatObserverRepo.unregisterReceiveMessageObserve(incomingMessageObserver);
+      NIMClient.getService(V2NIMMessageService.class).removeMessageListener(messageListener);
     }
   }
 }

@@ -48,7 +48,6 @@ public class CallKitUtil {
             .rtcAppKey(appKey)
             // 非必要：这里是设置自定义Rtc uid，这里主要用于本Demo的业务服务器处理安全通业务逻辑，在音视频违规时，
             // 必要：当前用户 AccId
-            .currentUserAccId(UserInfoManager.getSelfUserUuid())
             .currentUserRtcUId(customRtcUid)
             .timeOutMillisecond(CallConfig.CALL_TOTAL_WAIT_TIMEOUT)
             // 此处为 收到来电时展示的 notification 相关配置，如图标，提示语等。

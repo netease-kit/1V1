@@ -4,9 +4,9 @@
 
 import Foundation
 
+/// 错误码
 @objcMembers
 
-/// 错误码
 public class NEOneOnOneErrorCode: NSObject {
   /// 失败
   public static var failed: Int { -1 }

@@ -28,6 +28,8 @@ Pod::Spec.new do |s|
     s.resource = 'NEConversationUIKit/Assets/**/*'
     s.dependency NECommonUIKit.name
     s.dependency NEChatKit.name
+    s.dependency MJRefresh.name
+
   else
     s.source = { :http => "https://yx-web-nosdn.netease.im/package/NEConversationUIKit_iOS_v9.4.0.framework.zip?download=NEConversationUIKit_iOS_v9.4.0.framework.zip" }
     
@@ -35,24 +37,32 @@ Pod::Spec.new do |s|
       nos.vendored_frameworks = 'NEConversationUIKit.framework'
       nos.dependency NEChatKit.NOS
       nos.dependency NECommonUIKit.name
+      nos.dependency MJRefresh.name, MJRefresh.version
+
     end
     
     s.subspec 'NOS_Special' do |nos|
       nos.vendored_frameworks = 'NEConversationUIKit.framework'
       nos.dependency NEChatKit.NOS_Special
       nos.dependency NECommonUIKit.name
+      nos.dependency MJRefresh.name
+
     end
     
     s.subspec 'FCS' do |fcs|
       fcs.vendored_frameworks = 'NEConversationUIKit.framework'
       fcs.dependency NEChatKit.FCS
       fcs.dependency NECommonUIKit.name
+      fcs.dependency MJRefresh.name, MJRefresh.version
+
     end
     
     s.subspec 'FCS_Special' do |fcs|
       fcs.vendored_frameworks = 'NEConversationUIKit.framework'
       fcs.dependency NEChatKit.FCS_Special
       fcs.dependency NECommonUIKit.name
+      fcs.dependency MJRefresh.name
+
     end
     s.default_subspecs = 'NOS'
   end

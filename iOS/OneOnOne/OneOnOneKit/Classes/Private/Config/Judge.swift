@@ -4,7 +4,7 @@
 
 import Foundation
 
-struct Judge {
+enum Judge {
   /// 前置条件判断
 //  static func preCondition<T: Any>(_ success: @escaping () -> Void,
 //                                   failure: NEOneOnOneCallback<T>? = nil) {

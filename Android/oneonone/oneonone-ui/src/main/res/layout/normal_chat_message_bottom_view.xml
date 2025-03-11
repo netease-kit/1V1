@@ -112,6 +112,19 @@
             android:gravity="center"
             android:visibility="gone"/>
 
+        <EditText
+            android:id="@+id/chatRichEt"
+            android:layout_width="0dp"
+            android:layout_height="0dp"/>
+        <FrameLayout
+            android:id="@+id/chatMsgInputSwitchLayout"
+            android:layout_width="0dp"
+            android:layout_height="0dp"/>
+
+        <ImageView
+            android:id="@+id/chatMsgInputSwitch"
+            android:layout_width="0dp"
+            android:layout_height="0dp"/>
 
     </com.netease.yunxin.kit.common.ui.widgets.RoundFrameLayout>
         <FrameLayout android:id="@+id/chat_message_input_right_container"

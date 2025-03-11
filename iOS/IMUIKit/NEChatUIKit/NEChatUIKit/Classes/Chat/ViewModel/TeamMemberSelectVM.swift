@@ -4,17 +4,37 @@
 
 import Foundation
 import NEChatKit
-import NECoreIMKit
+import NECoreIM2Kit
 import NIMSDK
 
 @objcMembers
-public class TeamMemberSelectVM: NSObject {
-  public var chatRepo = ChatRepo.shared
+open class TeamMemberSelectVM: NSObject {
+  public var teamRepo = TeamRepo.shared
   private let className = "TeamMemberSelectVM"
 
-  public func fetchTeamMembers(sessionId: String,
-                               _ completion: @escaping (Error?, ChatTeamInfoModel?) -> Void) {
-    NELog.infoLog(ModuleName + " " + className, desc: #function + ", sessionId: " + sessionId)
-    chatRepo.getTeamInfo(sessionId, completion)
+  let teamProvider = TeamProvider.shared
+
+  open func getTeamMembers(_ teamId: String,
+                           _ completion: @escaping (Error?, NETeamInfoModel?) -> Void) {
+    NEALog.infoLog(ModuleName + " " + className, desc: #function + ", teamId: " + teamId)
+    if let team = NETeamUserManager.shared.getTeamInfo(),
+       let teamMembers = NETeamUserManager.shared.getAllTeamMemberModels() {
+      let model = NETeamInfoModel()
+      model.team = team
+      model.users = teamMembers
+      completion(nil, model)
+    } else {
+      NETeamUserManager.shared.getAllTeamMembers(teamId, .TEAM_MEMBER_ROLE_QUERY_TYPE_ALL) { _ in
+        let team = NETeamUserManager.shared.getTeamInfo()
+        if let teamMembers = NETeamUserManager.shared.getAllTeamMemberModels() {
+          let model = NETeamInfoModel()
+          model.team = team
+          model.users = teamMembers
+          completion(nil, model)
+        } else {
+          completion(nil, nil)
+        }
+      }
+    }
   }
 }

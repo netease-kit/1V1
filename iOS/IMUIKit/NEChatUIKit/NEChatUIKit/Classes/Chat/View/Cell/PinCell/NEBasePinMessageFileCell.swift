@@ -7,16 +7,23 @@ import UIKit
 
 @objcMembers
 open class NEBasePinMessageFileCell: NEBasePinMessageCell {
-  public var bubbleImage = UIImageView()
-
-  lazy var imgView: UIImageView = {
-    let view_img = UIImageView()
-    view_img.translatesAutoresizingMaskIntoConstraints = false
-    view_img.backgroundColor = .clear
-    return view_img
+  public lazy var stateView: FileStateView = {
+    let stateView = FileStateView()
+    stateView.translatesAutoresizingMaskIntoConstraints = false
+    stateView.backgroundColor = .clear
+    return stateView
   }()
 
-  lazy var titleLabel: UILabel = {
+  public var bubbleImage = UIImageView()
+
+  public lazy var imgView: UIImageView = {
+    let imageView = UIImageView()
+    imageView.translatesAutoresizingMaskIntoConstraints = false
+    imageView.backgroundColor = .clear
+    return imageView
+  }()
+
+  public lazy var titleLabel: UILabel = {
     let label = UILabel()
     label.translatesAutoresizingMaskIntoConstraints = false
     label.isUserInteractionEnabled = false
@@ -27,7 +34,7 @@ open class NEBasePinMessageFileCell: NEBasePinMessageCell {
     return label
   }()
 
-  lazy var sizeLabel: UILabel = {
+  public lazy var sizeLabel: UILabel = {
     let label = UILabel()
     label.translatesAutoresizingMaskIntoConstraints = false
     label.textColor = UIColor(hexString: "#999999")
@@ -36,7 +43,7 @@ open class NEBasePinMessageFileCell: NEBasePinMessageCell {
     return label
   }()
 
-  lazy var labelView: UIView = {
+  public lazy var labelView: UIView = {
     let view = UIView()
     view.translatesAutoresizingMaskIntoConstraints = false
     view.isUserInteractionEnabled = false
@@ -68,7 +75,7 @@ open class NEBasePinMessageFileCell: NEBasePinMessageCell {
     // Configure the view for the selected state
   }
 
-  override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
+  override public init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
     super.init(style: style, reuseIdentifier: reuseIdentifier)
   }
 
@@ -95,7 +102,7 @@ open class NEBasePinMessageFileCell: NEBasePinMessageCell {
       bubbleImage.topAnchor.constraint(equalTo: line.bottomAnchor, constant: 12),
     ])
 
-    backView.addSubview(imgView)
+    bubbleImage.addSubview(imgView)
     NSLayoutConstraint.activate([
       imgView.leftAnchor.constraint(equalTo: bubbleImage.leftAnchor, constant: 10),
       imgView.topAnchor.constraint(equalTo: bubbleImage.topAnchor, constant: 10),
@@ -103,66 +110,97 @@ open class NEBasePinMessageFileCell: NEBasePinMessageCell {
       imgView.heightAnchor.constraint(equalToConstant: 32),
     ])
 
-    backView.addSubview(labelView)
+    bubbleImage.addSubview(labelView)
     NSLayoutConstraint.activate([
       labelView.leftAnchor.constraint(equalTo: imgView.rightAnchor, constant: 15),
       labelView.topAnchor.constraint(equalTo: bubbleImage.topAnchor, constant: 10),
       labelView.rightAnchor.constraint(equalTo: bubbleImage.rightAnchor, constant: -10),
       labelView.bottomAnchor.constraint(equalTo: bubbleImage.bottomAnchor, constant: 0),
     ])
+
+    bubbleImage.addSubview(stateView)
+    NSLayoutConstraint.activate([
+      stateView.leftAnchor.constraint(equalTo: bubbleImage.leftAnchor, constant: 10),
+      stateView.topAnchor.constraint(equalTo: bubbleImage.topAnchor, constant: 10),
+      stateView.widthAnchor.constraint(equalToConstant: 32),
+      stateView.heightAnchor.constraint(equalToConstant: 32),
+    ])
+
+    if let gesture = contentGesture {
+      bubbleImage.addGestureRecognizer(gesture)
+    }
   }
 
-  override public func configure(_ item: PinMessageModel) {
+  override open func configure(_ item: NEPinMessageModel) {
     super.configure(item)
-    if let fileObject = item.message.messageObject as? NIMFileObject {
-      var imageName = "file_unknown"
-      var displayName = "未知文件"
-      if let filePath = fileObject.path as? NSString {
-        displayName = filePath.lastPathComponent
-        switch filePath.pathExtension.lowercased() {
-        case file_doc_support:
-          imageName = "file_doc"
-        case file_xls_support:
-          imageName = "file_xls"
-        case file_img_support:
-          imageName = "file_img"
-        case file_ppt_support:
-          imageName = "file_ppt"
-        case file_txt_support:
-          imageName = "file_txt"
-        case file_audio_support:
-          imageName = "file_audio"
-        case file_vedio_support:
-          imageName = "file_vedio"
-        case file_zip_support:
-          imageName = "file_zip"
-        case file_pdf_support:
-          imageName = "file_pdf"
-        case file_html_support:
-          imageName = "file_html"
-        case "key", "keynote":
-          imageName = "file_keynote"
-        default:
-          imageName = "file_unknown"
+    if let fileObject = item.message.attachment as? V2NIMMessageFileAttachment {
+      if let fileModel = item.pinFileModel {
+        fileModel.cell = self
+        if fileModel.state == .Success {
+          stateView.state = .FileOpen
+        } else {
+          stateView.state = .FileDownload
+          stateView.setProgress(Float(fileModel.progress))
+          if fileModel.progress >= 100 {
+            fileModel.state = .Success
+          }
         }
       }
+
+      var imageName = "file_unknown"
+      var suffix = (fileObject.name as NSString).pathExtension.lowercased()
+      if suffix.isEmpty, let ext = fileObject.ext {
+        suffix = ext[(ext.index(after: ext.startIndex)) ..< ext.endIndex].lowercased()
+      }
+      switch suffix {
+      case file_doc_support:
+        imageName = "file_doc"
+      case file_xls_support:
+        imageName = "file_xls"
+      case file_img_support:
+        imageName = "file_img"
+      case file_ppt_support:
+        imageName = "file_ppt"
+      case file_txt_support:
+        imageName = "file_txt"
+      case file_audio_support:
+        imageName = "file_audio"
+      case file_video_support:
+        imageName = "file_vedio"
+      case file_zip_support:
+        imageName = "file_zip"
+      case file_pdf_support:
+        imageName = "file_pdf"
+      case file_html_support:
+        imageName = "file_html"
+      case "key", "keynote":
+        imageName = "file_keynote"
+      default:
+        imageName = "file_unknown"
+      }
+
       imgView.image = UIImage.ne_imageNamed(name: imageName)
-      titleLabel.text = fileObject.displayName ?? displayName
-      let size_B = Double(fileObject.fileLength)
-      var size_str = String(format: "%.1f B", size_B)
+      titleLabel.text = fileObject.name
+
+      let size_B = Double(fileObject.size)
+      var size_str = String(format: "%.2f B", size_B)
       if size_B > 1e3 {
         let size_KB = size_B / 1e3
-        size_str = String(format: "%.1f KB", size_KB)
+        size_str = String(format: "%.2f KB", size_KB)
         if size_KB > 1e3 {
           let size_MB = size_KB / 1e3
-          size_str = String(format: "%.1f MB", size_MB)
+          size_str = String(format: "%.2f MB", size_MB)
           if size_MB > 1e3 {
             let size_GB = size_KB / 1e6
-            size_str = String(format: "%.1f GB", size_GB)
+            size_str = String(format: "%.2f GB", size_GB)
           }
         }
       }
       sizeLabel.text = size_str
     }
+  }
+
+  open func uploadProgress(progress: UInt) {
+    stateView.setProgress(Float(progress))
   }
 }

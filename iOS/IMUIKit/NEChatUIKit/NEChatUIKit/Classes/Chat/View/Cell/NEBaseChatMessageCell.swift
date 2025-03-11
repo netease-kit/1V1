@@ -3,7 +3,8 @@
 // Use of this source code is governed by a MIT license that can be
 // found in the LICENSE file.
 
-import NECoreIMKit
+import NEChatKit
+import NECoreIM2Kit
 import NECoreKit
 import NIMSDK
 import UIKit
@@ -17,7 +18,7 @@ public protocol ChatBaseCellDelegate: NSObjectProtocol {
   func didLongPressAvatar(_ cell: UITableViewCell, _ model: MessageContentModel?)
 
   // 单击消息体
-  func didTapMessageView(_ cell: UITableViewCell, _ model: MessageContentModel?)
+  func didTapMessageView(_ cell: UITableViewCell, _ model: MessageContentModel?, _ replyModel: MessageModel?)
 
   // 长按消息体
   func didLongPressMessageView(_ cell: UITableViewCell, _ model: MessageContentModel?)
@@ -30,6 +31,15 @@ public protocol ChatBaseCellDelegate: NSObjectProtocol {
 
   // 单击已读未读按钮
   func didTapReadView(_ cell: UITableViewCell, _ model: MessageContentModel?)
+
+  // 单击多选按钮
+  func didTapSelectButton(_ cell: UITableViewCell, _ model: MessageContentModel?)
+
+  // 划词选中失去焦点
+  @objc optional func didTextViewLoseFocus(_ cell: UITableViewCell, _ model: MessageContentModel?)
+
+  // 消息即将展示
+  @objc optional func messageWillShow(_ cell: UITableViewCell, _ model: MessageContentModel?)
 }
 
 @objc
@@ -42,13 +52,13 @@ protocol ChatAudioCellProtocol {
 
 @objcMembers
 open class NEBaseChatMessageCell: NEChatBaseCell {
-  public var seletedBtn = UIButton(type: .custom) // 多选按钮
-  private let bubbleWidth: CGFloat = 218 // 气泡默认宽度
+  private let pinLabelMaxWidth: CGFloat = 280 // pin 文案最大宽度
   public weak var delegate: ChatBaseCellDelegate?
   public var contentModel: MessageContentModel? // 消息模型
 
   /// Left
   public var avatarImageLeft = UIImageView() // 左侧头像
+  public var avatarImageLeftAnchor: NSLayoutConstraint? // 左侧头像左侧布局依赖
   public var nameLabelLeft = UILabel() // 左侧头像文字（无头像预设）
   public var bubbleImageLeft = UIImageView() // 左侧气泡
   public var bubbleTopAnchorLeft: NSLayoutConstraint? // 左侧气泡顶部布局约束
@@ -71,11 +81,20 @@ open class NEBaseChatMessageCell: NEChatBaseCell {
   public var pinLabelRight = UILabel() // 右侧标记文案
   private var pinLabelHRight: NSLayoutConstraint? // 右侧标记文案宽度布局约束
   private var pinLabelWRight: NSLayoutConstraint? // 右侧标记文案高度布局约束
+
   // 已读未读视图
   public var readView = CirleProgressView(frame: CGRect(x: 0, y: 0, width: 16, height: 16))
+  public var activityView = ChatActivityIndicatorView() // 消息状态视图
+  public var activityViewCenterYAnchor: NSLayoutConstraint? // 消息状态视图 Y 布局约束
+  public var selectedButton = UIButton(type: .custom) // 多选按钮
+  public var selectedButtonCenterYAnchor: NSLayoutConstraint? // 多选按钮中心 Y 布局约束
+  public var timeLabel = UILabel() // 消息时间
+  public var timeLabelHeightAnchor: NSLayoutConstraint? // 消息时间高度约束
+
   // 已读未读点击手势
   private var tapGesture: UITapGestureRecognizer?
-  public var activityView = ChatActivityIndicatorView() // 消息状态视图
+
+  public let messageTextFont = UIFont.systemFont(ofSize: ChatUIConfig.shared.messageProperties.messageTextSize)
 
   override public init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
     super.init(style: style, reuseIdentifier: reuseIdentifier)
@@ -86,10 +105,35 @@ open class NEBaseChatMessageCell: NEChatBaseCell {
   }
 
   public required init?(coder: NSCoder) {
-    fatalError("init(coder:) has not been implemented")
+    super.init(coder: coder)
+  }
+
+  deinit {
+    gestureRecognizers?.forEach { gestrue in
+      removeGestureRecognizer(gestrue)
+    }
+  }
+
+  open func setBubbleImage() {
+    var image = ChatUIConfig.shared.messageProperties.leftBubbleBg ?? UIImage.ne_imageNamed(name: "chat_message_receive")
+    bubbleImageLeft.backgroundColor = ChatUIConfig.shared.messageProperties.receiveMessageBg
+    bubbleImageLeft.image = image?
+      .resizableImage(withCapInsets: ChatUIConfig.shared.messageProperties.backgroundImageCapInsets)
+
+    image = ChatUIConfig.shared.messageProperties.rightBubbleBg ?? UIImage.ne_imageNamed(name: "chat_message_send")
+    bubbleImageRight.backgroundColor = ChatUIConfig.shared.messageProperties.selfMessageBg
+    bubbleImageRight.image = image?
+      .resizableImage(withCapInsets: ChatUIConfig.shared.messageProperties.backgroundImageCapInsets)
   }
 
   open func initProperty() {
+    timeLabel.font = .systemFont(ofSize: ChatUIConfig.shared.messageProperties.timeTextSize)
+    timeLabel.textColor = ChatUIConfig.shared.messageProperties.timeTextColor
+    timeLabel.textAlignment = .center
+    timeLabel.translatesAutoresizingMaskIntoConstraints = false
+    timeLabel.accessibilityIdentifier = "id.messageTipText"
+    timeLabel.backgroundColor = .clear
+
     // avatar
     avatarImageLeft.backgroundColor = UIColor(hexString: "#537FF4")
     avatarImageLeft.translatesAutoresizingMaskIntoConstraints = false
@@ -108,13 +152,13 @@ open class NEBaseChatMessageCell: NEChatBaseCell {
     // name
     nameLabelLeft.textAlignment = .center
     nameLabelLeft.translatesAutoresizingMaskIntoConstraints = false
-    nameLabelLeft.font = UIFont.systemFont(ofSize: NEKitChatConfig.shared.ui.userNickTextSize)
-    nameLabelLeft.textColor = NEKitChatConfig.shared.ui.userNickColor
+    nameLabelLeft.font = UIFont.systemFont(ofSize: ChatUIConfig.shared.messageProperties.userNickTextSize)
+    nameLabelLeft.textColor = ChatUIConfig.shared.messageProperties.userNickColor
 
     nameLabelRight.textAlignment = .center
     nameLabelRight.translatesAutoresizingMaskIntoConstraints = false
-    nameLabelRight.font = UIFont.systemFont(ofSize: NEKitChatConfig.shared.ui.userNickTextSize)
-    nameLabelRight.textColor = NEKitChatConfig.shared.ui.userNickColor
+    nameLabelRight.font = UIFont.systemFont(ofSize: ChatUIConfig.shared.messageProperties.userNickTextSize)
+    nameLabelRight.textColor = ChatUIConfig.shared.messageProperties.userNickColor
 
     // fullName
     fullNameLabel.translatesAutoresizingMaskIntoConstraints = false
@@ -123,17 +167,10 @@ open class NEBaseChatMessageCell: NEChatBaseCell {
     fullNameLabel.accessibilityIdentifier = "id.fullNameLabel"
 
     //        bubbleImage
-    bubbleImageLeft.backgroundColor = NEKitChatConfig.shared.ui.receiveMessageBg
-    var image = NEKitChatConfig.shared.ui.leftBubbleBg ?? UIImage.ne_imageNamed(name: "chat_message_receive")
-    bubbleImageLeft.image = image?
-      .resizableImage(withCapInsets: UIEdgeInsets(top: 35, left: 25, bottom: 10, right: 25))
+    setBubbleImage()
     bubbleImageLeft.translatesAutoresizingMaskIntoConstraints = false
     bubbleImageLeft.isUserInteractionEnabled = true
 
-    bubbleImageRight.backgroundColor = NEKitChatConfig.shared.ui.selfMessageBg
-    image = NEKitChatConfig.shared.ui.rightBubbleBg ?? UIImage.ne_imageNamed(name: "chat_message_send")
-    bubbleImageRight.image = image?
-      .resizableImage(withCapInsets: UIEdgeInsets(top: 35, left: 25, bottom: 10, right: 25))
     bubbleImageRight.translatesAutoresizingMaskIntoConstraints = false
     bubbleImageRight.isUserInteractionEnabled = true
 
@@ -142,30 +179,58 @@ open class NEBaseChatMessageCell: NEChatBaseCell {
     pinLabelLeft.font = UIFont.systemFont(ofSize: 12)
     pinLabelLeft.textAlignment = .left
     pinLabelLeft.lineBreakMode = .byTruncatingMiddle
+    pinLabelLeft.accessibilityIdentifier = "id.signal"
 
     pinLabelRight.translatesAutoresizingMaskIntoConstraints = false
     pinLabelRight.textColor = UIColor.ne_greenText
     pinLabelRight.font = UIFont.systemFont(ofSize: 12)
     pinLabelRight.textAlignment = .right
     pinLabelRight.lineBreakMode = .byTruncatingMiddle
+    pinLabelRight.accessibilityIdentifier = "id.signal"
 
     pinImageLeft.translatesAutoresizingMaskIntoConstraints = false
     pinImageLeft.contentMode = .scaleAspectFit
 
     pinImageRight.translatesAutoresizingMaskIntoConstraints = false
     pinImageRight.contentMode = .scaleAspectFit
+
+    readView.translatesAutoresizingMaskIntoConstraints = false
+    readView.accessibilityIdentifier = "id.readView"
+
+    activityView.translatesAutoresizingMaskIntoConstraints = false
+    activityView.failButton.addTarget(self, action: #selector(resend), for: .touchUpInside)
+    activityView.accessibilityIdentifier = "id.status"
+
+    selectedButton.translatesAutoresizingMaskIntoConstraints = false
+    selectedButton.setImage(.ne_imageNamed(name: "unselect"), for: .normal)
+    selectedButton.setImage(.ne_imageNamed(name: "select"), for: .selected)
+    selectedButton.addTarget(self, action: #selector(selectButtonClicked), for: .touchUpInside)
   }
 
   open func baseCommonUI() {
-    baseCommonUIRight()
+    selectionStyle = .none
+    backgroundColor = .clear
+
+    // time
+    contentView.addSubview(timeLabel)
+    timeLabelHeightAnchor = timeLabel.heightAnchor.constraint(equalToConstant: CGFloat.greatestFiniteMagnitude)
+    timeLabelHeightAnchor?.isActive = true
+    NSLayoutConstraint.activate([
+      timeLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 0),
+      timeLabel.leftAnchor.constraint(equalTo: contentView.leftAnchor, constant: 0),
+      timeLabel.rightAnchor.constraint(equalTo: contentView.rightAnchor, constant: -0),
+    ])
+
     baseCommonUILeft()
+    baseCommonUIRight()
   }
 
   open func baseCommonUILeft() {
     contentView.addSubview(avatarImageLeft)
+    avatarImageLeftAnchor = avatarImageLeft.leftAnchor.constraint(equalTo: contentView.leftAnchor, constant: 16)
+    avatarImageLeftAnchor?.isActive = true
     NSLayoutConstraint.activate([
-      avatarImageLeft.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 4),
-      avatarImageLeft.leftAnchor.constraint(equalTo: contentView.leftAnchor, constant: 16),
+      avatarImageLeft.topAnchor.constraint(equalTo: timeLabel.bottomAnchor, constant: chat_content_margin),
       avatarImageLeft.widthAnchor.constraint(equalToConstant: 32),
       avatarImageLeft.heightAnchor.constraint(equalToConstant: 32),
     ])
@@ -179,34 +244,32 @@ open class NEBaseChatMessageCell: NEChatBaseCell {
     ])
 
     contentView.addSubview(fullNameLabel)
-    fullNameH = fullNameLabel.heightAnchor.constraint(equalToConstant: 0)
+    fullNameH = fullNameLabel.heightAnchor.constraint(equalToConstant: CGFloat.greatestFiniteMagnitude)
+    fullNameH?.isActive = true
     NSLayoutConstraint.activate([
       fullNameLabel.leftAnchor.constraint(equalTo: avatarImageLeft.rightAnchor, constant: chat_content_margin),
       fullNameLabel.rightAnchor.constraint(equalTo: contentView.rightAnchor, constant: -16),
       fullNameLabel.topAnchor.constraint(equalTo: avatarImageLeft.topAnchor),
-      fullNameH!,
     ])
 
     //  bubbleImageLeft
     contentView.addSubview(bubbleImageLeft)
     bubbleTopAnchorLeft = bubbleImageLeft.topAnchor.constraint(equalTo: fullNameLabel.bottomAnchor, constant: 0)
-    bubbleWLeft = bubbleImageLeft.widthAnchor.constraint(equalToConstant: bubbleWidth)
-    bubbleHLeft = bubbleImageLeft.heightAnchor.constraint(equalToConstant: bubbleWidth)
-    NSLayoutConstraint.activate([
-      bubbleTopAnchorLeft!,
-      bubbleImageLeft.leftAnchor.constraint(equalTo: avatarImageLeft.rightAnchor, constant: chat_content_margin),
-      bubbleWLeft!,
-      bubbleHLeft!,
-    ])
+    bubbleTopAnchorLeft?.isActive = true
+    bubbleWLeft = bubbleImageLeft.widthAnchor.constraint(equalToConstant: CGFloat.greatestFiniteMagnitude)
+    bubbleWLeft?.isActive = true
+    bubbleHLeft = bubbleImageLeft.heightAnchor.constraint(equalToConstant: CGFloat.greatestFiniteMagnitude)
+    bubbleHLeft?.isActive = true
+    bubbleImageLeft.leftAnchor.constraint(equalTo: avatarImageLeft.rightAnchor, constant: chat_content_margin).isActive = true
 
     contentView.addSubview(pinLabelLeft)
-    pinLabelHLeft = pinLabelLeft.heightAnchor.constraint(equalToConstant: 0)
-    pinLabelWLeft = pinLabelLeft.widthAnchor.constraint(equalToConstant: 210)
+    pinLabelHLeft = pinLabelLeft.heightAnchor.constraint(equalToConstant: CGFloat.greatestFiniteMagnitude)
+    pinLabelHLeft?.isActive = true
+    pinLabelWLeft = pinLabelLeft.widthAnchor.constraint(equalToConstant: pinLabelMaxWidth)
+    pinLabelWLeft?.isActive = true
     NSLayoutConstraint.activate([
-      pinLabelLeft.topAnchor.constraint(equalTo: bubbleImageLeft.bottomAnchor, constant: 4),
+      pinLabelLeft.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -4),
       pinLabelLeft.leftAnchor.constraint(equalTo: bubbleImageLeft.leftAnchor, constant: 14),
-      pinLabelWLeft!,
-      pinLabelHLeft!,
     ])
 
     contentView.addSubview(pinImageLeft)
@@ -218,15 +281,12 @@ open class NEBaseChatMessageCell: NEChatBaseCell {
   }
 
   open func baseCommonUIRight() {
-    selectionStyle = .none
-    backgroundColor = .clear
-
     contentView.addSubview(avatarImageRight)
     NSLayoutConstraint.activate([
       avatarImageRight.rightAnchor.constraint(equalTo: contentView.rightAnchor, constant: -16),
       avatarImageRight.widthAnchor.constraint(equalToConstant: 32),
       avatarImageRight.heightAnchor.constraint(equalToConstant: 32),
-      avatarImageRight.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 4),
+      avatarImageRight.topAnchor.constraint(equalTo: avatarImageLeft.topAnchor, constant: 0),
     ])
 
     contentView.addSubview(nameLabelRight)
@@ -238,29 +298,27 @@ open class NEBaseChatMessageCell: NEChatBaseCell {
     ])
 
     contentView.addSubview(bubbleImageRight)
-    bubbleWRight = bubbleImageRight.widthAnchor.constraint(equalToConstant: bubbleWidth)
-    bubbleHRight = bubbleImageRight.heightAnchor.constraint(equalToConstant: bubbleWidth)
+    bubbleWRight = bubbleImageRight.widthAnchor.constraint(equalToConstant: CGFloat.greatestFiniteMagnitude)
+    bubbleWRight?.isActive = true
+    bubbleHRight = bubbleImageRight.heightAnchor.constraint(equalToConstant: CGFloat.greatestFiniteMagnitude)
+    bubbleHRight?.isActive = true
     NSLayoutConstraint.activate([
-      bubbleImageRight.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 4),
+      bubbleImageRight.topAnchor.constraint(equalTo: avatarImageRight.topAnchor, constant: 0),
       bubbleImageRight.rightAnchor.constraint(equalTo: avatarImageRight.leftAnchor, constant: -chat_content_margin),
-      bubbleWRight!,
-      bubbleHRight!,
     ])
 
 //        activityView
     contentView.addSubview(activityView)
-    activityView.translatesAutoresizingMaskIntoConstraints = false
-    activityView.failBtn.addTarget(self, action: #selector(resend), for: .touchUpInside)
+    activityViewCenterYAnchor = activityView.centerYAnchor.constraint(equalTo: bubbleImageRight.centerYAnchor, constant: 0)
+    activityViewCenterYAnchor?.isActive = true
     NSLayoutConstraint.activate([
       activityView.rightAnchor.constraint(equalTo: bubbleImageRight.leftAnchor, constant: -chat_content_margin),
-      activityView.centerYAnchor.constraint(equalTo: bubbleImageRight.centerYAnchor, constant: 0),
-      activityView.widthAnchor.constraint(equalToConstant: 25),
-      activityView.heightAnchor.constraint(equalToConstant: 25),
+      activityView.widthAnchor.constraint(equalToConstant: 22),
+      activityView.heightAnchor.constraint(equalToConstant: 22),
     ])
 
 //        readView
     contentView.addSubview(readView)
-    readView.translatesAutoresizingMaskIntoConstraints = false
     NSLayoutConstraint.activate([
       readView.rightAnchor.constraint(equalTo: bubbleImageRight.leftAnchor, constant: -chat_content_margin),
       readView.bottomAnchor.constraint(equalTo: bubbleImageRight.bottomAnchor, constant: 0),
@@ -268,24 +326,22 @@ open class NEBaseChatMessageCell: NEChatBaseCell {
       readView.heightAnchor.constraint(equalToConstant: 16),
     ])
 
-//        seletedBtn
-    contentView.addSubview(seletedBtn)
-    seletedBtn.translatesAutoresizingMaskIntoConstraints = false
+//        selectedButton
+    contentView.addSubview(selectedButton)
     NSLayoutConstraint.activate([
-      seletedBtn.leftAnchor.constraint(equalTo: contentView.leftAnchor, constant: 16),
-      seletedBtn.centerYAnchor.constraint(equalTo: contentView.centerYAnchor, constant: 0),
-      seletedBtn.widthAnchor.constraint(equalToConstant: 18),
-      seletedBtn.heightAnchor.constraint(equalToConstant: 18),
+      selectedButton.leftAnchor.constraint(equalTo: contentView.leftAnchor, constant: 16),
+      selectedButton.widthAnchor.constraint(equalToConstant: 18),
+      selectedButton.heightAnchor.constraint(equalToConstant: 18),
     ])
 
     contentView.addSubview(pinLabelRight)
-    pinLabelHRight = pinLabelRight.heightAnchor.constraint(equalToConstant: 0)
+    pinLabelHRight = pinLabelRight.heightAnchor.constraint(equalToConstant: CGFloat.greatestFiniteMagnitude)
+    pinLabelHRight?.isActive = true
     pinLabelWRight = pinLabelRight.widthAnchor.constraint(equalToConstant: 210)
+    pinLabelWRight?.isActive = true
     NSLayoutConstraint.activate([
-      pinLabelRight.topAnchor.constraint(equalTo: bubbleImageRight.bottomAnchor, constant: 4),
+      pinLabelRight.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -4),
       pinLabelRight.rightAnchor.constraint(equalTo: bubbleImageRight.rightAnchor, constant: 0),
-      pinLabelWRight!,
-      pinLabelHRight!,
     ])
 
     contentView.addSubview(pinImageRight)
@@ -298,14 +354,15 @@ open class NEBaseChatMessageCell: NEChatBaseCell {
 
   open func addGesture() {
 //        avatar
-    let tapRight = UITapGestureRecognizer(target: self, action: #selector(tapAvatar))
-    tapRight.cancelsTouchesInView = false
-    avatarImageRight.addGestureRecognizer(tapRight)
-    let tapLeft = UITapGestureRecognizer(target: self, action: #selector(tapAvatar))
-    tapLeft.cancelsTouchesInView = false
-    avatarImageLeft.addGestureRecognizer(tapLeft)
+    let avatarTapRight = UITapGestureRecognizer(target: self, action: #selector(tapAvatar))
+    avatarTapRight.cancelsTouchesInView = false
+    avatarImageRight.addGestureRecognizer(avatarTapRight)
+    let avatarTapLeft = UITapGestureRecognizer(target: self, action: #selector(tapAvatar))
+    avatarTapLeft.cancelsTouchesInView = false
+    avatarImageLeft.addGestureRecognizer(avatarTapLeft)
 
     let avatarLongGesture = UILongPressGestureRecognizer(target: self, action: #selector(longPressAvatar))
+    avatarLongGesture.cancelsTouchesInView = false
     avatarImageLeft.addGestureRecognizer(avatarLongGesture)
 
     let messageTapRight = UITapGestureRecognizer(target: self, action: #selector(tapMessage))
@@ -315,30 +372,24 @@ open class NEBaseChatMessageCell: NEChatBaseCell {
     messageTapLeft.cancelsTouchesInView = false
     bubbleImageLeft.addGestureRecognizer(messageTapLeft)
 
-    let messageLongPressRight = UILongPressGestureRecognizer(
-      target: self,
-      action: #selector(longPress)
-    )
+    let messageLongPressRight = UILongPressGestureRecognizer(target: self, action: #selector(longPress))
     bubbleImageRight.addGestureRecognizer(messageLongPressRight)
-    let messageLongPressLeft = UILongPressGestureRecognizer(
-      target: self,
-      action: #selector(longPress)
-    )
+    let messageLongPressLeft = UILongPressGestureRecognizer(target: self, action: #selector(longPress))
     bubbleImageLeft.addGestureRecognizer(messageLongPressLeft)
 
     let tapReadView = UITapGestureRecognizer(target: self, action: #selector(tapReadView))
+    tapReadView.cancelsTouchesInView = false
     readView.addGestureRecognizer(tapReadView)
     tapGesture = tapReadView
   }
 
   open func initSubviewsLayout() {
-    if NEKitChatConfig.shared.ui.avatarType == .rectangle,
-       let radius = NEKitChatConfig.shared.ui.avatarCornerRadius {
-      avatarImageRight.layer.cornerRadius = radius
-      avatarImageLeft.layer.cornerRadius = radius
-    } else if NEKitChatConfig.shared.ui.avatarType == .cycle {
+    if ChatUIConfig.shared.messageProperties.avatarType == .cycle {
       avatarImageRight.layer.cornerRadius = 16.0
       avatarImageLeft.layer.cornerRadius = 16.0
+    } else if ChatUIConfig.shared.messageProperties.avatarCornerRadius > 0 {
+      avatarImageRight.layer.cornerRadius = ChatUIConfig.shared.messageProperties.avatarCornerRadius
+      avatarImageLeft.layer.cornerRadius = ChatUIConfig.shared.messageProperties.avatarCornerRadius
     } else {
       avatarImageRight.layer.cornerRadius = 16.0
       avatarImageLeft.layer.cornerRadius = 16.0
@@ -348,13 +399,11 @@ open class NEBaseChatMessageCell: NEChatBaseCell {
 //    MARK: event
 
   open func tapAvatar(tap: UITapGestureRecognizer) {
-    print(#function)
     delegate?.didTapAvatarView(self, contentModel)
   }
 
   open func tapMessage(tap: UITapGestureRecognizer) {
-    print(#function)
-    delegate?.didTapMessageView(self, contentModel)
+    delegate?.didTapMessageView(self, contentModel, contentModel?.replyedModel)
   }
 
   open func longPressAvatar(longPress: UITapGestureRecognizer) {
@@ -364,21 +413,8 @@ open class NEBaseChatMessageCell: NEChatBaseCell {
   }
 
   open func longPress(longPress: UILongPressGestureRecognizer) {
-    print(#function)
-    switch longPress.state {
-    case .began:
-      print("state:begin")
+    if longPress.state == .began {
       delegate?.didLongPressMessageView(self, contentModel)
-    case .changed:
-      print("state:changed")
-    case .ended:
-      print("state:ended")
-    case .cancelled:
-      print("state:cancelled")
-    case .failed:
-      print("state:failed")
-    default:
-      print("state:default")
     }
   }
 
@@ -388,32 +424,73 @@ open class NEBaseChatMessageCell: NEChatBaseCell {
   }
 
   open func tapReadView(tap: UITapGestureRecognizer) {
-    print(#function)
     delegate?.didTapReadView(self, contentModel)
+  }
+
+  open func selectButtonClicked() {
+    selectedButton.isSelected = !selectedButton.isSelected
+    if let model = contentModel {
+      model.isSelected = !model.isSelected
+    }
+    delegate?.didTapSelectButton(self, contentModel)
   }
 
 //    MARK: set data
 
+  /// 设置是否允许多选
+  /// - Parameters:
+  ///   - model: 数据模型
+  ///   - enableSelect: 是否处于多选状态
+  open func setSelect(_ model: MessageContentModel, _ enableSelect: Bool = false) {
+    // 多选框
+    selectedButton.isHidden = model.isRevoked || !enableSelect
+    selectedButton.isSelected = model.isSelected
+
+    // 多选状态下，头像右移
+    avatarImageLeftAnchor?.constant = enableSelect ? fun_chat_min_h : 16
+
+    // 多选状态下，消息状态视图（发送失败）位置下移，避免与多选重叠
+    activityViewCenterYAnchor?.constant = enableSelect ? model.contentSize.height / 2 - 12 : 0
+  }
+
   override open func setModel(_ model: MessageContentModel) {
-    guard let isSend = model.message?.isOutgoingMsg else {
-      return
-    }
+    setModel(model, model.message?.isSelf ?? false)
+  }
+
+  override open func setModel(_ model: MessageContentModel, _ isSend: Bool) {
     let bubbleW = isSend ? bubbleWRight : bubbleWLeft
     let bubbleH = isSend ? bubbleHRight : bubbleHLeft
     let nameLabel = isSend ? nameLabelRight : nameLabelLeft
     let avatarImage = isSend ? avatarImageRight : avatarImageLeft
 
     contentModel = model
+    contentModel?.cell = self
     tapGesture?.isEnabled = true
     showLeftOrRight(showRight: isSend)
-    updatePinStatus(model)
+    updatePinStatus(model, isSend)
+
+    // time
+    if let time = model.timeContent, !time.isEmpty {
+      timeLabelHeightAnchor?.constant = chat_timeCellH
+      timeLabel.text = time
+      timeLabel.isHidden = false
+    } else {
+      timeLabelHeightAnchor?.constant = 0
+      timeLabel.text = ""
+      timeLabel.isHidden = true
+    }
 
     bubbleW?.constant = model.contentSize.width
     bubbleH?.constant = model.contentSize.height
+    selectedButtonCenterYAnchor = selectedButton.centerYAnchor.constraint(equalTo: isSend ? bubbleImageRight.centerYAnchor : bubbleImageLeft.centerYAnchor)
+    selectedButtonCenterYAnchor?.priority = .defaultHigh
+    selectedButtonCenterYAnchor?.isActive = true
 
     // avatar
     nameLabel.text = model.shortName
-    if let avatarURL = model.avatar {
+    nameLabel.isHidden = true
+    avatarImage.backgroundColor = .clear
+    if let avatarURL = model.avatar, !avatarURL.isEmpty {
       avatarImage
         .sd_setImage(with: URL(string: avatarURL)) { image, error, type, url in
           if image != nil {
@@ -424,14 +501,14 @@ open class NEBaseChatMessageCell: NEChatBaseCell {
             avatarImage.image = nil
             nameLabel.isHidden = false
             avatarImage.backgroundColor = UIColor
-              .colorWithString(string: model.message?.from)
+              .colorWithString(string: ChatMessageHelper.getSenderId(model.message))
           }
         }
     } else {
       avatarImage.image = nil
       nameLabel.isHidden = false
       avatarImage.backgroundColor = UIColor
-        .colorWithString(string: model.message?.from)
+        .colorWithString(string: ChatMessageHelper.getSenderId(model.message))
     }
 
     if model.fullNameHeight > 0 {
@@ -445,59 +522,59 @@ open class NEBaseChatMessageCell: NEChatBaseCell {
     }
     fullNameH?.constant = CGFloat(model.fullNameHeight)
 
-    switch model.message?.deliveryState {
-    case .delivering:
-      activityView.messageStatus = .sending
-    case .deliveried:
-      // 同一个账号，在多端登录，被对方拉黑，需要根据isBlackListed判断，进而更新信息状态
-      if let isBlackMsg = model.message?.isBlackListed, isBlackMsg {
-        activityView.messageStatus = .failed
-      } else {
+    if isSend {
+      switch model.message?.sendingState {
+      case .MESSAGE_SENDING_STATE_SENDING:
+        activityView.messageStatus = .sending
+      case .MESSAGE_SENDING_STATE_SUCCEEDED:
         activityView.messageStatus = .successed
+      case .MESSAGE_SENDING_STATE_FAILED:
+        activityView.messageStatus = .failed
+      default:
+        activityView.messageStatus = .sending
       }
-    case .failed:
-      activityView.messageStatus = .failed
-    default: break
+    } else {
+      activityView.messageStatus = .successed
     }
 
-    if isSend, model.message?.deliveryState == .deliveried {
-      if model.message?.session?.sessionType == .P2P {
-        let receiptEnable = model.message?.setting?.teamReceiptEnabled ?? false
-        if receiptEnable,
-           IMKitClient.instance.repo.getShowReadStatus(),
-           NEKitChatConfig.shared.ui.showP2pMessageStatus == true {
-          readView.isHidden = false
-          if let read = model.message?.isRemoteRead, read {
-            readView.progress = 1
-          } else {
-            readView.progress = 0
-          }
-          // 未读消息需要判断是否被拉黑，拉黑情况，已读未读状态不展示。
-          if let isBlackMsg = model.message?.isBlackListed, isBlackMsg {
-            readView.isHidden = true
-          } else {
-            readView.isHidden = false
-          }
-
-        } else {
+    if isSend, model.message?.sendingState == .MESSAGE_SENDING_STATE_SUCCEEDED {
+      if model.message?.conversationType == .CONVERSATION_TYPE_P2P {
+        // 话单消息不显示已读未读
+        if model.type == .rtcCallRecord {
           readView.isHidden = true
+        } else {
+          let receiptEnable = model.message?.messageConfig?.readReceiptEnabled ?? false
+          if receiptEnable,
+             !model.isRevoked,
+             SettingRepo.shared.getShowReadStatus(),
+             ChatUIConfig.shared.messageProperties.showP2pMessageStatus == true {
+            readView.isHidden = false
+            if model.readCount == 1, model.unreadCount == 0 {
+              readView.progress = 1
+            } else {
+              readView.progress = 0
+            }
+          } else {
+            readView.isHidden = true
+          }
         }
-
-      } else if model.message?.session?.sessionType == .team {
-        let receiptEnable = model.message?.setting?.teamReceiptEnabled ?? false
+      } else if model.message?.conversationType == .CONVERSATION_TYPE_TEAM {
+        let receiptEnable = model.message?.messageConfig?.readReceiptEnabled ?? false
         if receiptEnable,
-           IMKitClient.instance.repo.getShowReadStatus(),
-           NEKitChatConfig.shared.ui.showTeamMessageStatus == true {
+           !model.isRevoked,
+           SettingRepo.shared.getShowReadStatus(),
+           ChatUIConfig.shared.messageProperties.showTeamMessageStatus == true {
           readView.isHidden = false
-          let readCount = model.message?.teamReceiptInfo?.readCount ?? 0
-          let unreadCount = model.message?.teamReceiptInfo?.unreadCount ?? 0
-          let total = Float(readCount + unreadCount)
-          if (readCount + unreadCount) >= NEKitChatConfig.shared.maxReadingNum {
+          var total = NETeamUserManager.shared.getTeamInfo()?.memberCount ?? 0
+          if model.readCount + model.unreadCount != 0 {
+            total = model.readCount + model.unreadCount + 1
+          }
+          if total >= ChatUIConfig.shared.maxReadingNum {
             readView.isHidden = true
             return
           }
-          if total > 0 {
-            let progress = Float(readCount) / total
+          if total - 1 > 0 {
+            let progress = Float(model.readCount) / Float(total - 1)
             readView.progress = progress
             if progress >= 1.0 {
               tapGesture?.isEnabled = false
@@ -512,6 +589,8 @@ open class NEBaseChatMessageCell: NEChatBaseCell {
     } else {
       readView.isHidden = true
     }
+
+    delegate?.messageWillShow?(self, model)
   }
 
   /// 根据消息发送方向决定元素的显隐
@@ -524,20 +603,23 @@ open class NEBaseChatMessageCell: NEChatBaseCell {
     pinLabelLeft.isHidden = showRight
     fullNameLabel.isHidden = showRight
 
-    activityView.isHidden = !showRight
     avatarImageRight.isHidden = !showRight
     nameLabelRight.isHidden = !showRight
     bubbleImageRight.isHidden = !showRight
     pinImageRight.isHidden = !showRight
     pinLabelRight.isHidden = !showRight
+    activityView.isHidden = !showRight
     readView.isHidden = !showRight
   }
 
+  /// 重置文本选中状态
+  open func resetSelectRange() {}
+
+  /// 选中所有文本
+  open func selectAllRange() {}
+
   /// 更新标记状态
-  open func updatePinStatus(_ model: MessageContentModel) {
-    guard let isSend = model.message?.isOutgoingMsg else {
-      return
-    }
+  open func updatePinStatus(_ model: MessageContentModel, _ isSend: Bool) {
     let pinLabel = isSend ? pinLabelRight : pinLabelLeft
     let pinImage = isSend ? pinImageRight : pinImageLeft
     let pinLabelH = isSend ? pinLabelHRight : pinLabelHLeft
@@ -545,26 +627,22 @@ open class NEBaseChatMessageCell: NEChatBaseCell {
 
     pinLabel.isHidden = !model.isPined
     pinImage.isHidden = !model.isPined
-    contentView.backgroundColor = model.isPined ? NEKitChatConfig.shared.ui
-      .signalBgColor : .clear
+    contentView.backgroundColor = model.isPined ? ChatUIConfig.shared.messageProperties.signalBgColor : .clear
     if model.isPined {
-      let pinText = model.message?.session?.sessionType == .P2P ? chatLocalizable("pin_text_P2P") : chatLocalizable("pin_text_team")
+      let pinText = String(format: chatLocalizable("pin_text"), chatLocalizable("You"))
       if model.pinAccount == nil {
-        pinLabel.text = chatLocalizable("You") + " " + pinText
-      } else if let account = model.pinAccount, account == NIMSDK.shared().loginManager.currentAccount() {
-        pinLabel.text = chatLocalizable("You") + " " + pinText
+        pinLabel.text = pinText
+      } else if let account = model.pinAccount, account == IMKitClient.instance.account() {
+        pinLabel.text = pinText
       } else if let text = model.pinShowName {
-        pinLabel.text = text + pinText
+        pinLabel.text = String(format: chatLocalizable("pin_text"), text)
       }
 
       pinImage.image = UIImage.ne_imageNamed(name: "msg_pin")
-      let size = String.getTextRectSize(
-        pinLabel.text ?? pinText,
-        font: UIFont.systemFont(ofSize: 12.0),
-        size: CGSize(width: kScreenWidth - 56 - 22, height: CGFloat.greatestFiniteMagnitude)
-      )
+      let showText = pinLabel.text ?? pinText
+      let size = String.getRealSize(showText, .systemFont(ofSize: 12), CGSize(width: pinLabelMaxWidth, height: CGFloat.greatestFiniteMagnitude))
       pinLabelH?.constant = CGFloat(chat_pin_height)
-      pinLabelW?.constant = size.width + 1
+      pinLabelW?.constant = min(size.width + 1, pinLabelMaxWidth)
     } else {
       pinImage.image = nil
       pinLabelH?.constant = 0

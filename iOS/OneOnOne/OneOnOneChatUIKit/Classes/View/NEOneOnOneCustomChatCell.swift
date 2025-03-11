@@ -222,8 +222,8 @@ class NEOneOnOneRewardRightCell: NEBaseChatMessageCell {
   override func setModel(_ model: MessageContentModel) {
     print("this is reward message")
     super.setModel(model)
-    if let messageObject = model.message?.messageObject as? NIMCustomObject,
-       let attach = messageObject.attachment as? CustomAttachment {
+    if let messageObject = model.message?.attachment?.raw {
+      let attach = CustomAttachment(customJsonSrting: messageObject)
       salutionCell.setModel(attach)
     }
   }
@@ -272,8 +272,8 @@ class NEOneOnOneRewardLeftCell: NEBaseChatMessageCell {
   override func setModel(_ model: MessageContentModel) {
     print("this is reward message")
     super.setModel(model)
-    if let messageObject = model.message?.messageObject as? NIMCustomObject,
-       let attach = messageObject.attachment as? CustomAttachment {
+    if let messageObject = model.message?.attachment?.raw {
+      let attach = CustomAttachment(customJsonSrting: messageObject)
       salutionCell.setModel(attach)
     }
   }
@@ -325,15 +325,16 @@ class NEOneOnOneOfficialCell: NEBaseChatMessageCell {
   override func setModel(_ model: MessageContentModel) {
     print("this is official message")
     super.setModel(model)
-    if let messageObject = model.message?.messageObject as? NIMCustomObject,
-       let attach = messageObject.attachment as? CustomAttachment {
+
+    if let messageObject = model.message?.attachment?.raw {
+      let attach = CustomAttachment(customJsonSrting: messageObject)
       salutionCell.setModel(attach)
       if let msg = attach.msg {
         let size = NEOneOnOneOfficialSalution.getSize(content: msg)
         salutionCell.snp.updateConstraints { make in
           make.bottom.equalToSuperview()
-          make.width.equalTo(size.width)
-          make.height.equalTo(size.height)
+          make.width.equalTo(ceil(size.width))
+          make.height.equalTo(ceil(size.height))
           make.left.equalTo(avatarImageLeft.snp.right).offset(8)
         }
       }

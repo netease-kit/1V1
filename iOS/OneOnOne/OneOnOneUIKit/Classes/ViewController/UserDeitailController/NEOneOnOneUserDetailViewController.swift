@@ -267,7 +267,6 @@ import UIKit
       } else {
         return NEOneOnOneUserDetailBottomCell()
       }
-
     default:
       return UITableViewCell()
     }

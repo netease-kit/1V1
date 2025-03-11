@@ -6,7 +6,7 @@
 import UIKit
 
 @objcMembers
-public class ChatHeaderView: UIView {
+open class ChatHeaderView: UIView {
   public lazy var titleLabel: UILabel = {
     let label = UILabel()
     label.font = DefaultTextFont(12)
@@ -15,20 +15,12 @@ public class ChatHeaderView: UIView {
     return label
   }()
 
-  /*
-   // Only override draw() if you perform custom drawing.
-   // An empty implementation adversely affects performance during animation.
-   override func draw(_ rect: CGRect) {
-       // Drawing code
-   }
-   */
-
-  override init(frame: CGRect) {
+  override public init(frame: CGRect) {
     super.init(frame: frame)
     setupUI()
   }
 
-  required init?(coder: NSCoder) {
+  public required init?(coder: NSCoder) {
     super.init(coder: coder)
   }
 
@@ -42,7 +34,7 @@ public class ChatHeaderView: UIView {
     backgroundColor = .clear
   }
 
-  public func setTitle(_ name: String) {
+  open func setTitle(_ name: String) {
     titleLabel.text = name
       .count > 2 ? String(name[name.index(name.endIndex, offsetBy: -2)...]) : name
   }

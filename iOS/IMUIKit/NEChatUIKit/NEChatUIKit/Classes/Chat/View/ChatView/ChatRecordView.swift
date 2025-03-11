@@ -14,19 +14,19 @@ public protocol ChatRecordViewDelegate: NSObjectProtocol {
 }
 
 @objcMembers
-public class ChatRecordView: UIView, UIGestureRecognizerDelegate {
+open class ChatRecordView: UIView, UIGestureRecognizerDelegate {
   var recordImageView = UIImageView()
   var topTipLabel = UILabel()
   var tipLabel = UILabel()
   public weak var delegate: ChatRecordViewDelegate?
   private var outView = false
-  override init(frame: CGRect) {
+  override public init(frame: CGRect) {
     super.init(frame: frame)
     commonUI()
   }
 
-  required init?(coder: NSCoder) {
-    fatalError("init(coder:) has not been implemented")
+  public required init?(coder: NSCoder) {
+    super.init(coder: coder)
   }
 
   func commonUI() {
@@ -35,6 +35,7 @@ public class ChatRecordView: UIView, UIGestureRecognizerDelegate {
     topTipLabel.font = UIFont.systemFont(ofSize: 12)
     topTipLabel.textColor = .ne_lightText
     topTipLabel.textAlignment = .center
+    topTipLabel.isHidden = true // 不展示
     addSubview(topTipLabel)
     NSLayoutConstraint.activate([
       topTipLabel.topAnchor.constraint(equalTo: topAnchor, constant: 0),
@@ -99,7 +100,7 @@ public class ChatRecordView: UIView, UIGestureRecognizerDelegate {
     }
   }
 
-  public func stopRecordAnimation() {
+  open func stopRecordAnimation() {
     topTipLabel.isHidden = true
     recordImageView.stopAnimating()
   }

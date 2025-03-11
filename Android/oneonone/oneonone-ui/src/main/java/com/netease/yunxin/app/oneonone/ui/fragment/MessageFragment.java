@@ -58,7 +58,7 @@ public class MessageFragment extends ConversationFragment {
                 getString(R.string.sure),
                 aBoolean -> {
                   if (Boolean.TRUE.equals(aBoolean)) {
-                    ConversationRepo.clearAllUnreadCount();
+                    ConversationRepo.clearTotalUnreadCount(null);
                   }
                 });
     uiConfig.itemClickListener =
@@ -102,7 +102,7 @@ public class MessageFragment extends ConversationFragment {
                 getString(R.string.sure),
                 aBoolean -> {
                   if (Boolean.TRUE.equals(aBoolean)) {
-                    viewModel.deleteConversation(data);
+                    viewModel.deleteConversation(data.getConversationId());
                   }
                 });
           } else if (TextUtils.equals(action, ConversationConstant.Action.ACTION_STICK)) {

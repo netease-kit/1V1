@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import Foundation
+import NECoreIM2Kit
 import NERtcCallKit
 import NIMSDK
 
@@ -64,7 +65,7 @@ extension NEOneOnOneKit: NIMLoginManagerDelegate {
 
       roomService.loginGetRTCUid({ accountInfo in
         if let rtcUid = accountInfo?.rtcUid {
-          NERtcCallKit.sharedInstance().setValue(NSNumber(value: rtcUid), forKeyPath: "context.currentUserUid")
+          NECallEngine.sharedInstance().setValue(NSNumber(value: rtcUid), forKeyPath: "context.currentUserUid")
           self.localMember?.rtcUid = rtcUid
           /// 启动定时器
           self.roomService.startRepoty()
@@ -91,7 +92,7 @@ extension NEOneOnOneKit: NIMLoginManagerDelegate {
 
     roomService.loginGetRTCUid({ accountInfo in
       if let rtcUid = accountInfo?.rtcUid {
-        NERtcCallKit.sharedInstance().setValue(NSNumber(value: rtcUid), forKeyPath: "context.currentUserUid")
+        NECallEngine.sharedInstance().setValue(NSNumber(value: rtcUid), forKeyPath: "context.currentUserUid")
         self.localMember?.rtcUid = rtcUid
         self.localMember?.imToken = imToken
         self.localMember?.imAccid = account
@@ -99,7 +100,8 @@ extension NEOneOnOneKit: NIMLoginManagerDelegate {
         self.localMember?.nickName = nickName ?? ""
         self.localMember?.mobile = accountInfo?.mobile ?? ""
         // IM 登录
-        NERtcCallKit.sharedInstance().login(account, token: imToken) { error in
+        let option = V2NIMLoginOption()
+        IMKitClient.instance.login(account, token, option) { error in
           if let error = error as NSError? {
             NEOneOnOneLog.errorLog(kitTag, desc: "Failed to login. Code: \(error.code)")
             callback?(error.code, error.debugDescription, nil)
@@ -111,6 +113,7 @@ extension NEOneOnOneKit: NIMLoginManagerDelegate {
             callback?(NEOneOnOneErrorCode.success, nil, nil)
           }
         }
+
       } else {
         NEOneOnOneLog.errorLog(kitTag, desc: "Failed to loginGetRTCUid.")
         callback?(NEOneOnOneErrorCode.failed, "Failed to loginGetRTCUid.", nil)
@@ -134,7 +137,7 @@ extension NEOneOnOneKit: NIMLoginManagerDelegate {
       return
     }
 
-    NERtcCallKit.sharedInstance().logout { error in
+    IMKitClient.instance.logoutIM { error in
       if let error = error as? NSError {
         NEOneOnOneLog.errorLog(kitTag, desc: "Failed to logout. Code: \(error.code)")
         callback?(error.code, error.description, nil)

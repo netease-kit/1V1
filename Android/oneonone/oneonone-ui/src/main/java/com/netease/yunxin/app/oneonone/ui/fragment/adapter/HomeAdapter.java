@@ -13,7 +13,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
 import com.netease.nimlib.sdk.avsignalling.constant.ChannelType;
-import com.netease.nimlib.sdk.msg.constant.SessionTypeEnum;
+import com.netease.nimlib.sdk.v2.message.result.V2NIMSendMessageResult;
 import com.netease.yunxin.app.oneonone.ui.R;
 import com.netease.yunxin.app.oneonone.ui.constant.CallConfig;
 import com.netease.yunxin.app.oneonone.ui.databinding.OneOnOneRvItemHomeBinding;
@@ -33,8 +33,7 @@ import com.netease.yunxin.kit.common.image.ImageLoader;
 import com.netease.yunxin.kit.common.ui.dialog.CommonAlertDialog;
 import com.netease.yunxin.kit.common.ui.utils.ToastX;
 import com.netease.yunxin.kit.common.utils.NetworkUtils;
-import com.netease.yunxin.kit.corekit.im.model.UserInfo;
-import com.netease.yunxin.kit.corekit.im.provider.FetchCallback;
+import com.netease.yunxin.kit.corekit.im2.extend.ProgressFetchCallback;
 import com.netease.yunxin.kit.entertainment.common.utils.ClickUtils;
 import com.netease.yunxin.kit.entertainment.common.utils.DialogUtil;
 import java.util.ArrayList;
@@ -117,25 +116,23 @@ public class HomeAdapter extends RecyclerView.Adapter {
                         }
                         ChatUtil.sendTextMessage(
                             homeItemModel.userUuid,
-                            SessionTypeEnum.P2P,
                             context.getString(R.string.one_on_one_accost_text),
-                            false,
-                            new FetchCallback<Void>() {
+                            new ProgressFetchCallback<V2NIMSendMessageResult>() {
                               @Override
-                              public void onSuccess(@Nullable Void param) {
+                              public void onError(int i, @NonNull String s) {
+                                ALog.e(TAG, "sendTextMessage onFailed,code:" + i);
+                              }
+
+                              @Override
+                              public void onSuccess(
+                                  @Nullable V2NIMSendMessageResult v2NIMSendMessageResult) {
+                                ALog.e(TAG, "sendTextMessage success");
                                 ToastX.showShortToast(
                                     context.getString(R.string.one_on_one_accost_success));
                               }
 
                               @Override
-                              public void onFailed(int code) {
-                                ALog.e(TAG, "sendTextMessage failed,code:" + code);
-                              }
-
-                              @Override
-                              public void onException(@Nullable Throwable exception) {
-                                ALog.e(TAG, "sendTextMessage failed,exception:" + exception);
-                              }
+                              public void onProgress(int i) {}
                             });
                         dialog.dismiss();
                       }
@@ -143,10 +140,10 @@ public class HomeAdapter extends RecyclerView.Adapter {
                       @Override
                       public void onPrivateLetter(ContactUserDialog dialog) {
                         //跳转到单聊界面
-                        UserInfo userInfo =
-                            new UserInfo(
+                        UserModel userInfo =
+                            new UserModel(
                                 homeItemModel.userUuid, homeItemModel.userName, homeItemModel.icon);
-                        userInfo.setMobile(homeItemModel.mobile);
+                        userInfo.mobile = homeItemModel.mobile;
                         NavUtils.toP2pPage(context, userInfo, null);
                         dialog.dismiss();
                       }
@@ -216,7 +213,7 @@ public class HomeAdapter extends RecyclerView.Adapter {
 
     private void gotoCallPage(int channelType, HomeItemModel homeItemModel) {
       UserModel userModel = new UserModel();
-      userModel.imAccid = homeItemModel.userUuid;
+      userModel.account = homeItemModel.userUuid;
       userModel.nickname = homeItemModel.userName;
       userModel.avatar = homeItemModel.icon;
       userModel.mobile = homeItemModel.mobile;

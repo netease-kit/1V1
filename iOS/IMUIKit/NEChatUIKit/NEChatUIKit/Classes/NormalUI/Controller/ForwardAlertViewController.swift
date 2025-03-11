@@ -8,29 +8,29 @@ import NECommonUIKit
 import UIKit
 
 @objcMembers
-public class ForwardUserCell: NEBaseForwardUserCell {
+open class ForwardSessionCell: NEBaseForwardSessionCell {
   override func setupUI() {
     super.setupUI()
-    userHeader.layer.cornerRadius = 16
+    sessionHeaderView.layer.cornerRadius = 16
   }
 }
 
 @objcMembers
-public class ForwardAlertViewController: NEBaseForwardAlertViewController {
-  override public func setupUI() {
+open class ForwardAlertViewController: NEBaseForwardAlertViewController {
+  override open func setupUI() {
     super.setupUI()
-    oneUserHead.layer.cornerRadius = 16.0
-    userCollection.register(
-      ForwardUserCell.self,
-      forCellWithReuseIdentifier: "\(ForwardUserCell.self)"
+    oneSessionHeadView.layer.cornerRadius = 16.0
+    sessionCollectionView.register(
+      ForwardSessionCell.self,
+      forCellWithReuseIdentifier: "\(ForwardSessionCell.self)"
     )
   }
 
-  override public func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+  override open func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
     if let cell = collectionView.dequeueReusableCell(
-      withReuseIdentifier: "\(ForwardUserCell.self)",
+      withReuseIdentifier: "\(ForwardSessionCell.self)",
       for: indexPath
-    ) as? ForwardUserCell {
+    ) as? ForwardSessionCell {
       return setCellModel(cell: cell, indexPath: indexPath)
     }
     return UICollectionViewCell()

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import Foundation
+
 let tag = "NEOneOnOnePlayerUtil"
 
 @objc
@@ -182,6 +183,20 @@ public class NEOneOnOnePlayerUtil: NSObject {
         listener.OneOnOnePlayerDidFinishPlaying?()
       }
     }
+  }
+
+  /// 是否插入耳机
+  public func isHeadSetPlugging() -> Bool {
+    let route = AVAudioSession.sharedInstance().currentRoute
+    var isHead = false
+    for desc in route.outputs {
+      switch desc.portType {
+      case .headphones, .bluetoothA2DP, .usbAudio, .bluetoothHFP:
+        isHead = true
+      default: break
+      }
+    }
+    return isHead
   }
 }
 

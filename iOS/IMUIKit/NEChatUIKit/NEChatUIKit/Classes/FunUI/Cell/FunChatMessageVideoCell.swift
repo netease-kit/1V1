@@ -2,6 +2,7 @@
 // Use of this source code is governed by a MIT license that can be
 // found in the LICENSE file.
 
+import NEChatKit
 import NECommonKit
 import NIMSDK
 import UIKit
@@ -80,7 +81,7 @@ open class FunChatMessageVideoCell: FunChatMessageImageCell {
   }
 
   public required init?(coder: NSCoder) {
-    fatalError("init(coder:) has not been implemented")
+    super.init(coder: coder)
   }
 
   open func setupUI() {
@@ -120,34 +121,36 @@ open class FunChatMessageVideoCell: FunChatMessageImageCell {
     ])
   }
 
-  override open func setModel(_ model: MessageContentModel) {
-    super.setModel(model)
-    guard let isSend = model.message?.isOutgoingMsg else {
-      return
-    }
+  /// 根据消息发送方向决定元素的显隐
+  /// @param showRight    是否右侧显示（是否是发送的消息）
+  override open func showLeftOrRight(showRight: Bool) {
+    super.showLeftOrRight(showRight: showRight)
+    contentImageViewLeft.isHidden = showRight
+    timeViewLeft.isHidden = showRight
+    stateViewLeft.isHidden = showRight
+    contentImageViewRight.isHidden = !showRight
+    timeViewRight.isHidden = !showRight
+    stateViewRight.isHidden = !showRight
+  }
+
+  override open func setModel(_ model: MessageContentModel, _ isSend: Bool) {
+    super.setModel(model, isSend)
     let contentImageView = isSend ? contentImageViewRight : contentImageViewLeft
     let timeView = isSend ? timeViewRight : timeViewLeft
     let timeLabel = isSend ? timeLabelRight : timeLabelLeft
     let stateView = isSend ? stateViewRight : stateViewLeft
 
-    if let videoObject = model.message?.messageObject as? NIMVideoObject {
-      if let path = videoObject.coverPath, FileManager.default.fileExists(atPath: path) {
-        contentImageView.sd_setImage(
-          with: URL(fileURLWithPath: path),
-          placeholderImage: nil,
-          options: .retryFailed,
-          progress: nil,
-          completed: nil
-        )
-      } else {
-        contentImageView.sd_setImage(
-          with: URL(string: videoObject.coverUrl ?? ""),
-          placeholderImage: nil,
-          options: .retryFailed,
-          progress: nil,
-          completed: nil
-        )
-      }
+    if let videoObject = model.message?.attachment as? V2NIMMessageVideoAttachment {
+      // 获取首帧
+      let videoUrl = videoObject.url ?? ""
+      let thumbUrl = V2NIMStorageUtil.videoCoverUrl(videoUrl, offset: 0)
+      contentImageView.sd_setImage(
+        with: URL(string: thumbUrl),
+        placeholderImage: nil,
+        options: .retryFailed,
+        progress: nil,
+        completed: nil
+      )
 
       if videoObject.duration > 0 {
         timeView.isHidden = false
@@ -164,8 +167,8 @@ open class FunChatMessageVideoCell: FunChatMessageImageCell {
           stateView.state = .VideoPlay
         } else {
           stateView.state = .VideoDownload
-          stateView.setProgress(videoModel.progress)
-          if videoModel.progress >= 1 {
+          stateView.setProgress(Float(videoModel.progress / 100))
+          if videoModel.progress >= 100 {
             videoModel.state = .Success
           }
         }
@@ -173,8 +176,8 @@ open class FunChatMessageVideoCell: FunChatMessageImageCell {
     }
   }
 
-  override open func uploadProgress(byRight: Bool, _ progress: Float) {
-    let stateView = byRight ? stateViewRight : stateViewLeft
-    stateView.setProgress(progress)
+  override open func uploadProgress(_ progress: UInt) {
+    let stateView = stateViewLeft.isHidden ? stateViewRight : stateViewLeft
+    stateView.setProgress(Float(progress) / 100)
   }
 }

@@ -3,14 +3,15 @@
 // Use of this source code is governed by a MIT license that can be
 // found in the LICENSE file.
 
-import NECoreIMKit
+import NECoreIM2Kit
 import UIKit
+
 public enum NIMEmoticonType: NSInteger {
   case file = 0
   case unicode
 }
 
-public class NIMInputEmoticon: NSObject {
+open class NIMInputEmoticon: NSObject {
   public var type: NIMEmoticonType {
     if let ucode = unicode, ucode.count > 0 {
       return .unicode
@@ -25,7 +26,7 @@ public class NIMInputEmoticon: NSObject {
   public var unicode: String?
 }
 
-public class NIMInputEmoticonLayout: NSObject {
+open class NIMInputEmoticonLayout: NSObject {
   public var rows: NSInteger = 0 // 行数
   public var columes: NSInteger = 0 // 列数
   public var itemCountInPage: NSInteger = 0 // 每页显示几项
@@ -50,7 +51,7 @@ public class NIMInputEmoticonLayout: NSObject {
   }
 }
 
-public class NIMInputEmoticonCatalog: NSObject {
+open class NIMInputEmoticonCatalog: NSObject {
   public var layout: NIMInputEmoticonLayout?
   public var catalogID: String?
   public var title: String?
@@ -65,15 +66,34 @@ public class NIMInputEmoticonCatalog: NSObject {
   public var pagesCount: NSInteger = 0
 }
 
-public class NIMInputEmoticonManager: NSObject {
+open class NIMInputEmoticonManager: NSObject {
   public static let shared = NIMInputEmoticonManager()
   private var catalogs: [NIMInputEmoticonCatalog]?
   private var classTag = "NIMInputEmoticonManager"
+
+  /// 是否是外部资源
+  private(set) var isCustomEmojResource = false
 
   override public init() {
     super.init()
     parsePlist()
     preloadEmoticonResource()
+  }
+
+  open func setCustomEmojConfig(_ array: NSArray) {
+    var catalogs = [NIMInputEmoticonCatalog]()
+    for dict in array {
+      if let convertDict = dict as? NSDictionary {
+        let info = convertDict["info"] as? [String: Any]
+        let emotions = convertDict["data"] as? NSArray
+        let cataLog = catalogByInfo(
+          info: info as NSDictionary?,
+          emoticonsArray: emotions
+        )
+      }
+    }
+    self.catalogs = catalogs
+    isCustomEmojResource = true
   }
 
   func parsePlist() {
@@ -100,7 +120,7 @@ public class NIMInputEmoticonManager: NSObject {
     let cataLog = NIMInputEmoticonCatalog()
 
     guard let infoDict = info, let emotions = emoticonsArray else {
-      NELog.errorLog(classTag, desc: "❌info or emoticonsArray is nil")
+      NEALog.errorLog(classTag, desc: "info or emoticonsArray is nil")
       return cataLog
     }
     cataLog.catalogID = infoDict["id"] as? String
@@ -111,7 +131,7 @@ public class NIMInputEmoticonManager: NSObject {
     var id2Emoticons = [String: NIMInputEmoticon]()
     var resultEmotions = [NIMInputEmoticon]()
 
-    emotions.forEach { emoticonDict in
+    for emoticonDict in emotions {
       if let dict = (emoticonDict as? NSDictionary) {
         let emotion = NIMInputEmoticon()
         emotion.emoticonID = dict["id"] as? String
@@ -136,7 +156,7 @@ public class NIMInputEmoticonManager: NSObject {
 
   func preloadEmoticonResource() {}
 
-  public func emoticonCatalog(catalogID: String) -> NIMInputEmoticonCatalog? {
+  open func emoticonCatalog(catalogID: String) -> NIMInputEmoticonCatalog? {
     guard let infos = catalogs else { return nil }
 
     for catalog in infos {
@@ -147,11 +167,11 @@ public class NIMInputEmoticonManager: NSObject {
     return nil
   }
 
-  public func emoticonByTag(tag: String) -> NIMInputEmoticon? {
+  open func emoticonByTag(tag: String) -> NIMInputEmoticon? {
     var emotion: NIMInputEmoticon?
 
     guard let clogs = catalogs else {
-      NELog.errorLog(classTag, desc: "❌catalogs is nil")
+      NEALog.errorLog(classTag, desc: "catalogs is nil")
       return emotion
     }
 
@@ -168,10 +188,10 @@ public class NIMInputEmoticonManager: NSObject {
     return emotion
   }
 
-  public func emoticonByID(emoticonID: String) -> NIMInputEmoticon? {
+  open func emoticonByID(emoticonID: String) -> NIMInputEmoticon? {
     var emotion: NIMInputEmoticon?
     guard let clogs = catalogs else {
-      NELog.errorLog(classTag, desc: "❌catalogs is nil")
+      NEALog.errorLog(classTag, desc: "catalogs is nil")
       return emotion
     }
 
@@ -188,10 +208,10 @@ public class NIMInputEmoticonManager: NSObject {
     return emotion
   }
 
-  public func emoticonByCatalogID(catalogID: String, emoticonID: String) -> NIMInputEmoticon? {
+  open func emoticonByCatalogID(catalogID: String, emoticonID: String) -> NIMInputEmoticon? {
     var emotion: NIMInputEmoticon?
     guard let clogs = catalogs else {
-      NELog.errorLog(classTag, desc: "❌catalogs is nil")
+      NEALog.errorLog(classTag, desc: "catalogs is nil")
       return emotion
     }
 

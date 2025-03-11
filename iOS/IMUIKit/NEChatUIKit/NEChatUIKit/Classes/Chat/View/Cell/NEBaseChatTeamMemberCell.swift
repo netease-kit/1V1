@@ -27,7 +27,7 @@ open class NEBaseChatTeamMemberCell: UITableViewCell {
     return label
   }()
 
-  override public func setSelected(_ selected: Bool, animated: Bool) {
+  override open func setSelected(_ selected: Bool, animated: Bool) {
     super.setSelected(selected, animated: animated)
 
     // Configure the view for the selected state
@@ -48,8 +48,8 @@ open class NEBaseChatTeamMemberCell: UITableViewCell {
     NSLayoutConstraint.activate([
       headerView.leftAnchor.constraint(equalTo: contentView.leftAnchor, constant: 21),
       headerView.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
-      headerView.widthAnchor.constraint(equalToConstant: 42),
-      headerView.heightAnchor.constraint(equalToConstant: 42),
+      headerView.widthAnchor.constraint(equalToConstant: fun_chat_min_h),
+      headerView.heightAnchor.constraint(equalToConstant: fun_chat_min_h),
     ])
 
     contentView.addSubview(nameLabel)
@@ -60,14 +60,14 @@ open class NEBaseChatTeamMemberCell: UITableViewCell {
     ])
   }
 
-  open func configure(_ model: ChatTeamMemberInfoModel) {
-    if let url = model.nimUser?.userInfo?.avatarUrl {
+  open func configure(_ model: NETeamMemberInfoModel) {
+    if let url = model.nimUser?.user?.avatar, !url.isEmpty {
       headerView.sd_setImage(with: URL(string: url), completed: nil)
       headerView.setTitle("")
     } else {
       headerView.image = nil
-      headerView.setTitle(model.showNickInTeam())
-      headerView.backgroundColor = UIColor.colorWithString(string: model.nimUser?.userId)
+      headerView.setTitle(model.showNickInTeam() ?? "")
+      headerView.backgroundColor = UIColor.colorWithString(string: model.nimUser?.user?.accountId)
     }
     nameLabel.text = model.atNameInTeam()
   }

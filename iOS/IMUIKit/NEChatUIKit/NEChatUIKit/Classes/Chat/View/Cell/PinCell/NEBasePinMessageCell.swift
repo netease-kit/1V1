@@ -9,7 +9,8 @@ import UIKit
 
 @objc
 public protocol PinMessageCellDelegate {
-  func didClickMore(_ model: PinMessageModel?)
+  func didClickMore(_ model: NEPinMessageModel?)
+  func didClickContent(_ model: NEPinMessageModel?, _ cell: NEBasePinMessageCell)
 }
 
 @objcMembers
@@ -18,22 +19,23 @@ open class NEBasePinMessageCell: UITableViewCell {
 
   public var contentHeight: NSLayoutConstraint?
 
-  public var pinModel: PinMessageModel?
+  public var pinModel: NEPinMessageModel?
 
-  public var delegate: PinMessageCellDelegate?
+  public weak var delegate: PinMessageCellDelegate?
 
-  lazy var headerView: NEUserHeaderView = {
+  public var contentGesture: UITapGestureRecognizer?
+
+  public lazy var headerView: NEUserHeaderView = {
     let header = NEUserHeaderView(frame: .zero)
     header.titleLabel.font = NEConstant.defaultTextFont(12)
     header.titleLabel.textColor = UIColor.white
     header.layer.cornerRadius = 16
     header.clipsToBounds = true
     header.translatesAutoresizingMaskIntoConstraints = false
-    header.accessibilityIdentifier = "id.avatar"
     return header
   }()
 
-  lazy var nameLabel: UILabel = {
+  public lazy var nameLabel: UILabel = {
     let label = UILabel()
     label.font = UIFont.systemFont(ofSize: 12.0)
     label.textColor = .ne_darkText
@@ -42,11 +44,12 @@ open class NEBasePinMessageCell: UITableViewCell {
     return label
   }()
 
-  lazy var timeLabel: UILabel = {
+  public lazy var timeLabel: UILabel = {
     let label = UILabel()
     label.font = UIFont.systemFont(ofSize: 12.0)
     label.textColor = .ne_greyText
     label.translatesAutoresizingMaskIntoConstraints = false
+    label.accessibilityIdentifier = "id.time"
     return label
   }()
 
@@ -62,10 +65,11 @@ open class NEBasePinMessageCell: UITableViewCell {
     // Initialization code
   }
 
-  override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
+  override public init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
     super.init(style: style, reuseIdentifier: reuseIdentifier)
     selectionStyle = .none
     backgroundColor = .clear
+    contentGesture = UITapGestureRecognizer(target: self, action: #selector(contentClick))
     setupUI()
   }
 
@@ -81,21 +85,21 @@ open class NEBasePinMessageCell: UITableViewCell {
 
   open func setupUI() {
     contentView.backgroundColor = .clear
+
     backView.translatesAutoresizingMaskIntoConstraints = false
     backView.backgroundColor = UIColor.white
+    backView.clipsToBounds = true
+    backView.layer.cornerRadius = 8.0
     contentView.addSubview(backView)
 
     backLeftConstraint = backView.leftAnchor.constraint(equalTo: contentView.leftAnchor, constant: 20)
+    backLeftConstraint?.isActive = true
     backRightConstraint = backView.rightAnchor.constraint(equalTo: contentView.rightAnchor, constant: -20)
-
+    backRightConstraint?.isActive = true
     NSLayoutConstraint.activate([
-      backLeftConstraint!,
-      backRightConstraint!,
       backView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 12),
       backView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
     ])
-    backView.clipsToBounds = true
-    backView.layer.cornerRadius = 8.0
 
     backView.addSubview(headerView)
     NSLayoutConstraint.activate([
@@ -111,16 +115,16 @@ open class NEBasePinMessageCell: UITableViewCell {
     imageView.translatesAutoresizingMaskIntoConstraints = false
     backView.addSubview(imageView)
 
-    let moreBtn = UIButton()
-    moreBtn.addTarget(self, action: #selector(moreClick), for: .touchUpInside)
-    moreBtn.accessibilityIdentifier = "id.moreAction"
-    moreBtn.translatesAutoresizingMaskIntoConstraints = false
-    backView.addSubview(moreBtn)
+    let moreButton = UIButton()
+    moreButton.addTarget(self, action: #selector(moreClick), for: .touchUpInside)
+    moreButton.accessibilityIdentifier = "id.moreAction"
+    moreButton.translatesAutoresizingMaskIntoConstraints = false
+    backView.addSubview(moreButton)
     NSLayoutConstraint.activate([
-      moreBtn.rightAnchor.constraint(equalTo: backView.rightAnchor),
-      moreBtn.centerYAnchor.constraint(equalTo: headerView.centerYAnchor),
-      moreBtn.widthAnchor.constraint(equalToConstant: 50),
-      moreBtn.heightAnchor.constraint(equalToConstant: 40),
+      moreButton.rightAnchor.constraint(equalTo: backView.rightAnchor),
+      moreButton.centerYAnchor.constraint(equalTo: headerView.centerYAnchor),
+      moreButton.widthAnchor.constraint(equalToConstant: 50),
+      moreButton.heightAnchor.constraint(equalToConstant: 40),
     ])
 
     NSLayoutConstraint.activate([
@@ -153,20 +157,23 @@ open class NEBasePinMessageCell: UITableViewCell {
     line.backgroundColor = .ne_greyLine
   }
 
-  public func configure(_ item: PinMessageModel) {
+  open func configure(_ item: NEPinMessageModel) {
     pinModel = item
-    headerView.configHeadData(headUrl: item.chatmodel?.avatar,
-                              name: item.chatmodel?.fullName ?? "",
-                              uid: item.chatmodel?.message?.from ?? "")
-    nameLabel.text = item.chatmodel?.fullName
-    print("config time : ", item.message.timestamp)
-    timeLabel.text = String.stringFromDate(date: Date(timeIntervalSince1970: item.message.timestamp))
+    headerView.configHeadData(headUrl: item.chatmodel.avatar,
+                              name: item.chatmodel.shortName ?? "",
+                              uid: ChatMessageHelper.getSenderId(item.chatmodel.message) ?? "")
+    nameLabel.text = item.chatmodel.fullName
+    timeLabel.text = String.stringFromDate(date: Date(timeIntervalSince1970: item.message.createTime))
 
-    contentWidth?.constant = item.chatmodel?.contentSize.width ?? 0
-    contentHeight?.constant = item.chatmodel?.contentSize.height ?? 0
+    contentWidth?.constant = item.chatmodel.contentSize.width
+    contentHeight?.constant = item.chatmodel.contentSize.height
   }
 
   func moreClick() {
     delegate?.didClickMore(pinModel)
+  }
+
+  open func contentClick() {
+    delegate?.didClickContent(pinModel, self)
   }
 }

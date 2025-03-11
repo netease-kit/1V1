@@ -6,54 +6,58 @@ import UIKit
 
 @objcMembers
 open class ChatMessageCallCell: NormalChatMessageBaseCell {
-  public let contentLabelLeft = UILabel()
-  public let contentLabelRight = UILabel()
-  override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
+  public lazy var contentLabelLeft: UILabel = {
+    let label = UILabel()
+    label.translatesAutoresizingMaskIntoConstraints = false
+    label.isEnabled = false
+    label.numberOfLines = 0
+    label.isUserInteractionEnabled = false
+    label.font = messageTextFont
+    label.textAlignment = .center
+    label.backgroundColor = .clear
+    label.accessibilityIdentifier = "id.chatMessageCallText"
+    return label
+  }()
+
+  public lazy var contentLabelRight: UILabel = {
+    let label = UILabel()
+    label.translatesAutoresizingMaskIntoConstraints = false
+    label.isEnabled = false
+    label.numberOfLines = 0
+    label.isUserInteractionEnabled = false
+    label.font = messageTextFont
+    label.textAlignment = .center
+    label.backgroundColor = .clear
+    label.accessibilityIdentifier = "id.chatMessageCallText"
+    return label
+  }()
+
+  override public init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
     super.init(style: style, reuseIdentifier: reuseIdentifier)
-    commonUI()
   }
 
   public required init?(coder: NSCoder) {
     super.init(coder: coder)
   }
 
-  open func commonUI() {
-    commonUIRight()
-    commonUILeft()
-  }
-
-  open func commonUILeft() {
-    contentLabelLeft.translatesAutoresizingMaskIntoConstraints = false
-    contentLabelLeft.isEnabled = false
-    contentLabelLeft.numberOfLines = 0
-    contentLabelLeft.isUserInteractionEnabled = false
-    contentLabelLeft.font = NEKitChatConfig.shared.ui.messageTextSize
-    contentLabelLeft.textAlignment = .center
-    contentLabelLeft.backgroundColor = .clear
-    contentLabelLeft.accessibilityIdentifier = "id.chatMessageCallText"
+  override open func commonUILeft() {
+    super.commonUILeft()
     bubbleImageLeft.addSubview(contentLabelLeft)
     NSLayoutConstraint.activate([
       contentLabelLeft.rightAnchor.constraint(equalTo: bubbleImageLeft.rightAnchor, constant: -chat_content_margin),
       contentLabelLeft.leftAnchor.constraint(equalTo: bubbleImageLeft.leftAnchor, constant: chat_content_margin),
-      contentLabelLeft.topAnchor.constraint(equalTo: bubbleImageLeft.topAnchor, constant: 0),
+      contentLabelLeft.topAnchor.constraint(equalTo: replyViewLeft.topAnchor, constant: 0),
       contentLabelLeft.bottomAnchor.constraint(equalTo: bubbleImageLeft.bottomAnchor, constant: 0),
     ])
   }
 
-  open func commonUIRight() {
-    contentLabelRight.translatesAutoresizingMaskIntoConstraints = false
-    contentLabelRight.isEnabled = false
-    contentLabelRight.numberOfLines = 0
-    contentLabelRight.isUserInteractionEnabled = false
-    contentLabelRight.font = NEKitChatConfig.shared.ui.messageTextSize
-    contentLabelRight.textAlignment = .center
-    contentLabelRight.backgroundColor = .clear
-    contentLabelRight.accessibilityIdentifier = "id.chatMessageCallText"
+  override open func commonUIRight() {
+    super.commonUIRight()
     bubbleImageRight.addSubview(contentLabelRight)
     NSLayoutConstraint.activate([
       contentLabelRight.rightAnchor.constraint(equalTo: bubbleImageRight.rightAnchor, constant: -chat_content_margin),
       contentLabelRight.leftAnchor.constraint(equalTo: bubbleImageRight.leftAnchor, constant: chat_content_margin),
-      contentLabelRight.topAnchor.constraint(equalTo: bubbleImageRight.topAnchor, constant: 0),
+      contentLabelRight.topAnchor.constraint(equalTo: replyViewRight.topAnchor, constant: 0),
       contentLabelRight.bottomAnchor.constraint(equalTo: bubbleImageRight.bottomAnchor, constant: 0),
     ])
 
@@ -66,14 +70,11 @@ open class ChatMessageCallCell: NormalChatMessageBaseCell {
     contentLabelRight.isHidden = !showRight
   }
 
-  override open func setModel(_ model: MessageContentModel) {
-    super.setModel(model)
+  override open func setModel(_ model: MessageContentModel, _ isSend: Bool) {
+    super.setModel(model, isSend)
     if let m = model as? MessageCallRecordModel {
-      if let isSend = model.message?.isOutgoingMsg, isSend {
-        contentLabelRight.attributedText = m.attributeStr
-        return
-      }
-      contentLabelLeft.attributedText = m.attributeStr
+      let contentLabel = isSend ? contentLabelRight : contentLabelLeft
+      contentLabel.attributedText = m.attributeStr
     }
   }
 }

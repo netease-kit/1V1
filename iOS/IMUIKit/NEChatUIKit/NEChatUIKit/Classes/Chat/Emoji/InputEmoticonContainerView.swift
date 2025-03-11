@@ -3,14 +3,15 @@
 // Use of this source code is governed by a MIT license that can be
 // found in the LICENSE file.
 
-import NECoreIMKit
+import NECoreIM2Kit
 import UIKit
+
 @objc public protocol InputEmoticonContainerViewDelegate: NSObjectProtocol {
   func selectedEmoticon(emoticonID: String, emotCatalogID: String, description: String)
   func didPressSend(sender: UIButton)
 }
 
-public class InputEmoticonContainerView: UIView {
+open class InputEmoticonContainerView: UIView {
   private let classTag = "InputEmoticonContainerView"
   public weak var delegate: InputEmoticonContainerViewDelegate?
 
@@ -45,8 +46,8 @@ public class InputEmoticonContainerView: UIView {
     loadEmojiData()
   }
 
-  required init?(coder: NSCoder) {
-    fatalError("init(coder:) has not been implemented")
+  public required init?(coder: NSCoder) {
+    super.init(coder: coder)
   }
 
   func setUpSubViews() {
@@ -141,7 +142,7 @@ public class InputEmoticonContainerView: UIView {
         return emotionsCount / layoutCount + 1
       }
     } else {
-      NELog.errorLog(classTag, desc: "❌count maybe nil")
+      NEALog.errorLog(classTag, desc: "count maybe nil")
       return 0
     }
   }
@@ -183,12 +184,12 @@ extension InputEmoticonContainerView {
                      page: NSInteger) -> UIView {
     let subView = UIView()
     guard let layout = emoticon.layout else {
-      NELog.errorLog(classTag, desc: "layout is nil")
+      NEALog.errorLog(classTag, desc: "layout is nil")
       return UIView()
     }
 
     guard let emotions = emoticon.emoticons else {
-      NELog.errorLog(classTag, desc: "emoticon.emoticons is nil")
+      NEALog.errorLog(classTag, desc: "emoticon.emoticons is nil")
       return UIView()
     }
 
@@ -210,7 +211,6 @@ extension InputEmoticonContainerView {
           catalogID: id,
           delegate: self
         )
-        button.accessibilityIdentifier = "id.emoji"
         rowIndex = indexInPage / layout.columes
         coloumnIndex = indexInPage % layout.columes
         let x = coloumnIndex * Int(layout.cellWidth) + startX
@@ -251,7 +251,7 @@ extension InputEmoticonContainerView {
                                  startX: CGFloat, startY: CGFloat, iconWidth: CGFloat,
                                  iconHeight: CGFloat, emotion: NIMInputEmoticonCatalog) {
     guard let layout = emotion.layout else {
-      NELog.errorLog(classTag, desc: "❌emotion is nill")
+      NEALog.errorLog(classTag, desc: "emotion is nill")
       return
     }
 
@@ -263,6 +263,7 @@ extension InputEmoticonContainerView {
     deleteIcon.setImage(UIImage.ne_imageNamed(name: "emoji_del_normal"), for: .normal)
     deleteIcon.setImage(UIImage.ne_imageNamed(name: "emoji_del_pressed"), for: .highlighted)
     deleteIcon.addTarget(self, action: #selector(onIconSelected), for: .touchUpInside)
+    deleteIcon.accessibilityIdentifier = "id.emojiDelete"
     let newX = CGFloat(coloumnIndex + 1) * layout.cellWidth + startX
     let newY = CGFloat(rowIndex) * layout.cellHeight + startY
     let deleteIconRect = CGRect(
@@ -288,16 +289,16 @@ extension InputEmoticonContainerView {
 // MARK: ====== EmojiPageViewDelegate,EmojiPageViewDataSource ==============
 
 extension InputEmoticonContainerView: EmojiPageViewDelegate, EmojiPageViewDataSource {
-  public func numberOfPages(pageView: EmojiPageView?) -> NSInteger {
+  open func numberOfPages(pageView: EmojiPageView?) -> NSInteger {
     sumPages()
   }
 
-  public func pageView(pageView: EmojiPageView?, index: NSInteger) -> UIView {
+  open func pageView(pageView: EmojiPageView?, index: NSInteger) -> UIView {
     var page = 0
     var resultEmotion = NIMInputEmoticonCatalog()
 
     guard let totalData = totalCatalogData, let targetView = pageView else {
-      NELog.errorLog(classTag, desc: "❌totalCatalogData is nil")
+      NEALog.errorLog(classTag, desc: "totalCatalogData is nil")
       return UIView()
     }
 
@@ -312,13 +313,13 @@ extension InputEmoticonContainerView: EmojiPageViewDelegate, EmojiPageViewDataSo
     return emojiPageView(pageView: targetView, emoticon: resultEmotion, page: index - page)
   }
 
-  public func needScrollAnimation() -> Bool {
+  open func needScrollAnimation() -> Bool {
     true
   }
 
-  public func pageViewDidScroll(_ pageView: EmojiPageView?) {}
+  open func pageViewDidScroll(_ pageView: EmojiPageView?) {}
 
-  public func pageViewScrollEnd(_ pageView: EmojiPageView?, currentIndex: Int, totolPages: Int) {
+  open func pageViewScrollEnd(_ pageView: EmojiPageView?, currentIndex: Int, totolPages: Int) {
 //        let emticon = emoticonWithIndex(index: currentIndex)
     // 补充pageController逻辑
   }
@@ -327,15 +328,15 @@ extension InputEmoticonContainerView: EmojiPageViewDelegate, EmojiPageViewDataSo
 // MARK: =============== InputEmoticonTabViewDelegate ===============
 
 extension InputEmoticonContainerView: InputEmoticonTabViewDelegate {
-  public func tabView(_ tabView: InputEmoticonTabView?, didSelectTabIndex index: Int) {}
+  open func tabView(_ tabView: InputEmoticonTabView?, didSelectTabIndex index: Int) {}
 }
 
 // MARK: =============== InputEmoticonTabViewDelegate ===============
 
 extension InputEmoticonContainerView: NIMInputEmoticonButtonDelegate {
-  public func selectedEmoticon(emotion: NIMInputEmoticon, catalogID: String) {
+  open func selectedEmoticon(emotion: NIMInputEmoticon, catalogID: String) {
     guard let emotionId = emotion.emoticonID else {
-      NELog.errorLog(classTag, desc: "❌emoticonID is nil")
+      NEALog.errorLog(classTag, desc: "emoticonID is nil")
       return
     }
     if emotion.type == .unicode {

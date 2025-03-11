@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #import "NEOneOnOneUIManager.h"
+#import "NECallEngine+Party.h"
 #import "NEOneOnOneLog.h"
 
 @interface NEOneOnOneUIManager () <NEOneOnOneAuthListener>
@@ -48,32 +49,23 @@
   [NEOneOnOneKit.getInstance logoutWithCallback:callback];
 }
 
-//- (bool)isLoggedIn {
-//  return [[NEOneOnOneKit getInstance] isLoggedIn];
-//    return  NO;
-//}
-
 - (void)onOneOnOneAuthEvent:(enum NEOneOnOneAuthEvent)event {
   if ([self.delegate respondsToSelector:@selector(onOneOnOneClientEvent:)]) {
     [self.delegate onOneOnOneClientEvent:event];
   }
 }
 
-- (UINavigationController *)createViewController {
-  UINavigationController *c =
-      [[UINavigationController alloc] initWithRootViewController:[[UIViewController alloc] init]];
-  c.modalPresentationStyle = UIModalPresentationFullScreen;
-  return c;
+/// 是否在1v1房间中
+- (BOOL)isInOneOnOne {
+  return [[NEOneOnOneKit getInstance] isInOneOnOne];
 }
 
-- (UINavigationController *)roomListViewController {
-  UINavigationController *c =
-      [[UINavigationController alloc] initWithRootViewController:[[UIViewController alloc] init]];
-  if (@available(iOS 13.0, *)) {
-    c.overrideUserInterfaceStyle = UIUserInterfaceStyleLight;
-  }
-  c.modalPresentationStyle = UIModalPresentationFullScreen;
-  return c;
+/// 状态机处理
+- (void)setRTCIdle {
+  [[NECallEngine sharedInstance] changeStatusIdle];
+}
+- (void)setRTCCaling {
+  [[NECallEngine sharedInstance] changeStatusCalling];
 }
 
 @end

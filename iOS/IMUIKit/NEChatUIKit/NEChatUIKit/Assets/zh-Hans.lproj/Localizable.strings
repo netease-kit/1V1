@@ -3,33 +3,22 @@
 // Use of this source code is governed by a MIT license that can be
 // found in the LICENSE file.
 
-//MAKR：common
-"ok"="确认";
-
 //MAKR：message
-"send_picture"="发来了一张图片";
-"send_voice"="发来了一段语音";
-"send_video"="发来了一段视频";
-"send_location"="发来了一个位置";
-"send_file"="发来了一份文件";
 "press_speak"="按住说话";
+"record_faild"="录音失败，请重试";
 "send_after_let_go"="松开发送，按住滑到空白区域取消";
-"record_too_short"="录音时间太短";
+"record_too_short"="录制时间过短";
 "no_microphone_permission"="没有麦克风权限";
 "choose"="请选择";
-"take_photo"="拍照";
-"select_from_album"="从相册选择";
 "select_from_icloud"="从iCloud选择";
 "editing"="对方正在输入中...";
 "downloading"="正在下载中...";
-"read"="已读(0）";
-"unread"="未读(0）";
-"network_unavailable"="当前网络不可用，请检查你当网络设置。";
+"read"="已读";
+"unread"="未读";
 
 //MARK: tips
 //MARK: team
 "invite"="邀请 ";
-"humans"="人";
 "enter"="加入";
 "unknown_system_message"="未知消息类型";
 "You"="你";
@@ -41,7 +30,7 @@
 "out"="移除了 ";
 "has_updated" = "更新了";
 "to" = "为 ";
-"only_team_owner" = "仅群主";
+"only_team_owner" = "群主和管理员";
 "everyone" = "所有人";
 
 "team_name" = "名称";
@@ -55,28 +44,33 @@
 "team_be_invited_author" = "是否需要被邀请者同意权限";
 "team_update_info_permission" = "群资料修改权限";
 "team_update_client_custom"="更新客户端自定义字段的权限";
+"team_at_permission"="@所有人权限更新为";
+"team_top_permission"="置顶消息权限更新为";
 
 "team_custom_info" = "自定义扩展字段";
 "not_mute" = "解除禁言";
 "mute" = "禁言";
 "team_has_been_removed" = "当前群聊已解散";
+"team_has_been_quit" = "您已被移除群聊";
 "team_has_quit" = "已退出群聊";
 "join"="进入了";
 "pass"="通过了";
 "leave"="退出了";
 "transfer"="转移了群主身份给";
-"added_manager"="被添加为群管理员";
-"removed_manager"="被撤销了群管理员身份";
+"added_manager"="被任命为群管理员";
+"removed_manager"="被移除管理员";
 "accept"="接受入群邀请来自";
 "team_mute"="当前群主设置为禁言";
 "team_all_mute"="群禁言已开启";
 "team_all_no_mute"="群禁言已关闭";
-"pin_text_P2P"="标记了这条信息";
-"pin_text_team"="标记了这条信息";
+"pin_text"="%@标记了这条信息";
+"top_message"="置顶了一条消息";
+"untop_message"="移除了置顶消息";
 "chat_setting"="聊天设置";
 "session_set_top"="聊天置顶";
 "message_remind"="开启消息提醒";
 "open_soon"="暂未开放";
+"no_permission_tip"="暂无操作权限";
 
 //MARK: operation
 "operation_copy"="复制";
@@ -84,29 +78,36 @@
 "operation_forward"="转发";
 "operation_pin"="标记";
 "operation_cancel_pin"="取消标记";
+"operation_delete_collection"="删除收藏";
 "operation_select"="多选";
 "operation_collection"="收藏";
+"operation_top"="置顶";
+"operation_untop"="取消置顶";
 "operation_delete"="删除";
 "operation_recall"="撤回";
+"operation_to_text"="转文字";
+"operation_to_text_failed"="转文字失败";
 "withdrew_message" = "撤回了一条消息";
-"message_has_be_withdrawn" = "此消息已撤回";
 "message_reedit" = "重新编辑";
-"message_revoke_confim" = "确认要撤回该消息吗？";
-"message_delete_comfirm"="确认要删除该消息吗？";
+"message_revoke_confirm" = "确认要撤回该消息吗？";
+"message_delete_confirm"="确认要删除该消息吗？";
+"collection_delete_confirm"="确认要删除该收藏吗？";
+"delete_collection_success"="删除成功";
 
 
 //MARK: toast
-"copy_success"="复制成功";
 "collection_success"="已收藏";
 "no_permession"="暂无权限";
-"msg_reply"="回复";
-"msg_image"="图片消息";
-"msg_audio"="语音消息";
-"msg_video"="视频消息";
-"msg_file"="文件消息";
-"msg_location"="地理位置";
-"msg_custom"="自定义消息";
-"msg_unknown"="未知消息体";
+"msg_image"="[图片消息]";
+"msg_audio"="[语音消息]";
+"msg_video"="[视频消息]";
+"msg_file"="[文件消息]";
+"msg_location"="[地理位置]";
+"msg_rtc_audio"="[语音通话]";
+"msg_rtc_video"="[视频通话]";
+"msg_rtc_call"="[音视频通话]";
+"msg_custom"="[自定义消息]";
+"msg_unknown"="[未知消息体]";
 "message_read"="消息阅读状态";
 "message_all_unread"="全部成员未读";
 "user_select"="选择提醒";
@@ -114,14 +115,12 @@
 
 "contact_user"="转发到个人";
 "team"="转发到群组";
-"cancel"="取消";
 "send_to"="发送给";
 "send"="发送";
-"confirm"="确定";
+"session_record"="的会话记录";
 
+"collection_message"="的收藏消息";
 
-"mdhm"="MM月dd日 HH:mm";
-"ymdhm"="yyyy年MM月dd日 HH:mm";
 
 "chat_takePicture"="拍摄";
 "chat_photo"="相册";
@@ -131,17 +130,16 @@
 "gaode_map"="高德地图";
 "tencent_map"="腾讯地图";
 "search_place"="搜索地点";
-"search_cancel"="取消";
 "distance_inner"="内";
 "search_result_empty"="未找到你要搜的地址";
 "no_map_plugin"="未集成地图模块";
 "location_not_auth"="地理位置未授权，请去设置中开启";
-"fileSize_over_limit"="当前文件大小超出XXXM发送限制，请重新选择";
+"fileSize_over_limit"="当前文件大小超出%@M发送限制，请重新选择";
 
 "message_recalled"="此消息已撤回";
 
 "video_call"="视频通话";
-"audio_call"="音频通话";
+"audio_call"="语音通话";
 
 "call_complete"="通话时长";
 "call_canceled"="已取消";
@@ -159,12 +157,13 @@
 "pin_jump_detail"="跳转查看";
 "cancel_pin_success"="已取消标记";
 "no_pin_message"="暂无标记消息";
+"no_collection_message"="暂无收藏消息";
 
 "you_were_mentioned"="[有人@我]";
 // MARK: error toast
-"failed_operation"="操作失败";
 "team_not_exist"="群组不存在";
 "unpin_failed"="取消标记失败";
+"pin_limit_exceeded"="已超出 pin 数量上限";
 
 "fun_hold_to_talk"="按住 说话";
 
@@ -179,4 +178,40 @@
 
 "no_location"="请选择你要发送的位置信息";
 
-"delete_failed"="删除失败";
+// 多选
+"select_multi"="合并转发";
+"select_per_item"="逐条转发";
+"chat_history"="聊天记录";
+"chat_history_by"="的消息";
+"leave_message"="留言";
+"exist_invalid"="存在不可转发的消息体，是否去除后发送？";
+"forward_failed"="系统异常，转发失败";
+"multiForward_open_failed"="信息获取失败";
+"file_check_failed"="文件校验失败";
+"per_item_forward_limit"="逐条转发限制%d条消息";
+"selete_messages_limit"="批量删除限制%d条消息";
+"multiForward_forward_limit"="合并转发限制%d条消息";
+"exception_description"="异常说明";
+
+"multiple_line_placleholder"="请输入标题";
+"null_message_not_support"="不支持发送空消息";
+
+"black_list_tip"="对方把你拉黑，发送消息失败";
+"disable_stranger_call"="非好友暂不支持音视频通话";
+
+"chat_collection_p2p_tip"="来自于 与%@的会话";
+
+"chat_collection_team_tip"="来自于 %@";
+
+"collection_limit"="收藏数已达到限制值";
+"language_title"="将输入内容翻译为";
+
+"translate_use"="使用";
+"translate_sure"="AI处理";
+"ai_translating"="AI处理中...";
+"translate_default"="翻译为...";
+"chat_translate"="翻译";
+"ai_user_pin_top"="PIN置顶";
+"format_not_supported"="暂不支持该格式";
+"request_exception" = "模型请求异常";
+"ai_request_ing" = "大模型请求响应中...";

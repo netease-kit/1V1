@@ -4,8 +4,8 @@
 
 import Foundation
 
-@objc
 /// 房间类型
+@objc
 public enum NEOneOnOneLiveRoomType: Int {
   /// PK直播
   case pkLive = 1
@@ -17,8 +17,8 @@ public enum NEOneOnOneLiveRoomType: Int {
   case listen_together = 5
 }
 
-@objc
 /// 直播状态
+@objc
 public enum NEOneOnOneLiveStatus: UInt {
   /// 未直播
   case idle = 0

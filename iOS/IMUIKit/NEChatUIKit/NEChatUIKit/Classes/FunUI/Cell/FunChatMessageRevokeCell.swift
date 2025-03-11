@@ -6,57 +6,64 @@ import UIKit
 
 @objcMembers
 open class FunChatMessageRevokeCell: FunChatMessageBaseCell {
-  public var revokeLabelLeft = UILabel()
-  public var revokeLabelRight = UILabel()
+  public lazy var revokeLabelLeft: UILabel = {
+    let label = UILabel()
+    label.translatesAutoresizingMaskIntoConstraints = false
+    label.textColor = UIColor.ne_greyText
+    label.textAlignment = .center
+    label.lineBreakMode = .byTruncatingMiddle
+    label.font = UIFont.systemFont(ofSize: 14.0)
+    label.accessibilityIdentifier = "id.messageText"
+    return label
+  }()
+
+  public lazy var revokeLabelRight: UILabel = {
+    let label = UILabel()
+    label.translatesAutoresizingMaskIntoConstraints = false
+    label.textColor = UIColor.ne_greyText
+    label.textAlignment = .center
+    label.font = UIFont.systemFont(ofSize: 14.0)
+    label.accessibilityIdentifier = "id.messageText"
+    return label
+  }()
+
   public var reeditButton = UIButton(type: .custom)
   var revokeLabelRightXAnchor: NSLayoutConstraint?
 
   override public init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
     super.init(style: style, reuseIdentifier: reuseIdentifier)
-    commonUI()
   }
 
   public required init?(coder: NSCoder) {
-    fatalError("init(coder:) has not been implemented")
+    super.init(coder: coder)
   }
 
-  open func commonUI() {
-    commonUIRight()
-    commonUILeft()
-  }
-
-  open func commonUILeft() {
-    revokeLabelLeft.translatesAutoresizingMaskIntoConstraints = false
-    revokeLabelLeft.textColor = UIColor.ne_greyText
-    revokeLabelLeft.textAlignment = .center
-    revokeLabelLeft.lineBreakMode = .byTruncatingMiddle
-    revokeLabelLeft.font = UIFont.systemFont(ofSize: 14.0)
+  override open func commonUILeft() {
+    super.commonUILeft()
     contentView.addSubview(revokeLabelLeft)
     NSLayoutConstraint.activate([
       revokeLabelLeft.leftAnchor.constraint(equalTo: contentView.leftAnchor, constant: 16),
       revokeLabelLeft.rightAnchor.constraint(equalTo: contentView.rightAnchor, constant: -16),
-      revokeLabelLeft.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
+      revokeLabelLeft.topAnchor.constraint(equalTo: timeLabel.bottomAnchor, constant: 6),
       revokeLabelLeft.heightAnchor.constraint(equalToConstant: 16),
     ])
   }
 
-  open func commonUIRight() {
-    revokeLabelRight.translatesAutoresizingMaskIntoConstraints = false
-    revokeLabelRight.textColor = UIColor.ne_greyText
-    revokeLabelRight.textAlignment = .center
-    revokeLabelRight.font = UIFont.systemFont(ofSize: 14.0)
+  override open func commonUIRight() {
+    super.commonUIRight()
     contentView.addSubview(revokeLabelRight)
     revokeLabelRightXAnchor = revokeLabelRight.centerXAnchor.constraint(equalTo: contentView.centerXAnchor, constant: 0)
     revokeLabelRightXAnchor?.isActive = true
     NSLayoutConstraint.activate([
-      revokeLabelRight.widthAnchor.constraint(equalToConstant: 120),
-      revokeLabelRight.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
+      revokeLabelRight.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
+      revokeLabelRight.topAnchor.constraint(equalTo: timeLabel.bottomAnchor, constant: 6),
       revokeLabelRight.heightAnchor.constraint(equalToConstant: 16),
     ])
 
     reeditButton.translatesAutoresizingMaskIntoConstraints = false
     reeditButton.titleLabel?.font = UIFont.systemFont(ofSize: 14.0)
-    reeditButton.setTitleColor(UIColor.ne_blueText, for: .normal)
+    reeditButton.setTitleColor(UIColor.ne_normalTheme, for: .normal)
+    reeditButton.accessibilityIdentifier = "id.reeditButton"
 
     contentView.addSubview(reeditButton)
     NSLayoutConstraint.activate([
@@ -69,38 +76,42 @@ open class FunChatMessageRevokeCell: FunChatMessageBaseCell {
   }
 
   override open func showLeftOrRight(showRight: Bool) {
-    super.showLeftOrRight(showRight: showRight)
-    revokeLabelLeft.isHidden = showRight
-    reeditButton.isHidden = !showRight
-    revokeLabelRight.isHidden = !showRight
     avatarImageLeft.isHidden = true
+    nameLabelLeft.isHidden = true
     bubbleImageLeft.isHidden = true
-    avatarImageRight.isHidden = true
-    bubbleImageRight.isHidden = true
-    seletedBtn.isHidden = true
-    pinLabelLeft.isHidden = true
     pinImageLeft.isHidden = true
-    pinLabelRight.isHidden = true
+    pinLabelLeft.isHidden = true
+    fullNameLabel.isHidden = true
+
+    avatarImageRight.isHidden = true
+    nameLabelRight.isHidden = true
+    bubbleImageRight.isHidden = true
     pinImageRight.isHidden = true
+    pinLabelRight.isHidden = true
+    activityView.isHidden = true
+    readView.isHidden = true
+    selectedButton.isHidden = true
+
+    revokeLabelLeft.isHidden = showRight
+    revokeLabelRight.isHidden = !showRight
   }
 
-  override open func setModel(_ model: MessageContentModel) {
-    if let time = model.message?.timestamp {
+  override open func setModel(_ model: MessageContentModel, _ isSend: Bool) {
+    let isSend = IMKitClient.instance.isMe(model.message?.senderId)
+    let revokeLabel = isSend ? revokeLabelRight : revokeLabelLeft
+
+    // 校验撤回消息可编辑时间
+    if let time = model.message?.createTime {
       let date = Date()
       let currentTime = date.timeIntervalSince1970
-      if currentTime - time >= 60 * 2 {
+      if Int(currentTime - time) >= ChatUIConfig.shared.revokeEditTimeGap * 60 {
         model.timeOut = true
       }
     }
 
-    guard let isSend = model.message?.isOutgoingMsg else {
-      return
-    }
-    let revokeLabel = isSend ? revokeLabelRight : revokeLabelLeft
-
     model.contentSize = CGSize(width: kScreenWidth, height: 0)
-    super.setModel(model)
-    fullNameLabel.isHidden = true
+    super.setModel(model, isSend)
+    showLeftOrRight(showRight: isSend)
 
     revokeLabel.textColor = .funChatInputViewPlaceholderTextColor
     if isSend {
@@ -108,23 +119,23 @@ open class FunChatMessageRevokeCell: FunChatMessageBaseCell {
     } else {
       revokeLabel.text = (model.fullName ?? "") + " " + chatLocalizable("withdrew_message")
     }
-    reeditButton.setTitle(chatLocalizable("message_reedit"), for: .normal)
 
-    if isSend, model.isRevokedText == true {
+    if isSend, model.isReedit == true {
       if model.timeOut == true {
         reeditButton.isHidden = true
         revokeLabelRightXAnchor?.constant = 0
       } else {
         reeditButton.isHidden = false
+        reeditButton.setTitle(chatLocalizable("message_reedit"), for: .normal)
         revokeLabelRightXAnchor?.constant = -32
       }
     } else {
       reeditButton.isHidden = true
+      revokeLabelRightXAnchor?.constant = 0
     }
   }
 
   func reeditEvent(button: UIButton) {
-    print(#function)
     delegate?.didTapReeditButton(self, contentModel)
   }
 }

@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 #import <NEOneOnOneKit/NEOneOnOneKit-Swift.h>
-#import <NERtcCallKit/NERtcCallKit.h>
+#import <NERtcCallKit/NECallEngine.h>
 #import <NERtcCallUIKit/NECallViewBaseController.h>
 #import <UIKit/UIKit.h>
 #import "NEOneOnOneConnectingView.h"
@@ -15,7 +15,7 @@ static NSString *tag = @"NEOneOnOneCallViewController";
 typedef void (^BusyBlock)(void);
 
 @interface NEOneOnOneCallViewController : NECallViewBaseController <NERtcLinkEngineDelegate,
-                                                                    NERtcCallKitDelegate,
+                                                                    NECallEngineDelegate,
                                                                     NEOneOnOneListener,
                                                                     NERtcEngineDelegateEx>
 

@@ -4,14 +4,11 @@
 // found in the LICENSE file.
 
 import Foundation
-import NECoreKit
+import NECommonKit
 
-let coreLoader = CoreLoader<NEBaseConversationController>()
+let coreLoader = CommonLoader<NEBaseConversationController>()
 func localizable(_ key: String) -> String {
   coreLoader.localizable(key)
 }
 
 public let ModuleName = "NEConversationUIKit"
-
-// 创建群聊 选择人数限制
-public var inviteNumberLimit: Int = 200

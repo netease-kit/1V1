@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import Foundation
-import NEUIKit
 
 @objcMembers public class NEOneOnOneBottomConnectView: UIView {
   lazy var chatUpButton: UIButton = {
@@ -11,8 +10,8 @@ import NEUIKit
     button.setImage(NEOneOnOneUI.ne_imageName("chat_up_icon"), for: .normal)
     button.setImage(NEOneOnOneUI.ne_imageName("chat_up_icon"), for: .highlighted)
     button.setTitle(ne_oneOnOne_localized("搭讪"), for: .normal)
-    button.titleLabel?.textColor = UIColor.ne_color(withHex: 0xFFFFFFF)
-    button.tintColor = UIColor.ne_color(withHex: 0xFFFFFFF)
+    button.titleLabel?.textColor = UIColor(hexString: "#FFFFFFF")
+    button.tintColor = UIColor(hexString: "#FFFFFFF")
     button.backgroundColor = UIColor.clear
     button.layer.masksToBounds = true
     button.layer.cornerRadius = 22
@@ -24,8 +23,8 @@ import NEUIKit
     gradientLayer.endPoint = CGPoint(x: 1, y: 0)
     gradientLayer.locations = [0.5, 1.0]
     gradientLayer.colors = [
-      UIColor.ne_color(withHex: 0xF9627C).cgColor,
-      UIColor.ne_color(withHex: 0xFF8073).cgColor,
+      UIColor(hexString: "#F9627C").cgColor,
+      UIColor(hexString: "#FF8073").cgColor,
     ]
     button.imageEdgeInsets = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 2)
     button.titleEdgeInsets = UIEdgeInsets(top: 0, left: 2, bottom: 0, right: 0)
@@ -47,7 +46,7 @@ import NEUIKit
     let label = UILabel()
     label.text = ne_oneOnOne_localized("私信")
     label.font = UIFont.systemFont(ofSize: 10)
-    label.textColor = UIColor.ne_color(withHex: 0x8E95A9)
+    label.textColor = UIColor(hexString: "#8E95A9")
     return label
   }()
 
@@ -63,7 +62,7 @@ import NEUIKit
     let label = UILabel()
     label.text = ne_oneOnOne_localized("语音")
     label.font = UIFont.systemFont(ofSize: 10)
-    label.textColor = UIColor.ne_color(withHex: 0x8E95A9)
+    label.textColor = UIColor(hexString: "#8E95A9")
     return label
   }()
 
@@ -79,7 +78,7 @@ import NEUIKit
     let label = UILabel()
     label.text = ne_oneOnOne_localized("视频")
     label.font = UIFont.systemFont(ofSize: 10)
-    label.textColor = UIColor.ne_color(withHex: 0x8E95A9)
+    label.textColor = UIColor(hexString: "#8E95A9")
     return label
   }()
 

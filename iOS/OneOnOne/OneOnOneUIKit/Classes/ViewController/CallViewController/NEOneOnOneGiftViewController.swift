@@ -190,17 +190,21 @@ public class NEOneOnOneGiftCell: UICollectionViewCell {
     view.addSubview(bottomSendGiftView)
     view.addSubview(collectionView)
 
-    collectionView.snp.makeConstraints { make in
-      make.left.right.equalToSuperview()
-      make.top.equalToSuperview().offset(48 + 16)
-      make.height.equalTo(136)
-    }
-
     bottomSendGiftView.snp.makeConstraints { make in
-      make.top.equalTo(collectionView.snp.bottom).offset(16)
+      if #available(iOS 11.0, *) {
+        make.bottom.equalTo(view.safeAreaLayoutGuide).offset(-10)
+      } else {
+        make.bottom.equalToSuperview().offset(-10)
+      }
       make.right.equalToSuperview().offset(-12)
       make.height.equalTo(32)
       make.width.equalTo(140)
+    }
+
+    collectionView.snp.makeConstraints { make in
+      make.left.right.equalToSuperview()
+      make.bottom.equalTo(bottomSendGiftView.snp.top).offset(-16)
+      make.height.equalTo(136)
     }
   }
 

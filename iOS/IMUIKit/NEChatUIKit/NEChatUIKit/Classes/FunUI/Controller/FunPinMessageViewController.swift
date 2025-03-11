@@ -7,26 +7,26 @@ import UIKit
 
 @objcMembers
 open class FunPinMessageViewController: NEBasePinMessageViewController {
-  override public func viewDidLoad() {
+  override public init(conversationId: String) {
+    super.init(conversationId: conversationId)
+    pin_content_maxW = (kScreenWidth - 32)
+  }
+
+  public required init?(coder: NSCoder) {
+    super.init(coder: coder)
+  }
+
+  override open func viewDidLoad() {
     super.viewDidLoad()
     view.backgroundColor = .funChatBackgroundColor
     emptyView.setEmptyImage(name: "fun_user_empty")
   }
 
-  override open func getRegisterCellDic() -> [Int: NEBasePinMessageCell.Type] {
-    let cellClassDic = [
-      NIMMessageType.text.rawValue: FunPinMessageTextCell.self,
-      NIMMessageType.image.rawValue: FunPinMessageImageCell.self,
-      NIMMessageType.audio.rawValue: FunPinMessageAudioCell.self,
-      NIMMessageType.video.rawValue: FunPinMessageVideoCell.self,
-      NIMMessageType.location.rawValue: FunPinMessageLocationCell.self,
-      NIMMessageType.file.rawValue: FunPinMessageFileCell.self,
-      PinMessageDefaultType: FunPinMessageDefaultCell.self,
-    ]
-    return cellClassDic
+  override open func getRegisterCellDic() -> [String: NEBasePinMessageCell.Type] {
+    ChatMessageHelper.getPinCellRegisterDic(isFun: true)
   }
 
-  override open func showAction(item: PinMessageModel) {
+  override open func showAction(item: NEPinMessageModel) {
     var actions = [NECustomAlertAction]()
     weak var weakSelf = self
 
@@ -35,14 +35,14 @@ open class FunPinMessageViewController: NEBasePinMessageViewController {
     }
     actions.append(cancelPinAction)
 
-    if item.message.messageType == .text {
+    if item.message.messageType == .MESSAGE_TYPE_TEXT {
       let copyAction = NECustomAlertAction(title: chatLocalizable("operation_copy")) {
         weakSelf?.copyActionClicked(item: item)
       }
       actions.append(copyAction)
     }
 
-    if item.message.messageType != .audio {
+    if item.message.messageType != .MESSAGE_TYPE_AUDIO {
       let forwardAction = NECustomAlertAction(title: chatLocalizable("operation_forward")) {
         weakSelf?.forwardActionClicked(item: item)
       }
@@ -52,19 +52,14 @@ open class FunPinMessageViewController: NEBasePinMessageViewController {
     showCustomActionSheet(actions)
   }
 
+  /// 获取转发确认弹窗 - 通用版
   override open func getForwardAlertController() -> NEBaseForwardAlertViewController {
     FunForwardAlertViewController()
   }
 
-  override open func forwardMessage(_ message: NIMMessage) {
-    let userAction = NECustomAlertAction(title: chatLocalizable("contact_user")) { [weak self] in
-      self?.forwardMessageToUser(message)
-    }
-
-    let teamAction = NECustomAlertAction(title: chatLocalizable("team")) { [weak self] in
-      self?.forwardMessageToTeam(message)
-    }
-
-    showCustomActionSheet([teamAction, userAction])
+  override open func getMultiForwardViewController(_ messageAttachmentUrl: String?,
+                                                   _ messageAttachmentFilePath: String,
+                                                   _ messageAttachmentMD5: String?) -> MultiForwardViewController {
+    FunMultiForwardViewController(messageAttachmentUrl, messageAttachmentFilePath, messageAttachmentMD5)
   }
 }

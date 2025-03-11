@@ -7,23 +7,41 @@ import UIKit
 
 @objcMembers
 open class FunConversationSearchController: NEBaseConversationSearchController {
+  /// 取消按钮
+  lazy var cancelButton: UIButton = {
+    let cancelButton = UIButton()
+    cancelButton.translatesAutoresizingMaskIntoConstraints = false
+    cancelButton.setTitle(commonLocalizable("cancel"), for: .normal)
+    cancelButton.setTitleColor(.ne_greyText, for: .normal)
+    cancelButton.addTarget(self, action: #selector(backEvent), for: .touchUpInside)
+    cancelButton.titleLabel?.adjustsFontSizeToFitWidth = true
+    cancelButton.contentHorizontalAlignment = .center
+    cancelButton.accessibilityIdentifier = "id.backArrow"
+    return cancelButton
+  }()
+
   override public init(nibName nibNameOrNil: String?, bundle nibBundleOrNil: Bundle?) {
     super.init(nibName: nibNameOrNil, bundle: nibBundleOrNil)
     tag = "FunConversationSearchController"
   }
 
   public required init?(coder: NSCoder) {
-    fatalError("init(coder:) has not been implemented")
+    super.init(coder: coder)
   }
 
   override open func viewDidLoad() {
     super.viewDidLoad()
     view.backgroundColor = .funConversationBackgroundColor
-    navigationController?.isNavigationBarHidden = true
-    customNavigationView.isHidden = true
     emptyView.setEmptyImage(name: "fun_user_empty")
   }
 
+  override open func viewWillAppear(_ animated: Bool) {
+    super.viewWillAppear(animated)
+    navigationController?.isNavigationBarHidden = true
+    navigationView.isHidden = true
+  }
+
+  /// 初始化子视图
   override open func setupSubviews() {
     super.setupSubviews()
     let leftImageView = UIImageView(image: UIImage
@@ -33,20 +51,14 @@ open class FunConversationSearchController: NEBaseConversationSearchController {
     searchTextField.textColor = .black
     searchTextField.layer.cornerRadius = 4
     searchTextField.backgroundColor = .white
+    searchTextFieldTopAnchor = searchTextField.topAnchor.constraint(equalTo: view.topAnchor, constant: NEConstant.statusBarHeight + 12)
+    searchTextFieldTopAnchor?.isActive = true
     NSLayoutConstraint.activate([
-      searchTextField.topAnchor.constraint(equalTo: view.topAnchor, constant: NEConstant.statusBarHeight + 12),
       searchTextField.leftAnchor.constraint(equalTo: view.leftAnchor, constant: 8),
       searchTextField.rightAnchor.constraint(equalTo: view.rightAnchor, constant: -72),
       searchTextField.heightAnchor.constraint(equalToConstant: 36),
     ])
 
-    let cancelButton = UIButton()
-    cancelButton.translatesAutoresizingMaskIntoConstraints = false
-    cancelButton.setTitle(localizable("cancel"), for: .normal)
-    cancelButton.setTitleColor(.ne_greyText, for: .normal)
-    cancelButton.addTarget(self, action: #selector(backEvent), for: .touchUpInside)
-    cancelButton.titleLabel?.adjustsFontSizeToFitWidth = true
-    cancelButton.contentHorizontalAlignment = .center
     view.addSubview(cancelButton)
     NSLayoutConstraint.activate([
       cancelButton.centerYAnchor.constraint(equalTo: searchTextField.centerYAnchor),
@@ -73,7 +85,10 @@ open class FunConversationSearchController: NEBaseConversationSearchController {
     if #available(iOS 15.0, *) {
       tableView.sectionHeaderTopPadding = 0
     }
-    searchTextField.becomeFirstResponder()
+
+    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5, execute: DispatchWorkItem(block: { [weak self] in
+      self?.searchTextField.becomeFirstResponder()
+    }))
   }
 
   // MARK: UITableViewDelegate, UITableViewDataSource
@@ -84,7 +99,7 @@ open class FunConversationSearchController: NEBaseConversationSearchController {
       .dequeueReusableHeaderFooterView(
         withIdentifier: "\(NSStringFromClass(SearchSessionBaseView.self))"
       ) as! FunSearchSessionHeaderView
-    sectionView.title.textColor = .funConversationSearchHeaderViewTitleColor
+    sectionView.titleLabel.textColor = .funConversationSearchHeaderViewTitleColor
     sectionView.bottomLine.backgroundColor = .funConversationLineBorderColor
     sectionView.setUpTitle(title: headTitleArr[section])
     return sectionView

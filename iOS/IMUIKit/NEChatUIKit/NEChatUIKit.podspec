@@ -13,7 +13,7 @@ require_relative "../../PodConfigs/config_local_im.rb"
 
 Pod::Spec.new do |s|
   s.name         = 'NEChatUIKit'
-  s.version      = '9.6.0'
+  s.version      = '10.5.3'
   s.summary      = 'Chat Module of IM.'
   s.homepage         = YXConfig.homepage
   s.license          = YXConfig.license

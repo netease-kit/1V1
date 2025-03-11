@@ -11,6 +11,7 @@ plugins {
 
 android {
     compileSdk = 31
+    namespace = "com.netease.yunxin.app.oneonone.ui"
     buildFeatures {
         viewBinding = true
     }
@@ -23,7 +24,7 @@ dependencies {
     implementation("androidx.constraintlayout:constraintlayout:2.1.3")
     implementation("androidx.recyclerview:recyclerview:1.2.1")
 
-    api("com.netease.yunxin.kit.call:call-ui:2.3.0")
+    api("com.netease.yunxin.kit.call:call-ui:3.3.0")
     api("com.netease.yunxin.kit.common:common-network:1.1.8")
     implementation("com.netease.yunxin.kit.common:common-image:1.1.7")
 
@@ -37,12 +38,15 @@ dependencies {
 
     api(project(":beauty:beauty-faceunity"))
     api(project(":entertainment:entertainment-common"))
-    // 会话列表功能组件
-    api(project(":imkit:conversationkit-ui"))
-    // 聊天功能组件
-    api(project(":imkit:chatkit-ui"))
-    //位置消息模块
-    api(project(":imkit:locationkit"))
+//    // 会话列表功能组件
+//    api(project(":imkit:conversationkit-ui"))
+//    // 聊天功能组件
+//    api(project(":imkit:chatkit-ui"))
+//    //位置消息模块
+//    api(project(":imkit:locationkit"))
+    api("com.netease.yunxin.kit.conversation:conversationkit-ui:10.5.2")
+    api("com.netease.yunxin.kit.chat:chatkit-ui:10.5.2")
+    api("com.netease.yunxin.kit.locationkit:locationkit:10.5.2")
     implementation("com.airbnb.android:lottie:5.0.3")
 
     implementation("com.netease.nimlib:neliveplayer:3.2.2")

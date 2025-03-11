@@ -4,8 +4,8 @@
 
 import Foundation
 
-@objc
 /// 登录事件枚举
+@objc
 public enum NEOneOnOneAuthEvent: UInt {
   /// 被踢出登录
   case kickOut
@@ -23,8 +23,8 @@ public enum NEOneOnOneAuthEvent: UInt {
   case tokenExpired
 }
 
-@objc
 /// 鉴权监听协议
+@objc
 public protocol NEOneOnOneAuthListener: NSObjectProtocol {
   /// 登录状态变更
   /// - Parameter event: 鉴权事件枚举
